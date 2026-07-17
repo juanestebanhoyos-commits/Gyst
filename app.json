@@ -1,0 +1,7 @@
+{
+  "scheme": "gyst",
+  "plugins": [
+    "expo-status-bar",
+    "expo-router"
+  ]
+}

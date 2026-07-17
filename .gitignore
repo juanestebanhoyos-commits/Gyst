@@ -1,0 +1,8 @@
+.env
+.expo/
+node_modules/
+gyst-roadmap.json
+types/
+tasks/
+supabase/
+task.md
