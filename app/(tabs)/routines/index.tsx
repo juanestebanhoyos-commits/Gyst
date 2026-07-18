@@ -1,29 +1,17 @@
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import { useRoutines } from '@/hooks/useRoutines';
-import type { Database } from '@/types/supabase';
-
-type Routine = Database['public']['Tables']['routines']['Row'];
+import { LoadingScreen } from '@/components/LoadingScreen';
+import { ErrorScreen } from '@/components/ErrorScreen';
+import { ListSeparator } from '@/components/ListSeparator';
+import type { Routine } from '@/types/supabase';
 
 export default function RoutinesScreen() {
   const { data: routines, isLoading, error } = useRoutines();
 
-  if (isLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2563eb" />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>Error al cargar rutinas</Text>
-      </View>
-    );
-  }
+  if (isLoading) return <LoadingScreen />;
+  if (error) return <ErrorScreen message="Error al cargar rutinas" />;
 
   return (
     <View style={styles.container}>
@@ -44,7 +32,7 @@ export default function RoutinesScreen() {
           </TouchableOpacity>
         )}
         contentContainerStyle={styles.list}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ItemSeparatorComponent={ListSeparator}
         ListEmptyComponent={
           <Text style={styles.emptyText}>No hay rutinas disponibles</Text>
         }
@@ -67,12 +55,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
   },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f9fafb',
-  },
   title: {
     fontSize: 28,
     fontWeight: '800',
@@ -81,9 +63,6 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingBottom: 80,
-  },
-  separator: {
-    height: 10,
   },
   card: {
     backgroundColor: '#fff',
@@ -117,10 +96,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#ef4444',
   },
   emptyText: {
     fontSize: 16,

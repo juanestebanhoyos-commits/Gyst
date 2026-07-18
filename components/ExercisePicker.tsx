@@ -9,9 +9,7 @@ import {
 } from 'react-native';
 import { Search, X } from 'lucide-react-native';
 import ExerciseConfigForm, { ExerciseConfig } from './ExerciseConfigForm';
-import type { Database } from '@/types/supabase';
-
-type Exercise = Database['public']['Tables']['exercises']['Row'];
+import type { Exercise } from '@/types/supabase';
 
 export interface ExerciseEntry {
   exercise: Exercise;

@@ -1,31 +1,20 @@
 import { useState } from 'react';
-import { View, Text, TextInput, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
-import { Search } from 'lucide-react-native';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { Search, Plus } from 'lucide-react-native';
+import { router } from 'expo-router';
 import { useExercises } from '@/hooks/useExercises';
 import { ExerciseCard } from '@/components/ExerciseCard';
-import type { Database } from '@/types/supabase';
-
-type Exercise = Database['public']['Tables']['exercises']['Row'];
+import { LoadingScreen } from '@/components/LoadingScreen';
+import { ErrorScreen } from '@/components/ErrorScreen';
+import { ListSeparator } from '@/components/ListSeparator';
+import type { Exercise } from '@/types/supabase';
 
 export default function ExercisesScreen() {
   const [search, setSearch] = useState('');
   const { data: exercises, isLoading, error } = useExercises();
 
-  if (isLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2563eb" />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>Error al cargar ejercicios</Text>
-      </View>
-    );
-  }
+  if (isLoading) return <LoadingScreen />;
+  if (error) return <ErrorScreen message="Error al cargar ejercicios" />;
 
   const filtered = exercises?.filter((ex) => {
     const q = search.toLowerCase();
@@ -52,11 +41,18 @@ export default function ExercisesScreen() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <ExerciseCard exercise={item} />}
         contentContainerStyle={styles.list}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ItemSeparatorComponent={ListSeparator}
         ListEmptyComponent={
           <Text style={styles.emptyText}>No hay ejercicios disponibles</Text>
         }
       />
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => router.push('/(tabs)/exercises/new')}
+        activeOpacity={0.8}
+      >
+        <Plus color="#fff" size={24} />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -67,12 +63,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9fafb',
     paddingHorizontal: 16,
     paddingTop: 16,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f9fafb',
   },
   title: {
     fontSize: 28,
@@ -100,17 +90,26 @@ const styles = StyleSheet.create({
   list: {
     paddingBottom: 24,
   },
-  separator: {
-    height: 10,
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#ef4444',
-  },
   emptyText: {
     fontSize: 16,
     color: '#9ca3af',
     textAlign: 'center',
     marginTop: 32,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#2563eb',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
 });
