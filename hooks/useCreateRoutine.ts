@@ -20,32 +20,16 @@ export function useCreateRoutine() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (input: CreateRoutineInput) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) throw new Error('Not authenticated');
-
       const { exercises, ...routineData } = input;
 
-      const { data, error } = await supabase
-        .from('routines')
-        .insert({ ...routineData, user_id: session.user.id })
-        .select()
-        .single();
+      const { data: routineId, error } = await supabase.rpc('create_routine', {
+        name: routineData.name,
+        description: routineData.description ?? null,
+        is_public: routineData.is_public ?? false,
+        exercises: exercises ?? [],
+      });
       if (error) throw error;
-
-      if (exercises && exercises.length > 0) {
-        const routineExercises = exercises.map((ex) => ({
-          routine_id: data.id,
-          ...ex,
-        }));
-
-        const { error: insertError } = await supabase
-          .from('routine_exercises')
-          .insert(routineExercises);
-
-        if (insertError) throw insertError;
-      }
-
-      return data;
+      return routineId;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['routines'] });

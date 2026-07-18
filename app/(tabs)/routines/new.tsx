@@ -67,8 +67,8 @@ export default function NewRoutineScreen() {
         })),
       },
       {
-        onSuccess: (routine) => {
-          router.replace(`/(tabs)/routines/${routine.id}`);
+        onSuccess: (routineId) => {
+          router.replace(`/(tabs)/routines/${routineId}`);
         },
         onError: (err) => {
           setError(err.message);

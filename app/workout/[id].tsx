@@ -5,6 +5,7 @@ import { Square } from 'lucide-react-native';
 import { useRoutine } from '@/hooks/useRoutine';
 import { useRoutineExercises } from '@/hooks/useRoutineExercises';
 import { useStartWorkout } from '@/hooks/useStartWorkout';
+import { useSession } from '@/hooks/useSession';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
@@ -13,15 +14,16 @@ export default function WorkoutSessionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: routine, isLoading: loadingRoutine } = useRoutine(id);
   const { data: exercises, isLoading: loadingExercises } = useRoutineExercises(id);
+  const { user } = useSession();
   const startWorkout = useStartWorkout();
   const hasStarted = useRef(false);
 
   useEffect(() => {
-    if (!hasStarted.current) {
+    if (user && !hasStarted.current) {
       hasStarted.current = true;
-      startWorkout.mutate({ routine_id: id });
+      startWorkout.mutate({ userId: user.id, routine_id: id });
     }
-  }, [id]);
+  }, [id, user?.id]);
 
   const isLoading = loadingRoutine || loadingExercises || startWorkout.isPending;
 

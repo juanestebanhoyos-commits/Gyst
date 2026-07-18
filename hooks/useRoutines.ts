@@ -9,7 +9,8 @@ export function useRoutines() {
       const { data, error } = await supabase
         .from('routines')
         .select('*')
-        .order('updated_at', { ascending: false });
+        .order('updated_at', { ascending: false })
+        .limit(50);
       if (error) throw error;
       return data;
     },

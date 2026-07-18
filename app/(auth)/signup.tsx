@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'expo-router';
-import { supabase } from '@/lib/supabase';
 import {
   View,
   Text,
@@ -10,15 +9,16 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { UserPlus } from 'lucide-react-native';
+import { useSignup } from '@/hooks/useSignup';
 
 export default function SignupScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const signup = useSignup();
 
-  async function handleSignup() {
+  function handleSignup() {
     setError(null);
     setSuccess(false);
 
@@ -35,21 +35,13 @@ export default function SignupScreen() {
       return;
     }
 
-    setLoading(true);
-
-    const { error: signUpError } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-    });
-
-    if (signUpError) {
-      setError(signUpError.message);
-      setLoading(false);
-      return;
-    }
-
-    setSuccess(true);
-    setLoading(false);
+    signup.mutate(
+      { email: email.trim(), password },
+      {
+        onSuccess: () => setSuccess(true),
+        onError: (err) => setError(err.message),
+      },
+    );
   }
 
   if (success) {
@@ -97,16 +89,16 @@ export default function SignupScreen() {
       <TouchableOpacity
         style={styles.button}
         onPress={handleSignup}
-        disabled={loading}
+        disabled={signup.isPending}
         activeOpacity={0.8}
       >
-        {loading ? (
+        {signup.isPending ? (
           <ActivityIndicator color="#fff" />
         ) : (
           <UserPlus color="#fff" size={20} />
         )}
         <Text style={styles.buttonText}>
-          {loading ? 'Creando cuenta...' : 'Crear cuenta'}
+          {signup.isPending ? 'Creando cuenta...' : 'Crear cuenta'}
         </Text>
       </TouchableOpacity>
 

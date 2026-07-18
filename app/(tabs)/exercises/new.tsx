@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Plus } from 'lucide-react-native';
 import { useCreateCustomExercise } from '@/hooks/useCreateCustomExercise';
+import { useSession } from '@/hooks/useSession';
 
 const MUSCLE_GROUPS = [
   'Pecho',
@@ -31,6 +32,7 @@ export default function NewExerciseScreen() {
   const [primaryMuscle, setPrimaryMuscle] = useState('');
   const [equipment, setEquipment] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const { user } = useSession();
   const { mutate, isPending } = useCreateCustomExercise();
 
   function handleCreate() {
@@ -47,6 +49,7 @@ export default function NewExerciseScreen() {
 
     mutate(
       {
+        userId: user!.id,
         name: name.trim(),
         primary_muscle: primaryMuscle,
         equipment: equipment.trim() || null,

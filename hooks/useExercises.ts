@@ -9,7 +9,8 @@ export function useExercises() {
       const { data, error } = await supabase
         .from('exercises')
         .select('*')
-        .order('name', { ascending: true });
+        .order('name', { ascending: true })
+        .limit(50);
       if (error) throw error;
       return data;
     },

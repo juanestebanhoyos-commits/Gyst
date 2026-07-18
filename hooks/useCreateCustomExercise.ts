@@ -5,18 +5,16 @@ interface CreateCustomExerciseInput {
   name: string;
   primary_muscle: string;
   equipment?: string | null;
+  userId: string;
 }
 
 export function useCreateCustomExercise() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (input: CreateCustomExerciseInput) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) throw new Error('Not authenticated');
-
+    mutationFn: async ({ userId, ...input }: CreateCustomExerciseInput) => {
       const { data, error } = await supabase
         .from('exercises')
-        .insert({ ...input, is_custom: true, user_id: session.user.id })
+        .insert({ ...input, is_custom: true, user_id: userId })
         .select()
         .single();
       if (error) throw error;

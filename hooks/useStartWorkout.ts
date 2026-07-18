@@ -4,15 +4,12 @@ import { supabase } from '@/lib/supabase';
 export function useStartWorkout() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (input?: { routine_id?: string | null }) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) throw new Error('Not authenticated');
-
+    mutationFn: async ({ userId, routine_id }: { userId: string; routine_id?: string | null }) => {
       const { data, error } = await supabase
         .from('workout_logs')
         .insert({
-          user_id: session.user.id,
-          routine_id: input?.routine_id ?? null,
+          user_id: userId,
+          routine_id: routine_id ?? null,
         })
         .select('id')
         .single();

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, router } from 'expo-router';
-import { supabase } from '@/lib/supabase';
 import {
   View,
   Text,
@@ -10,14 +9,15 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { LogIn } from 'lucide-react-native';
+import { useLogin } from '@/hooks/useLogin';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const login = useLogin();
 
-  async function handleLogin() {
+  function handleLogin() {
     setError(null);
 
     if (!email.trim()) {
@@ -29,20 +29,13 @@ export default function LoginScreen() {
       return;
     }
 
-    setLoading(true);
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
-
-    if (signInError) {
-      setError(signInError.message);
-      setLoading(false);
-      return;
-    }
-
-    router.replace('/(tabs)');
+    login.mutate(
+      { email: email.trim(), password },
+      {
+        onSuccess: () => router.replace('/(tabs)'),
+        onError: (err) => setError(err.message),
+      },
+    );
   }
 
   return (
@@ -74,16 +67,16 @@ export default function LoginScreen() {
       <TouchableOpacity
         style={styles.button}
         onPress={handleLogin}
-        disabled={loading}
+        disabled={login.isPending}
         activeOpacity={0.8}
       >
-        {loading ? (
+        {login.isPending ? (
           <ActivityIndicator color="#fff" />
         ) : (
           <LogIn color="#fff" size={20} />
         )}
         <Text style={styles.buttonText}>
-          {loading ? 'Ingresando...' : 'Ingresar'}
+          {login.isPending ? 'Ingresando...' : 'Ingresar'}
         </Text>
       </TouchableOpacity>
 

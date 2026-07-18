@@ -13,7 +13,8 @@ export function useWorkoutHistory() {
       const { data, error } = await supabase
         .from('workout_logs')
         .select('*, routines(name)')
-        .order('started_at', { ascending: false });
+        .order('started_at', { ascending: false })
+        .limit(20);
       if (error) throw error;
       return data ?? [];
     },
