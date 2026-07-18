@@ -1,17 +1,11 @@
 import { Redirect, Tabs } from 'expo-router';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { useSession } from '@/hooks/useSession';
+import { LoadingScreen } from '@/components/LoadingScreen';
 
 export default function TabLayout() {
   const { session, isLoading } = useSession();
 
-  if (isLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
+  if (isLoading) return <LoadingScreen />;
 
   if (!session) {
     return <Redirect href="/(auth)/login" />;
@@ -26,14 +20,8 @@ export default function TabLayout() {
       <Tabs.Screen name="routines/new" options={{ href: null }} />
       <Tabs.Screen name="routines/[id]" options={{ href: null }} />
       <Tabs.Screen name="routines/add-exercise" options={{ href: null }} />
+      <Tabs.Screen name="history" options={{ title: 'Historial' }} />
     </Tabs>
   );
 }
 
-const styles = StyleSheet.create({
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});

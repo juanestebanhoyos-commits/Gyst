@@ -1,60 +1,41 @@
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Copy, Plus } from 'lucide-react-native';
+import { useEffect, useRef } from 'react';
+import { Square } from 'lucide-react-native';
 import { useRoutine } from '@/hooks/useRoutine';
 import { useRoutineExercises } from '@/hooks/useRoutineExercises';
-import { useSession } from '@/hooks/useSession';
-import { useCloneRoutine } from '@/hooks/useCloneRoutine';
+import { useStartWorkout } from '@/hooks/useStartWorkout';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
 
-export default function RoutineDetailScreen() {
+export default function WorkoutSessionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: routine, isLoading: loadingRoutine, error: routineError } = useRoutine(id);
-  const {
-    data: exercises,
-    isLoading: loadingExercises,
-    error: exercisesError,
-  } = useRoutineExercises(id);
+  const { data: routine, isLoading: loadingRoutine } = useRoutine(id);
+  const { data: exercises, isLoading: loadingExercises } = useRoutineExercises(id);
+  const startWorkout = useStartWorkout();
+  const hasStarted = useRef(false);
 
-  const { user } = useSession();
-  const cloneMutation = useCloneRoutine();
+  useEffect(() => {
+    if (!hasStarted.current) {
+      hasStarted.current = true;
+      startWorkout.mutate({ routine_id: id });
+    }
+  }, [id]);
 
-  const canClone = routine ? (routine.is_public || routine.user_id !== user?.id) : false;
+  const isLoading = loadingRoutine || loadingExercises || startWorkout.isPending;
 
-  const handleClone = () => {
-    cloneMutation.mutate(id, {
-      onSuccess: (newRoutineId) => {
-        router.replace(`/(tabs)/routines/${newRoutineId}`);
-      },
-    });
-  };
-
-  if (loadingRoutine || loadingExercises) return <LoadingScreen />;
-  if (routineError || exercisesError) return <ErrorScreen message="Error al cargar la rutina" />;
-  if (!routine) return <ErrorScreen message="Rutina no encontrada" />;
+  if (isLoading) return <LoadingScreen />;
+  if (startWorkout.isError || !routine)
+    return <ErrorScreen message={startWorkout.error?.message ?? 'No se pudo iniciar la sesión'} />;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{routine.name}</Text>
-      {routine.description ? (
-        <Text style={styles.description}>{routine.description}</Text>
-      ) : null}
-      {canClone ? (
-        <TouchableOpacity
-          style={styles.cloneButton}
-          activeOpacity={0.8}
-          onPress={handleClone}
-          disabled={cloneMutation.isPending}
-        >
-          <Copy color="#fff" size={18} />
-          <Text style={styles.cloneButtonText}>
-            {cloneMutation.isPending ? 'Clonando...' : 'Clonar rutina'}
-          </Text>
-        </TouchableOpacity>
-      ) : null}
-      <Text style={styles.sectionTitle}>Ejercicios</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>{routine.name}</Text>
+        <Text style={styles.subtitle}>Sesión activa</Text>
+      </View>
+
       <FlatList
         data={exercises}
         keyExtractor={(item) => item.id}
@@ -83,17 +64,16 @@ export default function RoutineDetailScreen() {
             Esta rutina no tiene ejercicios asignados
           </Text>
         }
-        ListFooterComponent={
-          <TouchableOpacity
-            style={styles.addButton}
-            activeOpacity={0.8}
-            onPress={() => router.push(`/(tabs)/routines/add-exercise?id=${id}`)}
-          >
-            <Plus color="#fff" size={20} />
-            <Text style={styles.addButtonText}>Agregar ejercicio</Text>
-          </TouchableOpacity>
-        }
       />
+
+      <TouchableOpacity
+        style={styles.finishButton}
+        activeOpacity={0.8}
+        onPress={() => router.replace('/(tabs)/routines')}
+      >
+        <Square color="#fff" size={20} />
+        <Text style={styles.finishButtonText}>Finalizar</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -105,26 +85,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
   },
+  header: {
+    marginBottom: 20,
+  },
   title: {
     fontSize: 28,
     fontWeight: '800',
     color: '#111827',
     marginBottom: 4,
   },
-  description: {
+  subtitle: {
     fontSize: 15,
-    color: '#6b7280',
-    marginBottom: 20,
-    lineHeight: 22,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#374151',
-    marginBottom: 12,
+    color: '#059669',
+    fontWeight: '600',
   },
   list: {
-    paddingBottom: 24,
+    paddingBottom: 80,
   },
   exerciseCard: {
     flexDirection: 'row',
@@ -160,35 +136,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#2563eb',
   },
-  addButton: {
-    backgroundColor: '#2563eb',
-    borderRadius: 10,
-    padding: 14,
+  finishButton: {
+    backgroundColor: '#ef4444',
+    borderRadius: 12,
+    padding: 16,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
-    marginTop: 16,
+    marginBottom: 24,
   },
-  addButtonText: {
+  finishButtonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  cloneButton: {
-    backgroundColor: '#059669',
-    borderRadius: 10,
-    padding: 12,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
-  },
-  cloneButtonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
   },
   emptyText: {
     fontSize: 15,

@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import type { Database } from '@/types/supabase';
+import type { RoutineExerciseRow, Exercise } from '@/types/supabase';
 
-type RoutineExercise = Database['public']['Tables']['routine_exercises']['Row'] & {
-  exercises: Pick<Database['public']['Tables']['exercises']['Row'], 'name' | 'primary_muscle'> | null;
+type RoutineExercise = RoutineExerciseRow & {
+  exercises: Pick<Exercise, 'name' | 'primary_muscle'> | null;
 };
 
 export function useRoutineExercises(routineId: string) {

@@ -1,8 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import type { Database } from '@/types/supabase';
-
-type Exercise = Database['public']['Tables']['exercises']['Row'];
+import type { Exercise } from '@/types/supabase';
 
 export function useExercises() {
   return useQuery<Exercise[]>({

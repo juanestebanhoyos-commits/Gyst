@@ -1,8 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import type { Database } from '@/types/supabase';
-
-type Routine = Database['public']['Tables']['routines']['Row'];
+import type { Routine } from '@/types/supabase';
 
 export function useRoutines() {
   return useQuery<Routine[]>({

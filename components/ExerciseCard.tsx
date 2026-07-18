@@ -1,8 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Dumbbell } from 'lucide-react-native';
-import type { Database } from '@/types/supabase';
-
-type Exercise = Database['public']['Tables']['exercises']['Row'];
+import type { Exercise } from '@/types/supabase';
 
 interface ExerciseCardProps {
   exercise: Pick<Exercise, 'name' | 'primary_muscle' | 'equipment' | 'is_custom'>;

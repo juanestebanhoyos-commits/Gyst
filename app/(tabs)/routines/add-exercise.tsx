@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -11,6 +10,8 @@ import {
 import { useExercises } from '@/hooks/useExercises';
 import { useRoutineExercises } from '@/hooks/useRoutineExercises';
 import { useAddExerciseToRoutine } from '@/hooks/useAddExerciseToRoutine';
+import { LoadingScreen } from '@/components/LoadingScreen';
+import { ErrorScreen } from '@/components/ErrorScreen';
 import ExercisePicker from '@/components/ExercisePicker';
 import type { ExerciseEntry } from '@/components/ExercisePicker';
 
@@ -39,21 +40,8 @@ export default function AddExerciseScreen() {
     );
   }
 
-  if (isLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2563eb" />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>Error al cargar ejercicios</Text>
-      </View>
-    );
-  }
+  if (isLoading) return <LoadingScreen />;
+  if (error) return <ErrorScreen message="Error al cargar ejercicios" />;
 
   return (
     <KeyboardAvoidingView
@@ -83,12 +71,5 @@ const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: '#f9fafb' },
   container: { flex: 1 },
   content: { padding: 16, gap: 8, paddingBottom: 40 },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f9fafb',
-  },
   title: { fontSize: 28, fontWeight: '800', color: '#111827', marginBottom: 8 },
-  errorText: { fontSize: 16, color: '#ef4444' },
 });
