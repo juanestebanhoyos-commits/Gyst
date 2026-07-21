@@ -9,6 +9,7 @@ import { useCloneRoutine } from '@/hooks/useCloneRoutine';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
+import { getDayNames } from '@/lib/date-utils';
 import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 
 const keyExtractor = (item: { id: string }) => item.id;
@@ -102,7 +103,15 @@ export default function RoutineDetailScreen() {
       {cloneError ? (
         <Text style={styles.errorText}>{cloneError}</Text>
       ) : null}
-      <Text style={styles.sectionTitle}>Ejercicios</Text>
+        {routine.scheduled_days && routine.scheduled_days.length > 0 ? (
+          <View style={styles.scheduledSection}>
+            <Text style={styles.scheduledLabel}>Días programados</Text>
+            <Text style={styles.scheduledDays}>
+              {getDayNames(routine.scheduled_days).join(' · ')}
+            </Text>
+          </View>
+        ) : null}
+        <Text style={styles.sectionTitle}>Ejercicios</Text>
       {loadingExercises ? (
         <LoadingScreen />
       ) : (
@@ -152,6 +161,25 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginBottom: 20,
     lineHeight: 22,
+  },
+  scheduledSection: {
+    backgroundColor: colors.bgWhite,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg - 2,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    marginBottom: spacing.lg,
+  },
+  scheduledLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textMuted,
+    marginBottom: spacing.xs,
+  },
+  scheduledDays: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.text,
   },
   sectionTitle: {
     ...typography.h3,

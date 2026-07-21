@@ -10,7 +10,6 @@
 ## Comandos
 - Dev: `npx expo start`
 - Type check: `npx tsc --noEmit`
-- Lint: `npx eslint . --fix`
 - Generar tipos DB: `npx supabase gen types typescript --project-id <id> > types/supabase.ts`
 
 ## Convenciones de código

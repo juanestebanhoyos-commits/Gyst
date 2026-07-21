@@ -1,30 +1,27 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
+import { WelcomeHeader } from '@/components/WelcomeHeader';
+import { StreakCard } from '@/components/StreakCard';
+import { TodayExercisesSection } from '@/components/TodayExercisesSection';
+import { RoutinesSection } from '@/components/RoutinesSection';
+import { colors } from '@/constants/theme';
 
 export default function HomeScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>GYST</Text>
-      <Text style={styles.subtitle}>Bienvenido a tu gym tracker</Text>
-    </View>
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+      <WelcomeHeader />
+      <StreakCard />
+      <TodayExercisesSection />
+      <RoutinesSection />
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    backgroundColor: '#fff',
+    backgroundColor: colors.bg,
   },
-  title: {
-    fontSize: 36,
-    fontWeight: '800',
-    color: '#2563eb',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#6b7280',
-    marginTop: 8,
+  content: {
+    paddingBottom: 32,
   },
 });

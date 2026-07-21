@@ -21,6 +21,7 @@ import { useRoutine } from '@/hooks/useRoutine';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import ExercisePicker from '@/components/ExercisePicker';
+import { TrainingDaysPicker } from '@/components/TrainingDaysPicker';
 import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 import type { ExerciseEntry } from '@/components/ExercisePicker';
 import type { Exercise } from '@/types/supabase';
@@ -38,6 +39,7 @@ export default function EditRoutineScreen() {
   const [isPublic, setIsPublic] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exercises, setExercises] = useState<ExerciseEntry[]>([]);
+  const [scheduledDays, setScheduledDays] = useState<number[]>([]);
   const [showPicker, setShowPicker] = useState(false);
 
   const addedIds = useMemo(() => new Set(exercises.map((e) => e.exercise.id)), [exercises]);
@@ -47,6 +49,7 @@ export default function EditRoutineScreen() {
       setName(routine.name || '');
       setDescription(routine.description || '');
       setIsPublic(routine.is_public || false);
+      setScheduledDays(routine.scheduled_days || []);
       setExercises(routineExercises?.flatMap((entry) => 
         entry.exercises ? [{
           exercise: entry.exercises as Exercise,
@@ -88,6 +91,7 @@ export default function EditRoutineScreen() {
         name: name.trim(),
         description: description.trim() || null,
         is_public: isPublic,
+        scheduled_days: scheduledDays,
       },
       {
         onSuccess: () => {
@@ -154,6 +158,14 @@ export default function EditRoutineScreen() {
             onValueChange={setIsPublic}
             trackColor={{ false: '#d1d5db', true: '#93c5fd' }}
             thumbColor={isPublic ? '#2563eb' : '#f4f3f4'}
+          />
+        </View>
+
+        <Text style={styles.label}>Días programados</Text>
+        <View style={styles.daysContainer}>
+          <TrainingDaysPicker
+            selectedDays={scheduledDays}
+            onChange={setScheduledDays}
           />
         </View>
 
@@ -345,6 +357,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.errorBg,
     padding: 10,
     borderRadius: borderRadius.sm,
+  },
+  daysContainer: {
+    marginTop: spacing.xs,
   },
   removeText: {
     color: colors.errorText,

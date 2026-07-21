@@ -16,6 +16,7 @@ import { Plus, X } from 'lucide-react-native';
 import { useCreateRoutine } from '@/hooks/useCreateRoutine';
 import { useExercises } from '@/hooks/useExercises';
 import ExercisePicker from '@/components/ExercisePicker';
+import { TrainingDaysPicker } from '@/components/TrainingDaysPicker';
 import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 import type { ExerciseEntry } from '@/components/ExercisePicker';
 
@@ -25,6 +26,7 @@ export default function NewRoutineScreen() {
   const [isPublic, setIsPublic] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exercises, setExercises] = useState<ExerciseEntry[]>([]);
+  const [scheduledDays, setScheduledDays] = useState<number[]>([]);
   const [showPicker, setShowPicker] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -57,6 +59,7 @@ export default function NewRoutineScreen() {
         name: name.trim(),
         description: description.trim() || null,
         is_public: isPublic,
+        scheduled_days: scheduledDays,
         exercises: exercises.map((ex, i) => ({
           exercise_id: ex.exercise.id,
           order_index: i + 1,
@@ -127,6 +130,14 @@ export default function NewRoutineScreen() {
             onValueChange={setIsPublic}
             trackColor={{ false: '#d1d5db', true: '#93c5fd' }}
             thumbColor={isPublic ? '#2563eb' : '#f4f3f4'}
+          />
+        </View>
+
+        <Text style={styles.label}>Días programados</Text>
+        <View style={styles.daysContainer}>
+          <TrainingDaysPicker
+            selectedDays={scheduledDays}
+            onChange={setScheduledDays}
           />
         </View>
 
@@ -308,6 +319,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  daysContainer: {
+    marginTop: spacing.xs,
   },
   error: {
     color: colors.errorText,

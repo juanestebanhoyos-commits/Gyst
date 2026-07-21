@@ -9,6 +9,7 @@ type RoutineExercise = RoutineExerciseRow & {
 export function useRoutineExercises(routineId: string) {
   return useQuery<RoutineExercise[]>({
     queryKey: ['routine_exercises', routineId],
+    enabled: !!routineId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('routine_exercises')

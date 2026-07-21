@@ -5,6 +5,7 @@ interface CreateRoutineInput {
   name: string;
   description?: string | null;
   is_public?: boolean;
+  scheduled_days?: number[];
   exercises?: {
     exercise_id: string;
     order_index: number;
@@ -20,7 +21,7 @@ export function useCreateRoutine() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (input: CreateRoutineInput) => {
-      const { exercises, ...routineData } = input;
+      const { exercises, scheduled_days, ...routineData } = input;
 
       const { data: routineId, error } = await supabase.rpc('create_routine', {
         name: routineData.name,
@@ -29,10 +30,20 @@ export function useCreateRoutine() {
         exercises: exercises ?? [],
       });
       if (error) throw error;
+
+      if (scheduled_days && scheduled_days.length > 0) {
+        const { error: updateError } = await supabase
+          .from('routines')
+          .update({ scheduled_days })
+          .eq('id', routineId);
+        if (updateError) throw updateError;
+      }
+
       return routineId;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['routines'] });
+      queryClient.invalidateQueries({ queryKey: ['today-routine'] });
     },
   });
 }

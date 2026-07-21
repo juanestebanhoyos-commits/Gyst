@@ -66,13 +66,14 @@ export default function OnboardingStep2Screen() {
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <View style={styles.daysContainer}>
-        {DAYS.map((day, index) => {
-          const isSelected = selectedDays.includes(index);
+        {DAYS.slice(1).map((day, i) => {
+          const dayIndex = i + 1;
+          const isSelected = selectedDays.includes(dayIndex);
           return (
             <TouchableOpacity
-              key={index}
+              key={dayIndex}
               style={[styles.dayChip, isSelected && styles.dayChipSelected]}
-              onPress={() => toggleDay(index)}
+              onPress={() => toggleDay(dayIndex)}
               activeOpacity={0.7}
             >
               <View

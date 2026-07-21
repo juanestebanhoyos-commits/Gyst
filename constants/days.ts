@@ -1,9 +1,10 @@
 export const DAYS = [
-  'Domingo',
+  null,
   'Lunes',
   'Martes',
   'Miércoles',
   'Jueves',
   'Viernes',
   'Sábado',
+  'Domingo',
 ] as const;
