@@ -7,6 +7,7 @@ interface LogSetInput {
   weight_kg: number;
   reps: number;
   rpe?: number | null;
+  rir?: number | null;
   is_warmup?: boolean;
 }
 
@@ -23,6 +24,7 @@ export function useLogSet(workoutLogId: string) {
           weight_kg: input.weight_kg,
           reps: input.reps,
           rpe: input.rpe ?? null,
+          rir: input.rir ?? null,
           is_warmup: input.is_warmup ?? false,
         })
         .select()
@@ -30,8 +32,9 @@ export function useLogSet(workoutLogId: string) {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['set_logs', workoutLogId] });
+      queryClient.invalidateQueries({ queryKey: ['set_logs', 'exercise', variables.exercise_id] });
     },
   });
 }

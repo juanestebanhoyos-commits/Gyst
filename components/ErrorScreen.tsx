@@ -1,16 +1,17 @@
+import { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 interface ErrorScreenProps {
   message: string;
 }
 
-export function ErrorScreen({ message }: ErrorScreenProps) {
+export const ErrorScreen = memo(function ErrorScreen({ message }: ErrorScreenProps) {
   return (
     <View style={styles.centered}>
       <Text style={styles.text}>{message}</Text>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   centered: {

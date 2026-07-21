@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { createContext, useContext, useState, useMemo, type ReactNode } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Search, X } from 'lucide-react-native';
 import ExerciseConfigForm, { ExerciseConfig } from './ExerciseConfigForm';
+import { colors, spacing, borderRadius } from '@/constants/theme';
 import type { Exercise } from '@/types/supabase';
 
 export interface ExerciseEntry {
@@ -20,7 +21,25 @@ export interface ExerciseEntry {
   notes: string | null;
 }
 
-interface ExercisePickerProps {
+interface ExercisePickerContextType {
+  search: string;
+  setSearch: (s: string) => void;
+  selectedExercise: Exercise | null;
+  select: (e: Exercise | null) => void;
+  available: Exercise[];
+  allExercises: Exercise[] | undefined;
+  handleAddConfig: (config: ExerciseConfig) => void;
+}
+
+const ExercisePickerContext = createContext<ExercisePickerContextType | null>(null);
+
+function usePickerContext() {
+  const ctx = useContext(ExercisePickerContext);
+  if (!ctx) throw new Error('ExercisePicker sub-components must be used within <ExercisePicker>');
+  return ctx;
+}
+
+interface ExercisePickerRootProps {
   allExercises: Exercise[] | undefined;
   existingIds: Set<string>;
   onAdd: (entry: ExerciseEntry) => void;
@@ -28,6 +47,7 @@ interface ExercisePickerProps {
   isLoading?: boolean;
   onClose?: () => void;
   error?: string | null;
+  children?: ReactNode;
 }
 
 export default function ExercisePicker({
@@ -38,7 +58,8 @@ export default function ExercisePicker({
   isLoading,
   onClose,
   error,
-}: ExercisePickerProps) {
+  children,
+}: ExercisePickerRootProps) {
   const [search, setSearch] = useState('');
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
@@ -56,7 +77,7 @@ export default function ExercisePicker({
     return filtered;
   }, [allExercises, existingIds, search]);
 
-  function handleSelect(exercise: Exercise) {
+  function handleSelect(exercise: Exercise | null) {
     setSelectedExercise(exercise);
   }
 
@@ -69,77 +90,128 @@ export default function ExercisePicker({
     setSelectedExercise(null);
   }
 
+  const ctx: ExercisePickerContextType = {
+    search,
+    setSearch,
+    selectedExercise,
+    select: handleSelect,
+    available,
+    allExercises,
+    handleAddConfig: handleAdd,
+  };
+
+  if (children) {
+    return (
+      <ExercisePickerContext.Provider value={ctx}>
+        <View style={styles.container}>{children}</View>
+      </ExercisePickerContext.Provider>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Seleccionar ejercicio</Text>
-        {onClose && (
-          <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <X color="#6b7280" size={20} />
-          </TouchableOpacity>
-        )}
+    <ExercisePickerContext.Provider value={ctx}>
+      <View style={styles.container}>
+        <ExercisePicker.Header onClose={onClose} />
+        <ExercisePicker.Search />
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+        <ExercisePicker.List />
+        {selectedExercise ? (
+          <ExercisePicker.ConfigForm submitLabel={submitLabel} isLoading={isLoading} />
+        ) : null}
       </View>
-
-      <View style={styles.searchRow}>
-        <Search color="#9ca3af" size={18} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Buscar ejercicios..."
-          value={search}
-          onChangeText={setSearch}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-      </View>
-
-      {error && <Text style={styles.error}>{error}</Text>}
-
-      {!allExercises ? (
-        <ActivityIndicator size="small" color="#2563eb" style={{ marginTop: 12 }} />
-      ) : available.length === 0 ? (
-        <Text style={styles.emptyText}>
-          No hay ejercicios disponibles
-        </Text>
-      ) : (
-        <View style={styles.list}>
-          {available.map((exercise) => {
-            const isSelected = selectedExercise?.id === exercise.id;
-            return (
-              <TouchableOpacity
-                key={exercise.id}
-                style={[styles.card, isSelected && styles.cardActive]}
-                onPress={() => handleSelect(exercise)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.cardName}>{exercise.name}</Text>
-                <Text style={styles.cardMuscle}>{exercise.primary_muscle}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      )}
-
-      {selectedExercise && (
-        <ExerciseConfigForm
-          exerciseName={selectedExercise.name}
-          onSubmit={handleAdd}
-          onCancel={() => setSelectedExercise(null)}
-          submitLabel={submitLabel}
-          isLoading={isLoading}
-        />
-      )}
-    </View>
+    </ExercisePickerContext.Provider>
   );
 }
 
+ExercisePicker.Header = function PickerHeader({
+  onClose,
+}: {
+  onClose?: () => void;
+}) {
+  return (
+    <View style={styles.header}>
+      <Text style={styles.title}>Seleccionar ejercicio</Text>
+      {onClose ? (
+        <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <X color={colors.textMuted} size={20} />
+        </TouchableOpacity>
+      ) : null}
+    </View>
+  );
+};
+
+ExercisePicker.Search = function PickerSearch() {
+  const { search, setSearch } = usePickerContext();
+  return (
+    <View style={styles.searchRow}>
+      <Search color={colors.textPlaceholder} size={18} />
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Buscar ejercicios..."
+        value={search}
+        onChangeText={setSearch}
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+    </View>
+  );
+};
+
+ExercisePicker.List = function PickerList() {
+  const { available, allExercises, selectedExercise, select } = usePickerContext();
+
+  return !allExercises ? (
+    <ActivityIndicator size="small" color={colors.primary} style={styles.loadingIndicator} />
+  ) : available.length === 0 ? (
+    <Text style={styles.emptyText}>No hay ejercicios disponibles</Text>
+  ) : (
+    <View style={styles.list}>
+      {available.map((exercise) => {
+        const isSelected = selectedExercise?.id === exercise.id;
+        return (
+          <TouchableOpacity
+            key={exercise.id}
+            style={[styles.card, isSelected && styles.cardActive]}
+            onPress={() => select(exercise)}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.cardName}>{exercise.name}</Text>
+            <Text style={styles.cardMuscle}>{exercise.primary_muscle}</Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+};
+
+ExercisePicker.ConfigForm = function PickerConfigForm({
+  submitLabel,
+  isLoading,
+}: {
+  submitLabel?: string;
+  isLoading?: boolean;
+}) {
+  const { selectedExercise, handleAddConfig, select } = usePickerContext();
+  if (!selectedExercise) return null;
+  return (
+    <ExerciseConfigForm
+      exerciseName={selectedExercise.name}
+      onSubmit={handleAddConfig}
+      onCancel={() => select(null)}
+      submitLabel={submitLabel}
+      isLoading={isLoading}
+    />
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
+    backgroundColor: colors.bgWhite,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg - 2,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
-    gap: 8,
+    borderColor: colors.borderLight,
+    gap: spacing.sm,
   },
   header: {
     flexDirection: 'row',
@@ -149,13 +221,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.text,
   },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f3f4f6',
-    borderRadius: 8,
+    backgroundColor: colors.bgLight,
+    borderRadius: borderRadius.sm,
     paddingHorizontal: 10,
     gap: 6,
   },
@@ -163,44 +235,47 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     fontSize: 15,
-    color: '#111827',
+    color: colors.text,
   },
   list: {
     gap: 6,
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 14,
+    backgroundColor: colors.bgWhite,
+    borderRadius: borderRadius.md,
+    padding: spacing.lg - 2,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: colors.borderLight,
   },
   cardActive: {
-    borderColor: '#2563eb',
-    backgroundColor: '#eff6ff',
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryBg,
   },
   cardName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
   },
   cardMuscle: {
     fontSize: 13,
-    color: '#6b7280',
+    color: colors.textMuted,
     marginTop: 2,
   },
   emptyText: {
     fontSize: 14,
-    color: '#9ca3af',
+    color: colors.textPlaceholder,
     textAlign: 'center',
-    marginTop: 16,
+    marginTop: spacing.lg,
   },
   error: {
-    color: '#dc2626',
+    color: colors.errorText,
     fontSize: 14,
     textAlign: 'center',
-    backgroundColor: '#fef2f2',
+    backgroundColor: colors.errorBg,
     padding: 10,
-    borderRadius: 8,
+    borderRadius: borderRadius.sm,
+  },
+  loadingIndicator: {
+    marginTop: 12,
   },
 });

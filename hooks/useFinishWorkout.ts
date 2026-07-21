@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
-export function useFinishWorkout(workoutLogId: string) {
+export function useFinishWorkout() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (workoutLogId: string) => {
       const { data, error } = await supabase
         .from('workout_logs')
         .update({ finished_at: new Date().toISOString() })
@@ -14,7 +14,7 @@ export function useFinishWorkout(workoutLogId: string) {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_data, workoutLogId) => {
       queryClient.invalidateQueries({ queryKey: ['workout_logs'] });
       queryClient.invalidateQueries({ queryKey: ['workout_logs', workoutLogId] });
     },

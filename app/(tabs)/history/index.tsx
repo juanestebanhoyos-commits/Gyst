@@ -1,8 +1,10 @@
+import { useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
+import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 
 function formatDuration(startedAt: string, finishedAt: string | null): string {
   const start = new Date(startedAt);
@@ -24,6 +26,20 @@ function formatDate(iso: string): string {
   });
 }
 
+const keyExtractor = (item: { id: string }) => item.id;
+
+const renderItem = useCallback(({ item }: { item: { started_at: string; finished_at: string | null; routines: { name: string } | null } }) => (
+  <View style={styles.card}>
+    <Text style={styles.date}>{formatDate(item.started_at)}</Text>
+    <Text style={styles.routineName}>
+      {item.routines?.name ?? 'Sesión libre'}
+    </Text>
+    <Text style={styles.duration}>
+      Duración: {formatDuration(item.started_at, item.finished_at)}
+    </Text>
+  </View>
+), []);
+
 export default function HistoryScreen() {
   const { data: logs, isLoading, error } = useWorkoutHistory();
 
@@ -35,18 +51,8 @@ export default function HistoryScreen() {
       <Text style={styles.title}>Historial</Text>
       <FlatList
         data={logs}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.date}>{formatDate(item.started_at)}</Text>
-            <Text style={styles.routineName}>
-              {item.routines?.name ?? 'Sesión libre'}
-            </Text>
-            <Text style={styles.duration}>
-              Duración: {formatDuration(item.started_at, item.finished_at)}
-            </Text>
-          </View>
-        )}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={ListSeparator}
         ListEmptyComponent={
@@ -60,45 +66,44 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    backgroundColor: colors.bg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#111827',
-    marginBottom: 16,
+    ...typography.h1,
+    color: colors.text,
+    marginBottom: spacing.lg,
   },
   list: {
     paddingBottom: 80,
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: colors.bgWhite,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: colors.borderLight,
   },
   date: {
     fontSize: 14,
-    color: '#6b7280',
+    color: colors.textMuted,
     fontWeight: '600',
   },
   routineName: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
-    marginTop: 4,
+    color: colors.text,
+    marginTop: spacing.xs,
   },
   duration: {
     fontSize: 14,
-    color: '#6b7280',
-    marginTop: 4,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
   },
   emptyText: {
     fontSize: 16,
-    color: '#9ca3af',
+    color: colors.textPlaceholder,
     textAlign: 'center',
     marginTop: 32,
   },

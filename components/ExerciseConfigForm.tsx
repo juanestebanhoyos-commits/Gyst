@@ -69,14 +69,14 @@ export default function ExerciseConfigForm({
     <View style={styles.section}>
       <View style={styles.header}>
         <Text style={styles.title} numberOfLines={1}>{exerciseName}</Text>
-        {onCancel && (
+        {onCancel ? (
           <TouchableOpacity onPress={onCancel} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
             <X color="#6b7280" size={20} />
           </TouchableOpacity>
-        )}
+        ) : null}
       </View>
 
-      {submitError && <Text style={styles.error}>{submitError}</Text>}
+      {submitError ? <Text style={styles.error}>{submitError}</Text> : null}
 
       <View style={styles.row}>
         <View style={styles.field}>

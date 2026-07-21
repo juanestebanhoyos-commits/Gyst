@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { router } from 'expo-router';
+import { useState, useMemo, useEffect } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
 import {
   View,
   Text,
@@ -12,26 +12,53 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { Plus, X } from 'lucide-react-native';
-import { useCreateRoutine } from '@/hooks/useCreateRoutine';
+import { Save } from 'lucide-react-native';
+import { useUpdateRoutine } from '@/hooks/useUpdateRoutine';
+import { useRoutineExercises } from '@/hooks/useRoutineExercises';
 import { useExercises } from '@/hooks/useExercises';
+import { useSession } from '@/hooks/useSession';
+import { useRoutine } from '@/hooks/useRoutine';
+import { LoadingScreen } from '@/components/LoadingScreen';
+import { ErrorScreen } from '@/components/ErrorScreen';
 import ExercisePicker from '@/components/ExercisePicker';
 import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 import type { ExerciseEntry } from '@/components/ExercisePicker';
+import type { Exercise } from '@/types/supabase';
 
-export default function NewRoutineScreen() {
+export default function EditRoutineScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { user, isLoading: sessionLoading } = useSession();
+  const { data: routine, isLoading: loadingRoutine, error: routineError } = useRoutine(id);
+  const { data: allExercises } = useExercises();
+  const { data: routineExercises } = useRoutineExercises(id);
+  const { mutate: updateRoutine, isPending } = useUpdateRoutine();
+
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exercises, setExercises] = useState<ExerciseEntry[]>([]);
   const [showPicker, setShowPicker] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { mutate: createRoutine } = useCreateRoutine();
-  const { data: allExercises } = useExercises();
 
   const addedIds = useMemo(() => new Set(exercises.map((e) => e.exercise.id)), [exercises]);
+
+  useEffect(() => {
+    if (routine) {
+      setName(routine.name || '');
+      setDescription(routine.description || '');
+      setIsPublic(routine.is_public || false);
+      setExercises(routineExercises?.flatMap((entry) => 
+        entry.exercises ? [{
+          exercise: entry.exercises as Exercise,
+          target_sets: entry.target_sets,
+          target_reps_min: entry.target_reps_min,
+          target_reps_max: entry.target_reps_max,
+          rest_seconds: entry.rest_seconds,
+          notes: entry.notes,
+        }] : [],
+      ) || []);
+    }
+  }, [routine, routineExercises]);
 
   function handleAddExercise(entry: ExerciseEntry) {
     setExercises((prev) => [...prev, entry]);
@@ -42,7 +69,7 @@ export default function NewRoutineScreen() {
     setExercises((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function handleCreate() {
+  function handleSave() {
     setError(null);
 
     if (!name.trim()) {
@@ -50,35 +77,35 @@ export default function NewRoutineScreen() {
       return;
     }
 
-    setIsSubmitting(true);
+    if (!user?.id) {
+      setError('Usuario no encontrado');
+      return;
+    }
 
-    createRoutine(
+    updateRoutine(
       {
+        id,
         name: name.trim(),
         description: description.trim() || null,
         is_public: isPublic,
-        exercises: exercises.map((ex, i) => ({
-          exercise_id: ex.exercise.id,
-          order_index: i + 1,
-          target_sets: ex.target_sets,
-          target_reps_min: ex.target_reps_min,
-          target_reps_max: ex.target_reps_max,
-          rest_seconds: ex.rest_seconds,
-          notes: ex.notes,
-        })),
       },
       {
-        onSuccess: (routineId) => {
-          router.replace(`/(tabs)/routines/${routineId}`);
+        onSuccess: () => {
+          router.replace(`/(tabs)/routines/${id}`);
         },
         onError: (err) => {
           setError(err.message);
         },
-        onSettled: () => {
-          setIsSubmitting(false);
-        },
       },
     );
+  }
+
+  if (sessionLoading || loadingRoutine) return <LoadingScreen />;
+  if (routineError) return <ErrorScreen message="Error al cargar la rutina" />;
+  if (!routine) return <ErrorScreen message="Rutina no encontrada" />;
+
+  if (!user || routine.user_id !== user.id) {
+    return <ErrorScreen message="No tienes permiso para editar esta rutina" />;
   }
 
   return (
@@ -91,7 +118,7 @@ export default function NewRoutineScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>Nueva rutina</Text>
+        <Text style={styles.title}>Editar rutina</Text>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -143,7 +170,7 @@ export default function NewRoutineScreen() {
                   </Text>
                 </View>
                 <TouchableOpacity onPress={() => handleRemoveExercise(i)}>
-                  <X color="#ef4444" size={20} />
+                  <Text style={styles.removeText}>Eliminar</Text>
                 </TouchableOpacity>
               </View>
             ))}
@@ -156,8 +183,7 @@ export default function NewRoutineScreen() {
             onPress={() => setShowPicker(true)}
             activeOpacity={0.8}
           >
-            <Plus color="#2563eb" size={20} />
-            <Text style={styles.addExerciseButtonText}>Agregar ejercicio</Text>
+            <Text style={styles.addExerciseButtonText}>+ Agregar ejercicio</Text>
           </TouchableOpacity>
         ) : (
           <ExercisePicker
@@ -165,22 +191,23 @@ export default function NewRoutineScreen() {
             existingIds={addedIds}
             onAdd={handleAddExercise}
             onClose={() => setShowPicker(false)}
+            submitLabel="Agregar ejercicio"
           />
         )}
 
         <TouchableOpacity
-          style={styles.createButton}
-          onPress={handleCreate}
-          disabled={isSubmitting}
+          style={[styles.saveButton, isPending && styles.saveButtonDisabled]}
+          onPress={handleSave}
+          disabled={isPending}
           activeOpacity={0.8}
         >
-          {isSubmitting ? (
+          {isPending ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Plus color="#fff" size={20} />
+            <Save color="#fff" size={20} />
           )}
-          <Text style={styles.createButtonText}>
-            {isSubmitting ? 'Creando...' : 'Crear rutina'}
+          <Text style={styles.saveButtonText}>
+            {isPending ? 'Guardando...' : 'Guardar cambios'}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -276,8 +303,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textMuted,
     marginTop: 2,
-  },
-  addExerciseButton: {
+  },  addExerciseButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -294,7 +320,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
-  createButton: {
+  saveButton: {
     backgroundColor: colors.primary,
     borderRadius: borderRadius.md,
     padding: spacing.lg - 2,
@@ -304,7 +330,10 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginTop: 20,
   },
-  createButtonText: {
+  saveButtonDisabled: {
+    opacity: 0.7,
+  },
+  saveButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
@@ -316,5 +345,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.errorBg,
     padding: 10,
     borderRadius: borderRadius.sm,
+  },
+  removeText: {
+    color: colors.errorText,
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

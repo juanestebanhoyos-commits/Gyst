@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Dumbbell } from 'lucide-react-native';
 import type { Exercise } from '@/types/supabase';
@@ -6,7 +7,7 @@ interface ExerciseCardProps {
   exercise: Pick<Exercise, 'name' | 'primary_muscle' | 'equipment' | 'is_custom'>;
 }
 
-export function ExerciseCard({ exercise }: ExerciseCardProps) {
+export const ExerciseCard = memo(function ExerciseCard({ exercise }: ExerciseCardProps) {
   return (
     <View style={styles.card}>
       <View style={styles.iconContainer}>
@@ -15,20 +16,20 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
       <View style={styles.info}>
         <View style={styles.nameRow}>
           <Text style={styles.name}>{exercise.name}</Text>
-          {exercise.is_custom && (
+          {exercise.is_custom ? (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>Propio</Text>
             </View>
-          )}
+          ) : null}
         </View>
         <Text style={styles.muscle}>{exercise.primary_muscle}</Text>
-        {exercise.equipment && (
+        {exercise.equipment ? (
           <Text style={styles.equipment}>{exercise.equipment}</Text>
-        )}
+        ) : null}
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

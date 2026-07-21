@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, Redirect, useLocalSearchParams } from 'expo-router';
 import {
   View,
   Text,
@@ -9,19 +9,24 @@ import {
 } from 'react-native';
 import { useExercises } from '@/hooks/useExercises';
 import { useRoutineExercises } from '@/hooks/useRoutineExercises';
+import { useRoutine } from '@/hooks/useRoutine';
+import { useSession } from '@/hooks/useSession';
 import { useAddExerciseToRoutine } from '@/hooks/useAddExerciseToRoutine';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import ExercisePicker from '@/components/ExercisePicker';
+import { colors, spacing, typography } from '@/constants/theme';
 import type { ExerciseEntry } from '@/components/ExercisePicker';
 
 export default function AddExerciseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: allExercises, isLoading, error } = useExercises();
+  const { user } = useSession();
+  const { data: routine, isLoading: loadingRoutine } = useRoutine(id);
+  const { data: allExercises, isLoading: loadingExercises, error } = useExercises();
   const { data: currentExercises } = useRoutineExercises(id);
   const { mutate, isPending } = useAddExerciseToRoutine(id);
 
-  const existingIds = new Set(currentExercises?.map((e) => e.exercise_id) ?? []);
+  const isLoading = loadingExercises || loadingRoutine;
 
   function handleAdd(entry: ExerciseEntry) {
     mutate(
@@ -42,6 +47,12 @@ export default function AddExerciseScreen() {
 
   if (isLoading) return <LoadingScreen />;
   if (error) return <ErrorScreen message="Error al cargar ejercicios" />;
+
+  if (!routine || (user && routine.user_id !== user.id)) {
+    return <Redirect href="/(tabs)/routines" />;
+  }
+
+  const existingIds = new Set(currentExercises?.map((e) => e.exercise_id) ?? []);
 
   return (
     <KeyboardAvoidingView
@@ -68,8 +79,8 @@ export default function AddExerciseScreen() {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#f9fafb' },
+  flex: { flex: 1, backgroundColor: colors.bg },
   container: { flex: 1 },
-  content: { padding: 16, gap: 8, paddingBottom: 40 },
-  title: { fontSize: 28, fontWeight: '800', color: '#111827', marginBottom: 8 },
+  content: { padding: spacing.lg, gap: spacing.sm, paddingBottom: 40 },
+  title: { ...typography.h1, color: colors.text, marginBottom: spacing.sm },
 });

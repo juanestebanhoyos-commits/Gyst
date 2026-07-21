@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Copy, Plus } from 'lucide-react-native';
@@ -8,6 +9,28 @@ import { useCloneRoutine } from '@/hooks/useCloneRoutine';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
+import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+
+const keyExtractor = (item: { id: string }) => item.id;
+
+const renderItem = useCallback(({ item, index }: { item: { id: string; exercises: { name: string; primary_muscle: string } | null; target_sets: number; target_reps_min: number; target_reps_max: number }; index: number }) => (
+  <View style={styles.exerciseCard}>
+    <Text style={styles.exerciseIndex}>{index + 1}</Text>
+    <View style={styles.exerciseInfo}>
+      <Text style={styles.exerciseName}>
+        {item.exercises?.name ?? 'Ejercicio desconocido'}
+      </Text>
+      {item.exercises?.primary_muscle ? (
+        <Text style={styles.exerciseMuscle}>
+          {item.exercises.primary_muscle}
+        </Text>
+      ) : null}
+    </View>
+    <Text style={styles.exerciseSets}>
+      {item.target_sets} × {item.target_reps_min}-{item.target_reps_max}
+    </Text>
+  </View>
+), []);
 
 export default function RoutineDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -20,19 +43,30 @@ export default function RoutineDetailScreen() {
 
   const { user } = useSession();
   const cloneMutation = useCloneRoutine();
+  const [cloneError, setCloneError] = useState<string | null>(null);
 
-  const canClone = routine ? (routine.is_public || routine.user_id !== user?.id) : false;
+  const isOwner = user ? routine?.user_id === user.id : false;
+  const canClone = !isOwner && !!routine?.is_public;
+  const canEdit = isOwner;
 
   const handleClone = () => {
+    setCloneError(null);
     cloneMutation.mutate(id, {
       onSuccess: (newRoutineId) => {
         router.replace(`/(tabs)/routines/${newRoutineId}`);
       },
+      onError: (err) => setCloneError(err.message),
     });
   };
 
-  if (loadingRoutine || loadingExercises) return <LoadingScreen />;
+  const handleEdit = () => {
+    if (canEdit) {
+      router.push(`/(tabs)/routines/edit/${id}`);
+    }
+  };
+
   if (routineError || exercisesError) return <ErrorScreen message="Error al cargar la rutina" />;
+  if (loadingRoutine && !routine) return <LoadingScreen />;
   if (!routine) return <ErrorScreen message="Rutina no encontrada" />;
 
   return (
@@ -41,59 +75,62 @@ export default function RoutineDetailScreen() {
       {routine.description ? (
         <Text style={styles.description}>{routine.description}</Text>
       ) : null}
-      {canClone ? (
-        <TouchableOpacity
-          style={styles.cloneButton}
-          activeOpacity={0.8}
-          onPress={handleClone}
-          disabled={cloneMutation.isPending}
-        >
-          <Copy color="#fff" size={18} />
-          <Text style={styles.cloneButtonText}>
-            {cloneMutation.isPending ? 'Clonando...' : 'Clonar rutina'}
-          </Text>
-        </TouchableOpacity>
+      <View style={styles.buttonsRow}>
+        {canClone ? (
+          <TouchableOpacity
+            style={styles.cloneButton}
+            activeOpacity={0.8}
+            onPress={handleClone}
+            disabled={cloneMutation.isPending}
+          >
+            <Copy color="#fff" size={18} />
+            <Text style={styles.cloneButtonText}>
+              {cloneMutation.isPending ? 'Clonando...' : 'Clonar rutina'}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
+        {canEdit ? (
+          <TouchableOpacity
+            style={styles.editButton}
+            activeOpacity={0.8}
+            onPress={handleEdit}
+          >
+            <Text style={styles.editButtonText}>Editar rutina</Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
+      {cloneError ? (
+        <Text style={styles.errorText}>{cloneError}</Text>
       ) : null}
       <Text style={styles.sectionTitle}>Ejercicios</Text>
-      <FlatList
-        data={exercises}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => (
-          <View style={styles.exerciseCard}>
-            <Text style={styles.exerciseIndex}>{index + 1}</Text>
-            <View style={styles.exerciseInfo}>
-              <Text style={styles.exerciseName}>
-                {item.exercises?.name ?? 'Ejercicio desconocido'}
-              </Text>
-              {item.exercises?.primary_muscle && (
-                <Text style={styles.exerciseMuscle}>
-                  {item.exercises.primary_muscle}
-                </Text>
-              )}
-            </View>
-            <Text style={styles.exerciseSets}>
-              {item.target_sets} × {item.target_reps_min}-{item.target_reps_max}
+      {loadingExercises ? (
+        <LoadingScreen />
+      ) : (
+        <FlatList
+          data={exercises}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          contentContainerStyle={styles.list}
+          ItemSeparatorComponent={ListSeparator}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>
+              Esta rutina no tiene ejercicios asignados
             </Text>
-          </View>
-        )}
-        contentContainerStyle={styles.list}
-        ItemSeparatorComponent={ListSeparator}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            Esta rutina no tiene ejercicios asignados
-          </Text>
-        }
-        ListFooterComponent={
-          <TouchableOpacity
-            style={styles.addButton}
-            activeOpacity={0.8}
-            onPress={() => router.push(`/(tabs)/routines/add-exercise?id=${id}`)}
-          >
-            <Plus color="#fff" size={20} />
-            <Text style={styles.addButtonText}>Agregar ejercicio</Text>
-          </TouchableOpacity>
-        }
-      />
+          }
+          ListFooterComponent={
+            canEdit ? (
+              <TouchableOpacity
+                style={styles.addButton}
+                activeOpacity={0.8}
+                onPress={() => router.push(`/(tabs)/routines/add-exercise?id=${id}`)}
+              >
+                <Plus color="#fff" size={20} />
+                <Text style={styles.addButtonText}>Agregar ejercicio</Text>
+              </TouchableOpacity>
+            ) : undefined
+          }
+        />
+      )}
     </View>
   );
 }
@@ -101,27 +138,25 @@ export default function RoutineDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    backgroundColor: colors.bg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#111827',
-    marginBottom: 4,
+    ...typography.h1,
+    color: colors.text,
+    marginBottom: spacing.xs,
   },
   description: {
     fontSize: 15,
-    color: '#6b7280',
+    color: colors.textMuted,
     marginBottom: 20,
     lineHeight: 22,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#374151',
-    marginBottom: 12,
+    ...typography.h3,
+    color: colors.textSecondary,
+    marginBottom: spacing.md,
   },
   list: {
     paddingBottom: 24,
@@ -129,46 +164,45 @@ const styles = StyleSheet.create({
   exerciseCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
+    backgroundColor: colors.bgWhite,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg - 2,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
-    gap: 12,
+    borderColor: colors.borderLight,
+    gap: spacing.md,
   },
   exerciseIndex: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#9ca3af',
+    color: colors.textPlaceholder,
     minWidth: 24,
   },
   exerciseInfo: {
     flex: 1,
   },
   exerciseName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
+    ...typography.bodyBold,
+    color: colors.text,
   },
   exerciseMuscle: {
     fontSize: 13,
-    color: '#6b7280',
+    color: colors.textMuted,
     marginTop: 2,
   },
   exerciseSets: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#2563eb',
+    color: colors.primary,
   },
   addButton: {
-    backgroundColor: '#2563eb',
-    borderRadius: 10,
-    padding: 14,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.md,
+    padding: spacing.lg - 2,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 16,
+    gap: spacing.sm,
+    marginTop: spacing.lg,
   },
   addButtonText: {
     color: '#fff',
@@ -176,24 +210,51 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   cloneButton: {
-    backgroundColor: '#059669',
-    borderRadius: 10,
-    padding: 12,
+    backgroundColor: colors.success,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   cloneButtonText: {
     color: '#fff',
     fontSize: 15,
     fontWeight: '600',
   },
+  editButton: {
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  editButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
   emptyText: {
     fontSize: 15,
-    color: '#9ca3af',
+    color: colors.textPlaceholder,
     textAlign: 'center',
     marginTop: 24,
+  },
+  buttonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  errorText: {
+    color: colors.errorText,
+    fontSize: 14,
+    textAlign: 'center',
+    backgroundColor: colors.errorBg,
+    padding: 10,
+    borderRadius: borderRadius.sm,
+    marginBottom: spacing.md,
   },
 });

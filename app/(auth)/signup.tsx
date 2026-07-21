@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import {
   View,
   Text,
@@ -8,8 +8,12 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserPlus } from 'lucide-react-native';
 import { useSignup } from '@/hooks/useSignup';
+import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+
+const ONBOARDING_KEY = '@gyst_onboarding';
 
 export default function SignupScreen() {
   const [email, setEmail] = useState('');
@@ -18,9 +22,8 @@ export default function SignupScreen() {
   const [success, setSuccess] = useState(false);
   const signup = useSignup();
 
-  function handleSignup() {
+  async function handleSignup() {
     setError(null);
-    setSuccess(false);
 
     if (!email.trim()) {
       setError('Ingresa tu email');
@@ -35,28 +38,27 @@ export default function SignupScreen() {
       return;
     }
 
+    const stored = await AsyncStorage.getItem(ONBOARDING_KEY);
+    const onboardingData = stored ? JSON.parse(stored) : { name: '', training_days: [] };
+
     signup.mutate(
-      { email: email.trim(), password },
       {
-        onSuccess: () => setSuccess(true),
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            name: onboardingData.name,
+            training_days: onboardingData.training_days,
+          },
+        },
+      },
+      {
+        onSuccess: async () => {
+          await AsyncStorage.removeItem(ONBOARDING_KEY);
+          router.replace('/(auth)/login');
+        },
         onError: (err) => setError(err.message),
       },
-    );
-  }
-
-  if (success) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>GYST</Text>
-        <Text style={styles.subtitle}>Registro exitoso</Text>
-        <Text style={styles.successText}>
-          Revisa tu correo para confirmar la cuenta. Si no ves el mensaje,
-          revisa la carpeta de spam.
-        </Text>
-        <Link href="/(auth)/login" style={styles.link}>
-          Volver a inicio de sesión
-        </Link>
-      </View>
     );
   }
 
@@ -65,7 +67,7 @@ export default function SignupScreen() {
       <Text style={styles.title}>GYST</Text>
       <Text style={styles.subtitle}>Crear cuenta</Text>
 
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <TextInput
         style={styles.input}
@@ -113,39 +115,39 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 24,
-    gap: 16,
-    backgroundColor: '#fff',
+    padding: spacing.xl,
+    gap: spacing.lg,
+    backgroundColor: colors.bgWhite,
   },
   title: {
     fontSize: 36,
     fontWeight: '800',
     textAlign: 'center',
-    color: '#2563eb',
+    color: colors.primary,
   },
   subtitle: {
     fontSize: 18,
     fontWeight: '600',
     textAlign: 'center',
-    color: '#374151',
-    marginBottom: 8,
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 10,
-    padding: 14,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    padding: spacing.lg - 2,
     fontSize: 16,
-    color: '#111827',
+    color: colors.text,
   },
   button: {
-    backgroundColor: '#2563eb',
-    borderRadius: 10,
-    padding: 14,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.md,
+    padding: spacing.lg - 2,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
+    gap: spacing.sm,
   },
   buttonText: {
     color: '#fff',
@@ -153,26 +155,26 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   error: {
-    color: '#dc2626',
+    color: colors.errorText,
     fontSize: 14,
     textAlign: 'center',
-    backgroundColor: '#fef2f2',
+    backgroundColor: colors.errorBg,
     padding: 10,
-    borderRadius: 8,
+    borderRadius: borderRadius.sm,
   },
   successText: {
-    color: '#16a34a',
+    color: colors.successText,
     fontSize: 14,
     textAlign: 'center',
-    backgroundColor: '#f0fdf4',
+    backgroundColor: colors.successBg,
     padding: 12,
-    borderRadius: 8,
+    borderRadius: borderRadius.sm,
     lineHeight: 20,
   },
   link: {
-    color: '#2563eb',
+    color: colors.primary,
     fontSize: 14,
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
 });

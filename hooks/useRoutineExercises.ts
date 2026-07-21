@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import type { RoutineExerciseRow, Exercise } from '@/types/supabase';
 
 type RoutineExercise = RoutineExerciseRow & {
-  exercises: Pick<Exercise, 'name' | 'primary_muscle'> | null;
+  exercises: Pick<Exercise, 'id' | 'name' | 'primary_muscle'> | null;
 };
 
 export function useRoutineExercises(routineId: string) {
@@ -12,7 +12,7 @@ export function useRoutineExercises(routineId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('routine_exercises')
-        .select('*, exercises(name, primary_muscle)')
+        .select('*, exercises(id, name, primary_muscle)')
         .eq('routine_id', routineId)
         .order('order_index', { ascending: true });
       if (error) throw error;

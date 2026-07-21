@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Check } from 'lucide-react-native';
 
@@ -9,7 +9,7 @@ interface SetInputProps {
   isLoading?: boolean;
 }
 
-export function SetInput({ exerciseName, setIndex, onSubmit, isLoading = false }: SetInputProps) {
+export const SetInput = memo(function SetInput({ exerciseName, setIndex, onSubmit, isLoading = false }: SetInputProps) {
   const [weight, setWeight] = useState('');
   const [reps, setReps] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +50,7 @@ export function SetInput({ exerciseName, setIndex, onSubmit, isLoading = false }
         <Text style={styles.setNumber}>Serie {setIndex}</Text>
       </View>
 
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <View style={styles.row}>
         <View style={styles.field}>
@@ -90,7 +90,7 @@ export function SetInput({ exerciseName, setIndex, onSubmit, isLoading = false }
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { LogIn } from 'lucide-react-native';
 import { useLogin } from '@/hooks/useLogin';
+import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -43,7 +44,7 @@ export default function LoginScreen() {
       <Text style={styles.title}>GYST</Text>
       <Text style={styles.subtitle}>Iniciar sesión</Text>
 
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <TextInput
         style={styles.input}
@@ -80,8 +81,8 @@ export default function LoginScreen() {
         </Text>
       </TouchableOpacity>
 
-      <Link href="/(auth)/signup" style={styles.link}>
-        ¿No tienes cuenta? Regístrate
+      <Link href="/(auth)/onboarding/step-1" style={styles.link}>
+        ¿No tienes cuenta? Créala aquí
       </Link>
     </View>
   );
@@ -91,39 +92,39 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 24,
-    gap: 16,
-    backgroundColor: '#fff',
+    padding: spacing.xl,
+    gap: spacing.lg,
+    backgroundColor: colors.bgWhite,
   },
   title: {
     fontSize: 36,
     fontWeight: '800',
     textAlign: 'center',
-    color: '#2563eb',
+    color: colors.primary,
   },
   subtitle: {
     fontSize: 18,
     fontWeight: '600',
     textAlign: 'center',
-    color: '#374151',
-    marginBottom: 8,
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 10,
-    padding: 14,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    padding: spacing.lg - 2,
     fontSize: 16,
-    color: '#111827',
+    color: colors.text,
   },
   button: {
-    backgroundColor: '#2563eb',
-    borderRadius: 10,
-    padding: 14,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.md,
+    padding: spacing.lg - 2,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
+    gap: spacing.sm,
   },
   buttonText: {
     color: '#fff',
@@ -131,17 +132,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   error: {
-    color: '#dc2626',
+    color: colors.errorText,
     fontSize: 14,
     textAlign: 'center',
-    backgroundColor: '#fef2f2',
+    backgroundColor: colors.errorBg,
     padding: 10,
-    borderRadius: 8,
+    borderRadius: borderRadius.sm,
   },
   link: {
-    color: '#2563eb',
+    color: colors.primary,
     fontSize: 14,
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
 });

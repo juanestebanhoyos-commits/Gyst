@@ -1,14 +1,37 @@
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { Square } from 'lucide-react-native';
 import { useRoutine } from '@/hooks/useRoutine';
 import { useRoutineExercises } from '@/hooks/useRoutineExercises';
 import { useStartWorkout } from '@/hooks/useStartWorkout';
+import { useFinishWorkout } from '@/hooks/useFinishWorkout';
 import { useSession } from '@/hooks/useSession';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
+import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+
+const keyExtractor = (item: { id: string }) => item.id;
+
+const renderItem = useCallback(({ item, index }: { item: { id: string; exercises: { name: string; primary_muscle: string } | null; target_sets: number; target_reps_min: number; target_reps_max: number }; index: number }) => (
+  <View style={styles.exerciseCard}>
+    <Text style={styles.exerciseIndex}>{index + 1}</Text>
+    <View style={styles.exerciseInfo}>
+      <Text style={styles.exerciseName}>
+        {item.exercises?.name ?? 'Ejercicio desconocido'}
+      </Text>
+      {item.exercises?.primary_muscle ? (
+        <Text style={styles.exerciseMuscle}>
+          {item.exercises.primary_muscle}
+        </Text>
+      ) : null}
+    </View>
+    <Text style={styles.exerciseSets}>
+      {item.target_sets} × {item.target_reps_min}-{item.target_reps_max}
+    </Text>
+  </View>
+), []);
 
 export default function WorkoutSessionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -16,18 +39,40 @@ export default function WorkoutSessionScreen() {
   const { data: exercises, isLoading: loadingExercises } = useRoutineExercises(id);
   const { user } = useSession();
   const startWorkout = useStartWorkout();
+  const finishWorkout = useFinishWorkout();
+  const workoutLogIdRef = useRef<string | null>(null);
   const hasStarted = useRef(false);
 
   useEffect(() => {
     if (user && !hasStarted.current) {
       hasStarted.current = true;
-      startWorkout.mutate({ userId: user.id, routine_id: id });
+      startWorkout.mutate(
+        { userId: user.id, routine_id: id },
+        {
+          onSuccess: (data) => {
+            workoutLogIdRef.current = data.id;
+          },
+        },
+      );
     }
   }, [id, user?.id]);
 
-  const isLoading = loadingRoutine || loadingExercises || startWorkout.isPending;
+  function handleFinish() {
+    const logId = workoutLogIdRef.current;
+    if (!logId) {
+      router.replace('/(tabs)/routines');
+      return;
+    }
+    finishWorkout.mutate(logId, {
+      onSuccess: () => {
+        router.replace('/(tabs)/routines');
+      },
+    });
+  }
 
-  if (isLoading) return <LoadingScreen />;
+  const isMutating = startWorkout.isPending || finishWorkout.isPending;
+
+  if (loadingRoutine || loadingExercises || isMutating) return <LoadingScreen />;
   if (startWorkout.isError || !routine)
     return <ErrorScreen message={startWorkout.error?.message ?? 'No se pudo iniciar la sesión'} />;
 
@@ -40,25 +85,8 @@ export default function WorkoutSessionScreen() {
 
       <FlatList
         data={exercises}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => (
-          <View style={styles.exerciseCard}>
-            <Text style={styles.exerciseIndex}>{index + 1}</Text>
-            <View style={styles.exerciseInfo}>
-              <Text style={styles.exerciseName}>
-                {item.exercises?.name ?? 'Ejercicio desconocido'}
-              </Text>
-              {item.exercises?.primary_muscle && (
-                <Text style={styles.exerciseMuscle}>
-                  {item.exercises.primary_muscle}
-                </Text>
-              )}
-            </View>
-            <Text style={styles.exerciseSets}>
-              {item.target_sets} × {item.target_reps_min}-{item.target_reps_max}
-            </Text>
-          </View>
-        )}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={ListSeparator}
         ListEmptyComponent={
@@ -71,10 +99,13 @@ export default function WorkoutSessionScreen() {
       <TouchableOpacity
         style={styles.finishButton}
         activeOpacity={0.8}
-        onPress={() => router.replace('/(tabs)/routines')}
+        onPress={handleFinish}
+        disabled={finishWorkout.isPending}
       >
         <Square color="#fff" size={20} />
-        <Text style={styles.finishButtonText}>Finalizar</Text>
+        <Text style={styles.finishButtonText}>
+          {finishWorkout.isPending ? 'Finalizando...' : 'Finalizar'}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -83,22 +114,21 @@ export default function WorkoutSessionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    backgroundColor: colors.bg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
   },
   header: {
     marginBottom: 20,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#111827',
-    marginBottom: 4,
+    ...typography.h1,
+    color: colors.text,
+    marginBottom: spacing.xs,
   },
   subtitle: {
     fontSize: 15,
-    color: '#059669',
+    color: colors.success,
     fontWeight: '600',
   },
   list: {
@@ -107,45 +137,44 @@ const styles = StyleSheet.create({
   exerciseCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
+    backgroundColor: colors.bgWhite,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg - 2,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
-    gap: 12,
+    borderColor: colors.borderLight,
+    gap: spacing.md,
   },
   exerciseIndex: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#9ca3af',
+    color: colors.textPlaceholder,
     minWidth: 24,
   },
   exerciseInfo: {
     flex: 1,
   },
   exerciseName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
+    ...typography.bodyBold,
+    color: colors.text,
   },
   exerciseMuscle: {
     fontSize: 13,
-    color: '#6b7280',
+    color: colors.textMuted,
     marginTop: 2,
   },
   exerciseSets: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#2563eb',
+    color: colors.primary,
   },
   finishButton: {
-    backgroundColor: '#ef4444',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: colors.error,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
+    gap: spacing.sm,
     marginBottom: 24,
   },
   finishButtonText: {
@@ -155,7 +184,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 15,
-    color: '#9ca3af',
+    color: colors.textPlaceholder,
     textAlign: 'center',
     marginTop: 24,
   },

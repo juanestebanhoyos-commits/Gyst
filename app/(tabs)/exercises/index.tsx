@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { Search, Plus } from 'lucide-react-native';
 import { router } from 'expo-router';
@@ -7,25 +7,38 @@ import { ExerciseCard } from '@/components/ExerciseCard';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
+import { colors, spacing, borderRadius, typography } from '@/constants/theme';
 import type { Exercise } from '@/types/supabase';
 
 export default function ExercisesScreen() {
   const [search, setSearch] = useState('');
-  const { data: exercises, isLoading, error } = useExercises();
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [search]);
+
+  const { data: exercises, isLoading, error } = useExercises({ search: debouncedSearch });
+
+  const renderExerciseItem = useCallback(({ item }: { item: Exercise }) => (
+    <TouchableOpacity onPress={() => router.push(`/exercise/${item.id}`)} activeOpacity={0.7}>
+      <ExerciseCard exercise={item} />
+    </TouchableOpacity>
+  ), []);
 
   if (isLoading) return <LoadingScreen />;
   if (error) return <ErrorScreen message="Error al cargar ejercicios" />;
-
-  const filtered = exercises?.filter((ex) => {
-    const q = search.toLowerCase();
-    return ex.name.toLowerCase().includes(q) || ex.primary_muscle.toLowerCase().includes(q);
-  });
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Ejercicios</Text>
       <View style={styles.searchContainer}>
-        <Search color="#9ca3af" size={20} />
+        <Search color={colors.textPlaceholder} size={20} />
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar ejercicio..."
@@ -37,9 +50,9 @@ export default function ExercisesScreen() {
         />
       </View>
       <FlatList<Exercise>
-        data={filtered}
+        data={exercises}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ExerciseCard exercise={item} />}
+        renderItem={renderExerciseItem}
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={ListSeparator}
         ListEmptyComponent={
@@ -60,50 +73,49 @@ export default function ExercisesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    backgroundColor: colors.bg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#111827',
-    marginBottom: 16,
+    ...typography.h1,
+    color: colors.text,
+    marginBottom: spacing.lg,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.bgWhite,
     borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    marginBottom: 12,
-    gap: 8,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.md,
+    gap: spacing.sm,
   },
   searchInput: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: spacing.md,
     fontSize: 16,
-    color: '#111827',
+    color: colors.text,
   },
   list: {
     paddingBottom: 24,
   },
   emptyText: {
     fontSize: 16,
-    color: '#9ca3af',
+    color: colors.textPlaceholder,
     textAlign: 'center',
     marginTop: 32,
   },
   fab: {
     position: 'absolute',
     bottom: 24,
-    right: 16,
+    right: spacing.lg,
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
