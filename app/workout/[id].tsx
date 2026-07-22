@@ -1,6 +1,6 @@
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { Square } from 'lucide-react-native';
 import { useRoutine } from '@/hooks/useRoutine';
 import { useRoutineExercises } from '@/hooks/useRoutineExercises';
@@ -10,30 +10,10 @@ import { useSession } from '@/hooks/useSession';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
-
-const keyExtractor = (item: { id: string }) => item.id;
-
-const renderItem = useCallback(({ item, index }: { item: { id: string; exercises: { name: string; primary_muscle: string } | null; target_sets: number; target_reps_min: number; target_reps_max: number }; index: number }) => (
-  <View style={styles.exerciseCard}>
-    <Text style={styles.exerciseIndex}>{index + 1}</Text>
-    <View style={styles.exerciseInfo}>
-      <Text style={styles.exerciseName}>
-        {item.exercises?.name ?? 'Ejercicio desconocido'}
-      </Text>
-      {item.exercises?.primary_muscle ? (
-        <Text style={styles.exerciseMuscle}>
-          {item.exercises.primary_muscle}
-        </Text>
-      ) : null}
-    </View>
-    <Text style={styles.exerciseSets}>
-      {item.target_sets} × {item.target_reps_min}-{item.target_reps_max}
-    </Text>
-  </View>
-), []);
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 export default function WorkoutSessionScreen() {
+  const { colors } = useAppTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: routine, isLoading: loadingRoutine } = useRoutine(id);
   const { data: exercises, isLoading: loadingExercises } = useRoutineExercises(id);
@@ -72,9 +52,112 @@ export default function WorkoutSessionScreen() {
 
   const isMutating = startWorkout.isPending || finishWorkout.isPending;
 
+  const keyExtractor = useCallback((item: { id: string }) => item.id, []);
+
+  const renderItem = useCallback(({ item, index }: { item: { id: string; exercise_id: string; exercises: { name: string; primary_muscle: string } | null; target_sets: number; target_reps_min: number; target_reps_max: number }; index: number }) => (
+    <TouchableOpacity
+      style={styles.exerciseCard}
+      activeOpacity={0.7}
+      onPress={() => router.push(`/exercise/${item.exercise_id}`)}
+    >
+      <Text style={styles.exerciseIndex}>{index + 1}</Text>
+      <View style={styles.exerciseInfo}>
+        <Text style={styles.exerciseName}>
+          {item.exercises?.name ?? 'Ejercicio desconocido'}
+        </Text>
+        {item.exercises?.primary_muscle ? (
+          <Text style={styles.exerciseMuscle}>
+            {item.exercises.primary_muscle}
+          </Text>
+        ) : null}
+      </View>
+      <Text style={styles.exerciseSets}>
+        {item.target_sets} × {item.target_reps_min}-{item.target_reps_max}
+      </Text>
+    </TouchableOpacity>
+  ), []);
+
   if (loadingRoutine || loadingExercises || isMutating) return <LoadingScreen />;
   if (startWorkout.isError || !routine)
     return <ErrorScreen message={startWorkout.error?.message ?? 'No se pudo iniciar la sesión'} />;
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.lg,
+    },
+    header: {
+      marginBottom: 20,
+    },
+    title: {
+      ...typography.h1,
+      color: colors.text,
+      marginBottom: spacing.xs,
+    },
+    subtitle: {
+      fontSize: 15,
+      color: colors.success,
+      fontWeight: '600',
+    },
+    list: {
+      paddingBottom: 80,
+    },
+    exerciseCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.bgWhite,
+      borderRadius: borderRadius.lg,
+      padding: spacing.lg - 2,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+      gap: spacing.md,
+    },
+    exerciseIndex: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: colors.textPlaceholder,
+      minWidth: 24,
+    },
+    exerciseInfo: {
+      flex: 1,
+    },
+    exerciseName: {
+      ...typography.bodyBold,
+      color: colors.text,
+    },
+    exerciseMuscle: {
+      ...typography.small,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    exerciseSets: {
+      ...typography.captionBold,
+      color: colors.primary,
+    },
+    finishButton: {
+      backgroundColor: colors.error,
+      borderRadius: borderRadius.lg,
+      padding: spacing.lg,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginBottom: 24,
+    },
+    finishButtonText: {
+      color: colors.textOnPrimary,
+      fontSize: 17,
+      fontWeight: '700',
+    },
+    emptyText: {
+      fontSize: 15,
+      color: colors.textPlaceholder,
+      textAlign: 'center',
+      marginTop: 24,
+    },
+  }), [colors]);
 
   return (
     <View style={styles.container}>
@@ -102,7 +185,7 @@ export default function WorkoutSessionScreen() {
         onPress={handleFinish}
         disabled={finishWorkout.isPending}
       >
-        <Square color="#fff" size={20} />
+        <Square color={colors.textOnPrimary} size={20} />
         <Text style={styles.finishButtonText}>
           {finishWorkout.isPending ? 'Finalizando...' : 'Finalizar'}
         </Text>
@@ -110,82 +193,3 @@ export default function WorkoutSessionScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-  },
-  header: {
-    marginBottom: 20,
-  },
-  title: {
-    ...typography.h1,
-    color: colors.text,
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: colors.success,
-    fontWeight: '600',
-  },
-  list: {
-    paddingBottom: 80,
-  },
-  exerciseCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.bgWhite,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg - 2,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    gap: spacing.md,
-  },
-  exerciseIndex: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.textPlaceholder,
-    minWidth: 24,
-  },
-  exerciseInfo: {
-    flex: 1,
-  },
-  exerciseName: {
-    ...typography.bodyBold,
-    color: colors.text,
-  },
-  exerciseMuscle: {
-    fontSize: 13,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-  exerciseSets: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.primary,
-  },
-  finishButton: {
-    backgroundColor: colors.error,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: 24,
-  },
-  finishButtonText: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  emptyText: {
-    fontSize: 15,
-    color: colors.textPlaceholder,
-    textAlign: 'center',
-    marginTop: 24,
-  },
-});

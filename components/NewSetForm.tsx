@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLogSet } from '@/hooks/useLogSet';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 interface NewSetFormProps {
   workoutLogId: string;
@@ -10,6 +11,7 @@ interface NewSetFormProps {
 }
 
 export function NewSetForm({ workoutLogId, exerciseId, nextSetNumber, onSuccess }: NewSetFormProps) {
+  const { colors } = useAppTheme();
   const [weight, setWeight] = useState('');
   const [reps, setReps] = useState('');
   const [rir, setRir] = useState('');
@@ -57,6 +59,64 @@ export function NewSetForm({ workoutLogId, exerciseId, nextSetNumber, onSuccess 
     );
   }
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      padding: spacing.lg,
+      backgroundColor: colors.bgWhite,
+      borderRadius: 12,
+      marginHorizontal: spacing.lg,
+      marginVertical: spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+    },
+    heading: {
+      ...typography.bodyBold,
+      color: colors.text,
+      marginBottom: spacing.md,
+    },
+    row: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+    },
+    field: {
+      flex: 1,
+    },
+    label: {
+      ...typography.small,
+      color: colors.textMuted,
+      marginBottom: spacing.xs,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.sm,
+      paddingHorizontal: spacing.md,
+      paddingVertical: 10,
+      fontSize: typography.body.fontSize,
+      color: colors.text,
+      textAlign: 'center',
+    },
+    error: {
+      color: colors.error,
+      ...typography.small,
+      marginTop: spacing.sm,
+    },
+    button: {
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.sm,
+      paddingVertical: spacing.md,
+      alignItems: 'center',
+      marginTop: spacing.md,
+    },
+    buttonDisabled: {
+      opacity: 0.6,
+    },
+    buttonText: {
+      color: colors.textOnPrimary,
+      ...typography.bodyBold,
+    },
+  }), [colors]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Registrar serie</Text>
@@ -69,7 +129,7 @@ export function NewSetForm({ workoutLogId, exerciseId, nextSetNumber, onSuccess 
             onChangeText={setWeight}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={colors.textPlaceholder}
           />
         </View>
         <View style={styles.field}>
@@ -80,7 +140,7 @@ export function NewSetForm({ workoutLogId, exerciseId, nextSetNumber, onSuccess 
             onChangeText={setReps}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={colors.textPlaceholder}
           />
         </View>
         <View style={styles.field}>
@@ -91,7 +151,7 @@ export function NewSetForm({ workoutLogId, exerciseId, nextSetNumber, onSuccess 
             onChangeText={setRir}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={colors.textPlaceholder}
           />
         </View>
       </View>
@@ -103,7 +163,7 @@ export function NewSetForm({ workoutLogId, exerciseId, nextSetNumber, onSuccess 
         activeOpacity={0.7}
       >
         {logSet.isPending ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={colors.textOnPrimary} />
         ) : (
           <Text style={styles.buttonText}>Guardar serie</Text>
         )}
@@ -111,63 +171,3 @@ export function NewSetForm({ workoutLogId, exerciseId, nextSetNumber, onSuccess 
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginHorizontal: 16,
-    marginVertical: 8,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-  },
-  heading: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 12,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  field: {
-    flex: 1,
-  },
-  label: {
-    fontSize: 13,
-    color: '#6b7280',
-    marginBottom: 4,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    color: '#111827',
-    textAlign: 'center',
-  },
-  error: {
-    color: '#dc2626',
-    fontSize: 13,
-    marginTop: 8,
-  },
-  button: {
-    backgroundColor: '#2563eb',
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-});

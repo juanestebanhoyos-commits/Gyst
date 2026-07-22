@@ -1,12 +1,14 @@
+import { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Dumbbell } from 'lucide-react-native';
 import { useTodayRoutine } from '@/hooks/useTodayRoutine';
 import { useRoutineExercises } from '@/hooks/useRoutineExercises';
 import { useActiveWorkout } from '@/hooks/useActiveWorkout';
-import { colors, spacing, borderRadius } from '@/constants/theme';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 export function TodayExercisesSection() {
+  const { colors } = useAppTheme();
   const router = useRouter();
   const { data: todayRoutine, isLoading: routineLoading } = useTodayRoutine();
   const { data: exercises, isLoading: exercisesLoading } = useRoutineExercises(
@@ -15,6 +17,89 @@ export function TodayExercisesSection() {
   const { data: activeWorkoutId } = useActiveWorkout();
 
   const routineId = todayRoutine?.id;
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginHorizontal: spacing.lg,
+      marginVertical: spacing.sm,
+      padding: spacing.lg,
+      backgroundColor: colors.bgWhite,
+      borderRadius: borderRadius.lg,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: spacing.md,
+      gap: spacing.sm,
+    },
+    title: {
+      ...typography.h3,
+      color: colors.text,
+    },
+    routineLabel: {
+      fontSize: 12,
+      color: colors.textMuted,
+      marginLeft: 'auto',
+    },
+    emptyText: {
+      ...typography.caption,
+      color: colors.textMuted,
+      textAlign: 'center',
+      marginBottom: spacing.md,
+    },
+    ctaButton: {
+      backgroundColor: colors.primary,
+      paddingVertical: spacing.md,
+      borderRadius: borderRadius.md,
+      alignItems: 'center',
+    },
+    ctaText: {
+      color: colors.textOnPrimary,
+      ...typography.bodyBold,
+    },
+    exerciseRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderLight,
+    },
+    exerciseInfo: {
+      flex: 1,
+    },
+    exerciseName: {
+      ...typography.bodyBold,
+      color: colors.text,
+    },
+    exerciseMeta: {
+      ...typography.small,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    chevron: {
+      fontSize: 20,
+      color: colors.textPlaceholder,
+      marginLeft: spacing.sm,
+    },
+    workoutButton: {
+      marginTop: spacing.md,
+      backgroundColor: colors.primary,
+      paddingVertical: spacing.md,
+      borderRadius: borderRadius.md,
+      alignItems: 'center',
+    },
+    workoutButtonText: {
+      color: colors.textOnPrimary,
+      ...typography.bodyBold,
+    },
+    loadingText: {
+      ...typography.caption,
+      color: colors.textPlaceholder,
+      textAlign: 'center',
+    },
+  }), [colors]);
 
   if (routineLoading) {
     return (
@@ -99,7 +184,7 @@ export function TodayExercisesSection() {
           if (activeWorkoutId) {
             router.push(`/workout/${activeWorkoutId}`);
           } else {
-            router.push(`/(tabs)/routines/${routineId}`);
+            router.push(`/workout/${routineId}`);
           }
         }}
       >
@@ -110,90 +195,3 @@ export function TodayExercisesSection() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginHorizontal: spacing.lg,
-    marginVertical: spacing.sm,
-    padding: spacing.lg,
-    backgroundColor: colors.bgWhite,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-    gap: spacing.sm,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  routineLabel: {
-    fontSize: 12,
-    color: colors.textMuted,
-    marginLeft: 'auto',
-  },
-  emptyText: {
-    fontSize: 14,
-    color: colors.textMuted,
-    textAlign: 'center',
-    marginBottom: spacing.md,
-  },
-  ctaButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-  },
-  ctaText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  exerciseRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
-  },
-  exerciseInfo: {
-    flex: 1,
-  },
-  exerciseName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  exerciseMeta: {
-    fontSize: 13,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-  chevron: {
-    fontSize: 20,
-    color: colors.textPlaceholder,
-    marginLeft: spacing.sm,
-  },
-  workoutButton: {
-    marginTop: spacing.md,
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-  },
-  workoutButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  loadingText: {
-    fontSize: 14,
-    color: colors.textPlaceholder,
-    textAlign: 'center',
-  },
-});

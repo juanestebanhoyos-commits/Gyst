@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, router } from 'expo-router';
 import {
   View,
@@ -11,11 +11,12 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserPlus } from 'lucide-react-native';
 import { useSignup } from '@/hooks/useSignup';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 const ONBOARDING_KEY = '@gyst_onboarding';
 
 export default function SignupScreen() {
+  const { colors } = useAppTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +63,73 @@ export default function SignupScreen() {
     );
   }
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      padding: spacing.xl,
+      gap: spacing.lg,
+      backgroundColor: colors.bgWhite,
+    },
+    title: {
+      fontSize: 36,
+      fontWeight: '800',
+      textAlign: 'center',
+      color: colors.primary,
+    },
+    subtitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      textAlign: 'center',
+      color: colors.textSecondary,
+      marginBottom: spacing.sm,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg - 2,
+      ...typography.body,
+      color: colors.text,
+    },
+    button: {
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg - 2,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    buttonText: {
+      color: colors.textOnPrimary,
+      ...typography.bodyBold,
+    },
+    error: {
+      color: colors.errorText,
+      ...typography.caption,
+      textAlign: 'center',
+      backgroundColor: colors.errorBg,
+      padding: 10,
+      borderRadius: borderRadius.sm,
+    },
+    successText: {
+      color: colors.successText,
+      ...typography.caption,
+      textAlign: 'center',
+      backgroundColor: colors.successBg,
+      padding: 12,
+      borderRadius: borderRadius.sm,
+      lineHeight: 20,
+    },
+    link: {
+      color: colors.primary,
+      ...typography.caption,
+      textAlign: 'center',
+      marginTop: spacing.sm,
+    },
+  }), [colors]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>GYST</Text>
@@ -95,9 +163,9 @@ export default function SignupScreen() {
         activeOpacity={0.8}
       >
         {signup.isPending ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={colors.textOnPrimary} />
         ) : (
-          <UserPlus color="#fff" size={20} />
+          <UserPlus color={colors.textOnPrimary} size={20} />
         )}
         <Text style={styles.buttonText}>
           {signup.isPending ? 'Creando cuenta...' : 'Crear cuenta'}
@@ -110,71 +178,3 @@ export default function SignupScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: spacing.xl,
-    gap: spacing.lg,
-    backgroundColor: colors.bgWhite,
-  },
-  title: {
-    fontSize: 36,
-    fontWeight: '800',
-    textAlign: 'center',
-    color: colors.primary,
-  },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
-    color: colors.textSecondary,
-    marginBottom: spacing.sm,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg - 2,
-    fontSize: 16,
-    color: colors.text,
-  },
-  button: {
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg - 2,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  error: {
-    color: colors.errorText,
-    fontSize: 14,
-    textAlign: 'center',
-    backgroundColor: colors.errorBg,
-    padding: 10,
-    borderRadius: borderRadius.sm,
-  },
-  successText: {
-    color: colors.successText,
-    fontSize: 14,
-    textAlign: 'center',
-    backgroundColor: colors.successBg,
-    padding: 12,
-    borderRadius: borderRadius.sm,
-    lineHeight: 20,
-  },
-  link: {
-    color: colors.primary,
-    fontSize: 14,
-    textAlign: 'center',
-    marginTop: spacing.sm,
-  },
-});

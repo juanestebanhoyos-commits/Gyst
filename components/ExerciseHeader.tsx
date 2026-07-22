@@ -1,4 +1,6 @@
+import { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import { ProgressChart } from '@/components/ProgressChart';
 import { NewSetForm } from '@/components/NewSetForm';
 import { SetHistoryList } from '@/components/SetHistoryList';
@@ -12,6 +14,28 @@ interface ExerciseDetailScreenProps {
 }
 
 export function ExerciseHeaderComponent() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.bgWhite,
+    },
+    header: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.lg,
+      paddingBottom: spacing.sm,
+    },
+    title: {
+      ...typography.h2,
+      color: colors.text,
+    },
+    subtitle: {
+      ...typography.caption,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+  }), [colors]);
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -27,25 +51,3 @@ export function ExerciseHeaderComponent() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginTop: 2,
-  },
-});

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { Search, Plus } from 'lucide-react-native';
 import { router } from 'expo-router';
@@ -7,10 +7,11 @@ import { ExerciseCard } from '@/components/ExerciseCard';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { Exercise } from '@/types/supabase';
 
 export default function ExercisesScreen() {
+  const { colors } = useAppTheme();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -30,6 +31,61 @@ export default function ExercisesScreen() {
       <ExerciseCard exercise={item} />
     </TouchableOpacity>
   ), []);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.lg,
+    },
+    title: {
+      ...typography.h1,
+      color: colors.text,
+      marginBottom: spacing.lg,
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.bgWhite,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.md,
+      paddingHorizontal: spacing.md,
+      marginBottom: spacing.md,
+      gap: spacing.sm,
+    },
+    searchInput: {
+      flex: 1,
+      paddingVertical: spacing.md,
+      color: colors.text,
+    },
+    list: {
+      paddingBottom: spacing.xl,
+    },
+    emptyText: {
+      ...typography.body,
+      color: colors.textPlaceholder,
+      textAlign: 'center',
+      marginTop: 32,
+    },
+    fab: {
+      position: 'absolute',
+      bottom: spacing.xl,
+      right: spacing.lg,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      elevation: 4,
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+    },
+  }), [colors]);
 
   if (isLoading) return <LoadingScreen />;
   if (error) return <ErrorScreen message="Error al cargar ejercicios" />;
@@ -64,64 +120,8 @@ export default function ExercisesScreen() {
         onPress={() => router.push('/(tabs)/exercises/new')}
         activeOpacity={0.8}
       >
-        <Plus color="#fff" size={24} />
+        <Plus color={colors.textOnPrimary} size={24} />
       </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-  },
-  title: {
-    ...typography.h1,
-    color: colors.text,
-    marginBottom: spacing.lg,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.bgWhite,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.md,
-    marginBottom: spacing.md,
-    gap: spacing.sm,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: spacing.md,
-    fontSize: 16,
-    color: colors.text,
-  },
-  list: {
-    paddingBottom: 24,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: colors.textPlaceholder,
-    textAlign: 'center',
-    marginTop: 32,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: spacing.lg,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-});

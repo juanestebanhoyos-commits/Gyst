@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Search, X } from 'lucide-react-native';
 import ExerciseConfigForm, { ExerciseConfig } from './ExerciseConfigForm';
-import { colors, spacing, borderRadius } from '@/constants/theme';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { Exercise } from '@/types/supabase';
 
 export interface ExerciseEntry {
@@ -29,6 +29,7 @@ interface ExercisePickerContextType {
   available: Exercise[];
   allExercises: Exercise[] | undefined;
   handleAddConfig: (config: ExerciseConfig) => void;
+  styles: ReturnType<typeof StyleSheet.create>;
 }
 
 const ExercisePickerContext = createContext<ExercisePickerContextType | null>(null);
@@ -60,6 +61,7 @@ export default function ExercisePicker({
   error,
   children,
 }: ExercisePickerRootProps) {
+  const { colors } = useAppTheme();
   const [search, setSearch] = useState('');
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
@@ -90,6 +92,86 @@ export default function ExercisePicker({
     setSelectedExercise(null);
   }
 
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          backgroundColor: colors.bgWhite,
+          borderRadius: borderRadius.lg,
+          padding: spacing.lg - 2,
+          borderWidth: 1,
+          borderColor: colors.borderLight,
+          gap: spacing.sm,
+        },
+        header: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        },
+        title: {
+          fontSize: 16,
+          fontWeight: '700',
+          color: colors.text,
+        },
+        searchRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: colors.bgLight,
+          borderRadius: borderRadius.sm,
+          paddingHorizontal: 10,
+          gap: 6,
+        },
+        searchInput: {
+          flex: 1,
+          paddingVertical: 10,
+          fontSize: 15,
+          color: colors.text,
+        },
+        list: {
+          gap: 6,
+        },
+        card: {
+          backgroundColor: colors.bgWhite,
+          borderRadius: borderRadius.md,
+          padding: spacing.lg - 2,
+          borderWidth: 1,
+          borderColor: colors.borderLight,
+        },
+        cardActive: {
+          borderColor: colors.primary,
+          backgroundColor: colors.primaryBg,
+        },
+        cardName: {
+          fontSize: 16,
+          fontWeight: '600',
+          color: colors.text,
+        },
+        cardMuscle: {
+          fontSize: 13,
+          color: colors.textMuted,
+          marginTop: 2,
+        },
+        emptyText: {
+          fontSize: 14,
+          color: colors.textPlaceholder,
+          textAlign: 'center',
+          marginTop: spacing.lg,
+        },
+        error: {
+          color: colors.errorText,
+          fontSize: 14,
+          textAlign: 'center',
+          backgroundColor: colors.errorBg,
+          padding: 10,
+          borderRadius: borderRadius.sm,
+        },
+        loadingIndicator: {
+          marginTop: 12,
+        },
+      }),
+    [colors],
+  );
+
   const ctx: ExercisePickerContextType = {
     search,
     setSearch,
@@ -98,6 +180,7 @@ export default function ExercisePicker({
     available,
     allExercises,
     handleAddConfig: handleAdd,
+    styles,
   };
 
   if (children) {
@@ -128,6 +211,8 @@ ExercisePicker.Header = function PickerHeader({
 }: {
   onClose?: () => void;
 }) {
+  const { styles } = usePickerContext();
+  const { colors } = useAppTheme();
   return (
     <View style={styles.header}>
       <Text style={styles.title}>Seleccionar ejercicio</Text>
@@ -141,7 +226,8 @@ ExercisePicker.Header = function PickerHeader({
 };
 
 ExercisePicker.Search = function PickerSearch() {
-  const { search, setSearch } = usePickerContext();
+  const { search, setSearch, styles } = usePickerContext();
+  const { colors } = useAppTheme();
   return (
     <View style={styles.searchRow}>
       <Search color={colors.textPlaceholder} size={18} />
@@ -158,7 +244,8 @@ ExercisePicker.Search = function PickerSearch() {
 };
 
 ExercisePicker.List = function PickerList() {
-  const { available, allExercises, selectedExercise, select } = usePickerContext();
+  const { available, allExercises, selectedExercise, select, styles } = usePickerContext();
+  const { colors } = useAppTheme();
 
   return !allExercises ? (
     <ActivityIndicator size="small" color={colors.primary} style={styles.loadingIndicator} />
@@ -204,78 +291,4 @@ ExercisePicker.ConfigForm = function PickerConfigForm({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.bgWhite,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg - 2,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    gap: spacing.sm,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.bgLight,
-    borderRadius: borderRadius.sm,
-    paddingHorizontal: 10,
-    gap: 6,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 10,
-    fontSize: 15,
-    color: colors.text,
-  },
-  list: {
-    gap: 6,
-  },
-  card: {
-    backgroundColor: colors.bgWhite,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg - 2,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  },
-  cardActive: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primaryBg,
-  },
-  cardName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  cardMuscle: {
-    fontSize: 13,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: colors.textPlaceholder,
-    textAlign: 'center',
-    marginTop: spacing.lg,
-  },
-  error: {
-    color: colors.errorText,
-    fontSize: 14,
-    textAlign: 'center',
-    backgroundColor: colors.errorBg,
-    padding: 10,
-    borderRadius: borderRadius.sm,
-  },
-  loadingIndicator: {
-    marginTop: 12,
-  },
-});
+

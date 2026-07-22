@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Plus, X } from 'lucide-react-native';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 export interface ExerciseConfig {
   target_sets: number;
@@ -32,6 +33,7 @@ export default function ExerciseConfigForm({
   submitLabel = 'Añadir a lista',
   isLoading = false,
 }: ExerciseConfigFormProps) {
+  const { colors } = useAppTheme();
   const [targetSets, setTargetSets] = useState('3');
   const [targetRepsMin, setTargetRepsMin] = useState('8');
   const [targetRepsMax, setTargetRepsMax] = useState('12');
@@ -65,13 +67,92 @@ export default function ExerciseConfigForm({
     setSubmitError(null);
   }
 
+  const styles = useMemo(() => StyleSheet.create({
+    section: {
+      backgroundColor: colors.bgWhite,
+      borderRadius: 12,
+      padding: spacing.lg,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+      gap: spacing.md,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    title: {
+      ...typography.bodyBold,
+      color: colors.text,
+      flex: 1,
+      marginRight: spacing.sm,
+    },
+    row: {
+      flexDirection: 'row',
+      gap: spacing.md,
+    },
+    field: {
+      flex: 1,
+    },
+    label: {
+      ...typography.captionBold,
+      color: colors.textSecondary,
+      marginBottom: spacing.xs,
+    },
+    input: {
+      backgroundColor: colors.bgLight,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.sm,
+      padding: 10,
+      fontSize: typography.body.fontSize,
+      color: colors.text,
+      textAlign: 'center',
+    },
+    fullInput: {
+      backgroundColor: colors.bgLight,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.sm,
+      padding: spacing.md,
+      fontSize: typography.body.fontSize,
+      color: colors.text,
+    },
+    textArea: {
+      minHeight: 60,
+      textAlignVertical: 'top',
+    },
+    addButton: {
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.md,
+      padding: 14,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginTop: spacing.xs,
+    },
+    addButtonText: {
+      color: colors.textOnPrimary,
+      ...typography.bodyBold,
+    },
+    error: {
+      color: colors.error,
+      ...typography.caption,
+      textAlign: 'center',
+      backgroundColor: colors.errorBg,
+      padding: 10,
+      borderRadius: borderRadius.sm,
+    },
+  }), [colors]);
+
   return (
     <View style={styles.section}>
       <View style={styles.header}>
         <Text style={styles.title} numberOfLines={1}>{exerciseName}</Text>
         {onCancel ? (
           <TouchableOpacity onPress={onCancel} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <X color="#6b7280" size={20} />
+            <X color={colors.textMuted} size={20} />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -132,9 +213,9 @@ export default function ExerciseConfigForm({
         activeOpacity={0.8}
       >
         {isLoading ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={colors.textOnPrimary} />
         ) : (
-          <Plus color="#fff" size={20} />
+          <Plus color={colors.textOnPrimary} size={20} />
         )}
         <Text style={styles.addButtonText}>
           {isLoading ? 'Agregando...' : submitLabel}
@@ -143,85 +224,3 @@ export default function ExerciseConfigForm({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  section: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    gap: 12,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
-    flex: 1,
-    marginRight: 8,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  field: {
-    flex: 1,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 4,
-  },
-  input: {
-    backgroundColor: '#f9fafb',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 16,
-    color: '#111827',
-    textAlign: 'center',
-  },
-  fullInput: {
-    backgroundColor: '#f9fafb',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: '#111827',
-  },
-  textArea: {
-    minHeight: 60,
-    textAlignVertical: 'top',
-  },
-  addButton: {
-    backgroundColor: '#2563eb',
-    borderRadius: 10,
-    padding: 14,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 4,
-  },
-  addButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  error: {
-    color: '#dc2626',
-    fontSize: 14,
-    textAlign: 'center',
-    backgroundColor: '#fef2f2',
-    padding: 10,
-    borderRadius: 8,
-  },
-});

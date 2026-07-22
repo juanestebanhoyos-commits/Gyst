@@ -1,17 +1,58 @@
+import { useMemo } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useExerciseSetLogs } from '@/hooks/useExerciseSetLogs';
+import { useAppTheme, spacing, typography } from '@/lib/theme';
 
 interface SetHistoryListProps {
   exerciseId: string;
 }
 
 export function SetHistoryList({ exerciseId }: SetHistoryListProps) {
+  const { colors } = useAppTheme();
   const { data, isLoading, isError, error } = useExerciseSetLogs(exerciseId);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      padding: spacing.lg,
+      marginHorizontal: spacing.lg,
+      marginVertical: spacing.sm,
+    },
+    center: {
+      padding: spacing.xl,
+      alignItems: 'center',
+    },
+    heading: {
+      ...typography.bodyBold,
+      color: colors.text,
+      marginBottom: spacing.md,
+    },
+    row: {
+      paddingVertical: spacing.sm,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.bgLight,
+    },
+    rowText: {
+      ...typography.caption,
+      color: colors.textSecondary,
+      fontFamily: 'monospace',
+    },
+    emptyText: {
+      ...typography.caption,
+      color: colors.textPlaceholder,
+      textAlign: 'center',
+      paddingVertical: 20,
+    },
+    errorText: {
+      ...typography.caption,
+      color: colors.error,
+      textAlign: 'center',
+    },
+  }), [colors]);
 
   if (isLoading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="small" color="#2563eb" />
+        <ActivityIndicator size="small" color={colors.primary} />
       </View>
     );
   }
@@ -48,42 +89,3 @@ export function SetHistoryList({ exerciseId }: SetHistoryListProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    marginHorizontal: 16,
-    marginVertical: 8,
-  },
-  center: {
-    padding: 24,
-    alignItems: 'center',
-  },
-  heading: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 12,
-  },
-  row: {
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
-  },
-  rowText: {
-    fontSize: 14,
-    color: '#374151',
-    fontFamily: 'monospace',
-  },
-  emptyText: {
-    fontSize: 14,
-    color: '#9ca3af',
-    textAlign: 'center',
-    paddingVertical: 20,
-  },
-  errorText: {
-    fontSize: 14,
-    color: '#dc2626',
-    textAlign: 'center',
-  },
-});

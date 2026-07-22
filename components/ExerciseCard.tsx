@@ -1,6 +1,7 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Dumbbell } from 'lucide-react-native';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { Exercise } from '@/types/supabase';
 
 interface ExerciseCardProps {
@@ -8,10 +9,65 @@ interface ExerciseCardProps {
 }
 
 export const ExerciseCard = memo(function ExerciseCard({ exercise }: ExerciseCardProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    card: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: spacing.lg,
+      backgroundColor: colors.bgWhite,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+      gap: 14,
+    },
+    iconContainer: {
+      width: 44,
+      height: 44,
+      borderRadius: borderRadius.md,
+      backgroundColor: colors.primaryBg,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    info: {
+      flex: 1,
+      gap: 2,
+    },
+    nameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    name: {
+      ...typography.bodyBold,
+      color: colors.text,
+    },
+    badge: {
+      backgroundColor: colors.bg,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+      borderRadius: 6,
+    },
+    badgeText: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.textMuted,
+    },
+    muscle: {
+      ...typography.caption,
+      color: colors.textMuted,
+    },
+    equipment: {
+      fontSize: 12,
+      color: colors.textPlaceholder,
+      marginTop: 2,
+    },
+  }), [colors]);
+
   return (
     <View style={styles.card}>
       <View style={styles.iconContainer}>
-        <Dumbbell color="#2563eb" size={24} />
+        <Dumbbell color={colors.primary} size={24} />
       </View>
       <View style={styles.info}>
         <View style={styles.nameRow}>
@@ -29,59 +85,4 @@ export const ExerciseCard = memo(function ExerciseCard({ exercise }: ExerciseCar
       </View>
     </View>
   );
-});
-
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    gap: 14,
-  },
-  iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    backgroundColor: '#eff6ff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  info: {
-    flex: 1,
-    gap: 2,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  badge: {
-    backgroundColor: '#f3f4f6',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#6b7280',
-  },
-  muscle: {
-    fontSize: 14,
-    color: '#6b7280',
-  },
-  equipment: {
-    fontSize: 12,
-    color: '#9ca3af',
-    marginTop: 2,
-  },
 });

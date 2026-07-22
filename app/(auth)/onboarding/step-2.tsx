@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { router } from 'expo-router';
 import {
   View,
@@ -10,17 +10,107 @@ import {
 import { Check, ArrowRight } from 'lucide-react-native';
 import { useOnboardingLocal } from '@/hooks/useOnboardingLocal';
 import { DAYS } from '@/constants/days';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 export default function OnboardingStep2Screen() {
+  const { colors } = useAppTheme();
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const { data, isLoading, completeOnboarding } = useOnboardingLocal();
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      padding: spacing.xl,
+      gap: spacing.lg,
+      backgroundColor: colors.bgWhite,
+    },
+    stepIndicator: {
+      ...typography.captionBold,
+      color: colors.textMuted,
+      textAlign: 'center',
+      marginBottom: spacing.xs,
+    },
+    title: {
+      ...typography.h2,
+      textAlign: 'center',
+      color: colors.text,
+    },
+    subtitle: {
+      fontSize: 15,
+      textAlign: 'center',
+      color: colors.textMuted,
+      marginBottom: spacing.sm,
+      lineHeight: 22,
+    },
+    error: {
+      color: colors.error,
+      ...typography.caption,
+      textAlign: 'center',
+      backgroundColor: colors.errorBg,
+      padding: 10,
+      borderRadius: borderRadius.sm,
+    },
+    daysContainer: {
+      gap: 10,
+    },
+    dayChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg - 2,
+      backgroundColor: colors.bgWhite,
+    },
+    dayChipSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primaryBg,
+    },
+    checkbox: {
+      width: 22,
+      height: 22,
+      borderRadius: 6,
+      borderWidth: 2,
+      borderColor: colors.border,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    checkboxSelected: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    dayText: {
+      ...typography.body,
+      color: colors.textSecondary,
+    },
+    dayTextSelected: {
+      color: colors.primary,
+      fontWeight: '600',
+    },
+    button: {
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg - 2,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginTop: spacing.sm,
+    },
+    buttonText: {
+      color: colors.textOnPrimary,
+      ...typography.bodyBold,
+    },
+  }), [colors]);
+
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -82,7 +172,7 @@ export default function OnboardingStep2Screen() {
                   isSelected && styles.checkboxSelected,
                 ]}
               >
-                {isSelected ? <Check color="#fff" size={16} /> : null}
+                {isSelected ? <Check color={colors.textOnPrimary} size={16} /> : null}
               </View>
               <Text
                 style={[
@@ -104,9 +194,9 @@ export default function OnboardingStep2Screen() {
         activeOpacity={0.8}
       >
         {saving ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={colors.textOnPrimary} />
         ) : (
-          <ArrowRight color="#fff" size={20} />
+          <ArrowRight color={colors.textOnPrimary} size={20} />
         )}
         <Text style={styles.buttonText}>
           {saving ? 'Guardando...' : 'Finalizar'}
@@ -115,94 +205,3 @@ export default function OnboardingStep2Screen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 24,
-    gap: 16,
-    backgroundColor: '#fff',
-  },
-  stepIndicator: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#6b7280',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '800',
-    textAlign: 'center',
-    color: '#111827',
-  },
-  subtitle: {
-    fontSize: 15,
-    textAlign: 'center',
-    color: '#6b7280',
-    marginBottom: 8,
-    lineHeight: 22,
-  },
-  error: {
-    color: '#dc2626',
-    fontSize: 14,
-    textAlign: 'center',
-    backgroundColor: '#fef2f2',
-    padding: 10,
-    borderRadius: 8,
-  },
-  daysContainer: {
-    gap: 10,
-  },
-  dayChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 10,
-    padding: 14,
-    backgroundColor: '#fff',
-  },
-  dayChipSelected: {
-    borderColor: '#2563eb',
-    backgroundColor: '#eff6ff',
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: '#d1d5db',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxSelected: {
-    backgroundColor: '#2563eb',
-    borderColor: '#2563eb',
-  },
-  dayText: {
-    fontSize: 16,
-    color: '#374151',
-  },
-  dayTextSelected: {
-    color: '#2563eb',
-    fontWeight: '600',
-  },
-  button: {
-    backgroundColor: '#2563eb',
-    borderRadius: 10,
-    padding: 14,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 8,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

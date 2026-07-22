@@ -17,10 +17,11 @@ import { useCreateRoutine } from '@/hooks/useCreateRoutine';
 import { useExercises } from '@/hooks/useExercises';
 import ExercisePicker from '@/components/ExercisePicker';
 import { TrainingDaysPicker } from '@/components/TrainingDaysPicker';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { ExerciseEntry } from '@/components/ExercisePicker';
 
 export default function NewRoutineScreen() {
+  const { colors } = useAppTheme();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(false);
@@ -84,6 +85,138 @@ export default function NewRoutineScreen() {
     );
   }
 
+  const styles = useMemo(() => StyleSheet.create({
+    flex: {
+      flex: 1,
+      backgroundColor: colors.bg,
+    },
+    container: {
+      flex: 1,
+    },
+    content: {
+      padding: spacing.lg,
+      gap: spacing.sm,
+      paddingBottom: 40,
+    },
+    title: {
+      ...typography.h1,
+      color: colors.text,
+      marginBottom: spacing.sm,
+    },
+    label: {
+      ...typography.captionBold,
+      color: colors.textSecondary,
+      marginTop: spacing.md,
+      marginBottom: spacing.xs,
+    },
+    input: {
+      backgroundColor: colors.bgWhite,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg - 2,
+      ...typography.body,
+      color: colors.text,
+    },
+    textArea: {
+      minHeight: 80,
+      textAlignVertical: 'top',
+    },
+    switchRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: colors.bgWhite,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg - 2,
+      marginTop: spacing.md,
+    },
+    switchLabel: {
+      ...typography.bodyBold,
+      color: colors.text,
+    },
+    switchHint: {
+      ...typography.small,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    sectionTitle: {
+      ...typography.h3,
+      color: colors.text,
+      marginTop: spacing.lg,
+      marginBottom: spacing.xs,
+    },
+    exerciseList: {
+      gap: spacing.sm,
+    },
+    exerciseListItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.bgWhite,
+      borderRadius: borderRadius.md,
+      padding: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+    },
+    exerciseInfo: {
+      flex: 1,
+    },
+    exerciseName: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    exerciseDetail: {
+      ...typography.small,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    addExerciseButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      borderWidth: 1.5,
+      borderColor: colors.primary,
+      borderStyle: 'dashed',
+      borderRadius: borderRadius.md,
+      padding: spacing.lg - 2,
+      marginTop: spacing.sm,
+    },
+    addExerciseButtonText: {
+      color: colors.primary,
+      fontSize: 15,
+      fontWeight: '600',
+    },
+    createButton: {
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg - 2,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginTop: 20,
+    },
+    createButtonText: {
+      color: colors.textOnPrimary,
+      ...typography.bodyBold,
+    },
+    daysContainer: {
+      marginTop: spacing.xs,
+    },
+    error: {
+      color: colors.errorText,
+      ...typography.caption,
+      textAlign: 'center',
+      backgroundColor: colors.errorBg,
+      padding: 10,
+      borderRadius: borderRadius.sm,
+    },
+  }), [colors]);
+
   return (
     <KeyboardAvoidingView
       style={styles.flex}
@@ -128,8 +261,8 @@ export default function NewRoutineScreen() {
           <Switch
             value={isPublic}
             onValueChange={setIsPublic}
-            trackColor={{ false: '#d1d5db', true: '#93c5fd' }}
-            thumbColor={isPublic ? '#2563eb' : '#f4f3f4'}
+            trackColor={{ false: '#d1d5db', true: colors.primaryLight }}
+            thumbColor={isPublic ? colors.primary : colors.bgLight}
           />
         </View>
 
@@ -154,7 +287,7 @@ export default function NewRoutineScreen() {
                   </Text>
                 </View>
                 <TouchableOpacity onPress={() => handleRemoveExercise(i)}>
-                  <X color="#ef4444" size={20} />
+                  <X color={colors.error} size={20} />
                 </TouchableOpacity>
               </View>
             ))}
@@ -167,7 +300,7 @@ export default function NewRoutineScreen() {
             onPress={() => setShowPicker(true)}
             activeOpacity={0.8}
           >
-            <Plus color="#2563eb" size={20} />
+            <Plus color={colors.primary} size={20} />
             <Text style={styles.addExerciseButtonText}>Agregar ejercicio</Text>
           </TouchableOpacity>
         ) : (
@@ -186,9 +319,9 @@ export default function NewRoutineScreen() {
           activeOpacity={0.8}
         >
           {isSubmitting ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={colors.textOnPrimary} />
           ) : (
-            <Plus color="#fff" size={20} />
+            <Plus color={colors.textOnPrimary} size={20} />
           )}
           <Text style={styles.createButtonText}>
             {isSubmitting ? 'Creando...' : 'Crear rutina'}
@@ -198,137 +331,3 @@ export default function NewRoutineScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: spacing.lg,
-    gap: spacing.sm,
-    paddingBottom: 40,
-  },
-  title: {
-    ...typography.h1,
-    color: colors.text,
-    marginBottom: spacing.sm,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    marginTop: spacing.md,
-    marginBottom: spacing.xs,
-  },
-  input: {
-    backgroundColor: colors.bgWhite,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg - 2,
-    fontSize: 16,
-    color: colors.text,
-  },
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: colors.bgWhite,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg - 2,
-    marginTop: spacing.md,
-  },
-  switchLabel: {
-    ...typography.bodyBold,
-    color: colors.text,
-  },
-  switchHint: {
-    fontSize: 13,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-  sectionTitle: {
-    ...typography.h3,
-    color: colors.text,
-    marginTop: spacing.lg,
-    marginBottom: spacing.xs,
-  },
-  exerciseList: {
-    gap: spacing.sm,
-  },
-  exerciseListItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.bgWhite,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  },
-  exerciseInfo: {
-    flex: 1,
-  },
-  exerciseName: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  exerciseDetail: {
-    fontSize: 13,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-  addExerciseButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    borderWidth: 1.5,
-    borderColor: colors.primary,
-    borderStyle: 'dashed',
-    borderRadius: borderRadius.md,
-    padding: spacing.lg - 2,
-    marginTop: spacing.sm,
-  },
-  addExerciseButtonText: {
-    color: colors.primary,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  createButton: {
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg - 2,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginTop: 20,
-  },
-  createButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  daysContainer: {
-    marginTop: spacing.xs,
-  },
-  error: {
-    color: colors.errorText,
-    fontSize: 14,
-    textAlign: 'center',
-    backgroundColor: colors.errorBg,
-    padding: 10,
-    borderRadius: borderRadius.sm,
-  },
-});

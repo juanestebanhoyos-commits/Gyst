@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet } from 'react-native';
-import Svg, { Path, Circle, Line, Text as SvgText } from 'react-native-svg';
+import Svg, { G, Path, Circle, Line, Text as SvgText } from 'react-native-svg';
 import { useMemo } from 'react';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { useChartView, VIEW_OPTIONS, VIEW_TITLES, Y_AXIS_SUFFIX } from '@/hooks/useChartView';
-import { colors } from '@/constants/theme';
+import { useAppTheme, spacing, typography } from '@/lib/theme';
 import type { SetLog } from '@/types/supabase';
 
 interface ProgressChartProps {
@@ -13,6 +13,7 @@ interface ProgressChartProps {
 }
 
 export function ProgressChart({ data, width = 300, height = 200 }: ProgressChartProps) {
+  const { colors } = useAppTheme();
   const {
     selectedView,
     setSelectedView,
@@ -44,6 +45,31 @@ export function ProgressChart({ data, width = 300, height = 200 }: ProgressChart
     [chartPoints, chartHeight, chartWidth, minValue, range],
   );
 
+  const linePath = linePoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
+
+  const yTicks = 4;
+  const tickValues = Array.from({ length: yTicks + 1 }, (_, i) =>
+    Math.round((minValue + (range / yTicks) * i) * 10) / 10,
+  );
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      alignItems: 'center',
+      paddingVertical: spacing.sm,
+    },
+    title: {
+      ...typography.bodyBold,
+      color: colors.text,
+      marginBottom: spacing.sm,
+    },
+    emptyText: {
+      color: colors.textPlaceholder,
+      fontSize: 14,
+      textAlign: 'center',
+      paddingVertical: 40,
+    },
+  }), [colors]);
+
   if (chartPoints.length < 2) {
     return (
       <View style={styles.container}>
@@ -62,13 +88,6 @@ export function ProgressChart({ data, width = 300, height = 200 }: ProgressChart
     );
   }
 
-  const linePath = linePoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
-
-  const yTicks = 4;
-  const tickValues = Array.from({ length: yTicks + 1 }, (_, i) =>
-    Math.round((minValue + (range / yTicks) * i) * 10) / 10,
-  );
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{currentTitle}</Text>
@@ -81,7 +100,7 @@ export function ProgressChart({ data, width = 300, height = 200 }: ProgressChart
         {tickValues.map((val, i) => {
           const y = padding.top + chartHeight - ((val - minValue) / range) * chartHeight;
           return (
-            <g key={`tick-${i}`}>
+            <G key={`tick-${i}`}>
               <Line
                 x1={padding.left}
                 y1={y}
@@ -99,14 +118,14 @@ export function ProgressChart({ data, width = 300, height = 200 }: ProgressChart
               >
                 {Math.round(val)}{currentSuffix}
               </SvgText>
-            </g>
+            </G>
           );
         })}
 
         <Path d={linePath} stroke={colors.primary} strokeWidth={2} fill="none" strokeLinejoin="round" />
 
         {linePoints.map((p, i) => (
-          <g key={`dot-${i}`}>
+          <G key={`dot-${i}`}>
             <Circle cx={p.x} cy={p.y} r={4} fill={colors.primary} />
             <SvgText
               x={p.x}
@@ -117,28 +136,9 @@ export function ProgressChart({ data, width = 300, height = 200 }: ProgressChart
             >
               {p.label}
             </SvgText>
-          </g>
+          </G>
         ))}
       </Svg>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 8,
-  },
-  emptyText: {
-    color: '#9ca3af',
-    fontSize: 14,
-    textAlign: 'center',
-    paddingVertical: 40,
-  },
-});

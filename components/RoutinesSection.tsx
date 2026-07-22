@@ -1,11 +1,13 @@
+import { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useRoutines } from '@/hooks/useRoutines';
-import { colors, spacing, borderRadius } from '@/constants/theme';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 export function RoutinesSection() {
+  const { colors } = useAppTheme();
   const router = useRouter();
   const { data: routines, isLoading } = useRoutines();
   const DISPLAY_LIMIT = 5;
@@ -28,6 +30,62 @@ export function RoutinesSection() {
     },
     enabled: routineIds.length > 0,
   });
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginHorizontal: spacing.lg,
+      marginVertical: spacing.sm,
+      padding: spacing.lg,
+      backgroundColor: colors.bgWhite,
+      borderRadius: borderRadius.lg,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+    },
+    title: {
+      ...typography.h3,
+      color: colors.text,
+      marginBottom: spacing.md,
+    },
+    emptyText: {
+      ...typography.caption,
+      color: colors.textMuted,
+      textAlign: 'center',
+      marginBottom: spacing.md,
+    },
+    ctaButton: {
+      backgroundColor: colors.primary,
+      paddingVertical: spacing.md,
+      borderRadius: borderRadius.md,
+      alignItems: 'center',
+    },
+    ctaText: {
+      color: colors.textOnPrimary,
+      ...typography.bodyBold,
+    },
+    routineCard: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderLight,
+    },
+    routineName: {
+      ...typography.bodyBold,
+      color: colors.text,
+      flex: 1,
+    },
+    exerciseCount: {
+      ...typography.caption,
+      color: colors.textMuted,
+      marginLeft: spacing.sm,
+    },
+    loadingText: {
+      ...typography.caption,
+      color: colors.textPlaceholder,
+      textAlign: 'center',
+    },
+  }), [colors]);
 
   if (isLoading) {
     return (
@@ -70,62 +128,3 @@ export function RoutinesSection() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginHorizontal: spacing.lg,
-    marginVertical: spacing.sm,
-    padding: spacing.lg,
-    backgroundColor: colors.bgWhite,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: spacing.md,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: colors.textMuted,
-    textAlign: 'center',
-    marginBottom: spacing.md,
-  },
-  ctaButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-  },
-  ctaText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  routineCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
-  },
-  routineName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    flex: 1,
-  },
-  exerciseCount: {
-    fontSize: 14,
-    color: colors.textMuted,
-    marginLeft: spacing.sm,
-  },
-  loadingText: {
-    fontSize: 14,
-    color: colors.textPlaceholder,
-    textAlign: 'center',
-  },
-});

@@ -22,11 +22,12 @@ import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import ExercisePicker from '@/components/ExercisePicker';
 import { TrainingDaysPicker } from '@/components/TrainingDaysPicker';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { ExerciseEntry } from '@/components/ExercisePicker';
 import type { Exercise } from '@/types/supabase';
 
 export default function EditRoutineScreen() {
+  const { colors } = useAppTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user, isLoading: sessionLoading } = useSession();
   const { data: routine, isLoading: loadingRoutine, error: routineError } = useRoutine(id);
@@ -104,6 +105,146 @@ export default function EditRoutineScreen() {
     );
   }
 
+  const styles = useMemo(() => StyleSheet.create({
+    flex: {
+      flex: 1,
+      backgroundColor: colors.bg,
+    },
+    container: {
+      flex: 1,
+    },
+    content: {
+      padding: spacing.lg,
+      gap: spacing.sm,
+      paddingBottom: 40,
+    },
+    title: {
+      ...typography.h1,
+      color: colors.text,
+      marginBottom: spacing.sm,
+    },
+    label: {
+      ...typography.captionBold,
+      color: colors.textSecondary,
+      marginTop: spacing.md,
+      marginBottom: spacing.xs,
+    },
+    input: {
+      backgroundColor: colors.bgWhite,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg - 2,
+      ...typography.body,
+      color: colors.text,
+    },
+    textArea: {
+      minHeight: 80,
+      textAlignVertical: 'top',
+    },
+    switchRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: colors.bgWhite,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg - 2,
+      marginTop: spacing.md,
+    },
+    switchLabel: {
+      ...typography.bodyBold,
+      color: colors.text,
+    },
+    switchHint: {
+      ...typography.small,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    sectionTitle: {
+      ...typography.h3,
+      color: colors.text,
+      marginTop: spacing.lg,
+      marginBottom: spacing.xs,
+    },
+    exerciseList: {
+      gap: spacing.sm,
+    },
+    exerciseListItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.bgWhite,
+      borderRadius: borderRadius.md,
+      padding: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+    },
+    exerciseInfo: {
+      flex: 1,
+    },
+    exerciseName: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    exerciseDetail: {
+      ...typography.small,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    addExerciseButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      borderWidth: 1.5,
+      borderColor: colors.primary,
+      borderStyle: 'dashed',
+      borderRadius: borderRadius.md,
+      padding: spacing.lg - 2,
+      marginTop: spacing.sm,
+    },
+    addExerciseButtonText: {
+      color: colors.primary,
+      fontSize: 15,
+      fontWeight: '600',
+    },
+    saveButton: {
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg - 2,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginTop: 20,
+    },
+    saveButtonDisabled: {
+      opacity: 0.7,
+    },
+    saveButtonText: {
+      color: colors.textOnPrimary,
+      ...typography.bodyBold,
+    },
+    error: {
+      color: colors.errorText,
+      ...typography.caption,
+      textAlign: 'center',
+      backgroundColor: colors.errorBg,
+      padding: 10,
+      borderRadius: borderRadius.sm,
+    },
+    daysContainer: {
+      marginTop: spacing.xs,
+    },
+    removeText: {
+      color: colors.errorText,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+  }), [colors]);
+
   if (sessionLoading || loadingRoutine) return <LoadingScreen />;
   if (routineError) return <ErrorScreen message="Error al cargar la rutina" />;
   if (!routine) return <ErrorScreen message="Rutina no encontrada" />;
@@ -156,8 +297,8 @@ export default function EditRoutineScreen() {
           <Switch
             value={isPublic}
             onValueChange={setIsPublic}
-            trackColor={{ false: '#d1d5db', true: '#93c5fd' }}
-            thumbColor={isPublic ? '#2563eb' : '#f4f3f4'}
+            trackColor={{ false: '#d1d5db', true: colors.primaryLight }}
+            thumbColor={isPublic ? colors.primary : colors.bgLight}
           />
         </View>
 
@@ -214,9 +355,9 @@ export default function EditRoutineScreen() {
           activeOpacity={0.8}
         >
           {isPending ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={colors.textOnPrimary} />
           ) : (
-            <Save color="#fff" size={20} />
+            <Save color={colors.textOnPrimary} size={20} />
           )}
           <Text style={styles.saveButtonText}>
             {isPending ? 'Guardando...' : 'Guardar cambios'}
@@ -226,144 +367,3 @@ export default function EditRoutineScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: spacing.lg,
-    gap: spacing.sm,
-    paddingBottom: 40,
-  },
-  title: {
-    ...typography.h1,
-    color: colors.text,
-    marginBottom: spacing.sm,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    marginTop: spacing.md,
-    marginBottom: spacing.xs,
-  },
-  input: {
-    backgroundColor: colors.bgWhite,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg - 2,
-    fontSize: 16,
-    color: colors.text,
-  },
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: colors.bgWhite,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg - 2,
-    marginTop: spacing.md,
-  },
-  switchLabel: {
-    ...typography.bodyBold,
-    color: colors.text,
-  },
-  switchHint: {
-    fontSize: 13,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-  sectionTitle: {
-    ...typography.h3,
-    color: colors.text,
-    marginTop: spacing.lg,
-    marginBottom: spacing.xs,
-  },
-  exerciseList: {
-    gap: spacing.sm,
-  },
-  exerciseListItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.bgWhite,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  },
-  exerciseInfo: {
-    flex: 1,
-  },
-  exerciseName: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  exerciseDetail: {
-    fontSize: 13,
-    color: colors.textMuted,
-    marginTop: 2,
-  },  addExerciseButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    borderWidth: 1.5,
-    borderColor: colors.primary,
-    borderStyle: 'dashed',
-    borderRadius: borderRadius.md,
-    padding: spacing.lg - 2,
-    marginTop: spacing.sm,
-  },
-  addExerciseButtonText: {
-    color: colors.primary,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  saveButton: {
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg - 2,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginTop: 20,
-  },
-  saveButtonDisabled: {
-    opacity: 0.7,
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  error: {
-    color: colors.errorText,
-    fontSize: 14,
-    textAlign: 'center',
-    backgroundColor: colors.errorBg,
-    padding: 10,
-    borderRadius: borderRadius.sm,
-  },
-  daysContainer: {
-    marginTop: spacing.xs,
-  },
-  removeText: {
-    color: colors.errorText,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-});

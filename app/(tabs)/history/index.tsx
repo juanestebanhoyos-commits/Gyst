@@ -1,10 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 function formatDuration(startedAt: string, finishedAt: string | null): string {
   const start = new Date(startedAt);
@@ -28,20 +28,65 @@ function formatDate(iso: string): string {
 
 const keyExtractor = (item: { id: string }) => item.id;
 
-const renderItem = useCallback(({ item }: { item: { started_at: string; finished_at: string | null; routines: { name: string } | null } }) => (
-  <View style={styles.card}>
-    <Text style={styles.date}>{formatDate(item.started_at)}</Text>
-    <Text style={styles.routineName}>
-      {item.routines?.name ?? 'Sesión libre'}
-    </Text>
-    <Text style={styles.duration}>
-      Duración: {formatDuration(item.started_at, item.finished_at)}
-    </Text>
-  </View>
-), []);
-
 export default function HistoryScreen() {
+  const { colors } = useAppTheme();
   const { data: logs, isLoading, error } = useWorkoutHistory();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.lg,
+    },
+    title: {
+      ...typography.h1,
+      color: colors.text,
+      marginBottom: spacing.lg,
+    },
+    list: {
+      paddingBottom: 80,
+    },
+    card: {
+      backgroundColor: colors.bgWhite,
+      borderRadius: borderRadius.lg,
+      padding: spacing.lg,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+    },
+    date: {
+      ...typography.captionBold,
+      color: colors.textMuted,
+    },
+    routineName: {
+      ...typography.h3,
+      color: colors.text,
+      marginTop: spacing.xs,
+    },
+    duration: {
+      ...typography.caption,
+      color: colors.textMuted,
+      marginTop: spacing.xs,
+    },
+    emptyText: {
+      ...typography.body,
+      color: colors.textPlaceholder,
+      textAlign: 'center',
+      marginTop: 32,
+    },
+  }), [colors]);
+
+  const renderItem = useCallback(({ item }: { item: { started_at: string; finished_at: string | null; routines: { name: string } | null } }) => (
+    <View style={styles.card}>
+      <Text style={styles.date}>{formatDate(item.started_at)}</Text>
+      <Text style={styles.routineName}>
+        {item.routines?.name ?? 'Sesión libre'}
+      </Text>
+      <Text style={styles.duration}>
+        Duración: {formatDuration(item.started_at, item.finished_at)}
+      </Text>
+    </View>
+  ), [styles]);
 
   if (isLoading) return <LoadingScreen />;
   if (error) return <ErrorScreen message="Error al cargar historial" />;
@@ -62,49 +107,3 @@ export default function HistoryScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-  },
-  title: {
-    ...typography.h1,
-    color: colors.text,
-    marginBottom: spacing.lg,
-  },
-  list: {
-    paddingBottom: 80,
-  },
-  card: {
-    backgroundColor: colors.bgWhite,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  },
-  date: {
-    fontSize: 14,
-    color: colors.textMuted,
-    fontWeight: '600',
-  },
-  routineName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
-    marginTop: spacing.xs,
-  },
-  duration: {
-    fontSize: 14,
-    color: colors.textMuted,
-    marginTop: spacing.xs,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: colors.textPlaceholder,
-    textAlign: 'center',
-    marginTop: 32,
-  },
-});

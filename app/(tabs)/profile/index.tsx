@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -18,11 +18,13 @@ import { useTheme } from '@/hooks/useTheme';
 import { TrainingDaysPicker } from '@/components/TrainingDaysPicker';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { Database } from '@/types/supabase';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
 export default function ProfileScreen() {
+  const { colors } = useAppTheme();
   const { user } = useSession();
   const queryClient = useQueryClient();
   const updateProfile = useUpdateProfile();
@@ -86,6 +88,94 @@ export default function ProfileScreen() {
     }
   }
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+    },
+    content: {
+      padding: spacing.lg,
+      paddingBottom: 80,
+      gap: 20,
+    },
+    title: {
+      ...typography.h1,
+      color: colors.text,
+      marginBottom: spacing.xs,
+    },
+    section: {
+      gap: spacing.sm,
+    },
+    label: {
+      ...typography.captionBold,
+      color: colors.textSecondary,
+    },
+    emailText: {
+      ...typography.body,
+      color: colors.textMuted,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.md,
+      padding: spacing.md,
+      ...typography.body,
+      color: colors.text,
+      backgroundColor: colors.bgWhite,
+    },
+    themeRow: {
+      flexDirection: 'row',
+      gap: spacing.md,
+    },
+    themeOption: {
+      flex: 1,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.md,
+      padding: spacing.md,
+      alignItems: 'center',
+      backgroundColor: colors.bgWhite,
+    },
+    themeOptionActive: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primaryBg,
+    },
+    themeOptionText: {
+      ...typography.bodyBold,
+      color: colors.textSecondary,
+    },
+    themeOptionTextActive: {
+      color: colors.primary,
+    },
+    button: {
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.md,
+      padding: spacing.md,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    buttonDisabled: {
+      opacity: 0.7,
+    },
+    buttonText: {
+      color: colors.textOnPrimary,
+      ...typography.bodyBold,
+    },
+    signOutButton: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.sm,
+      padding: spacing.md,
+    },
+    signOutText: {
+      color: colors.errorText,
+      ...typography.bodyBold,
+    },
+  }), [colors]);
+
   if (isLoading) return <LoadingScreen />;
   if (error) return <ErrorScreen message="Error al cargar perfil" />;
 
@@ -105,7 +195,7 @@ export default function ProfileScreen() {
           value={username}
           onChangeText={setUsername}
           placeholder="Tu nombre"
-          placeholderTextColor="#9ca3af"
+          placeholderTextColor={colors.textPlaceholder}
         />
       </View>
 
@@ -164,9 +254,9 @@ export default function ProfileScreen() {
         activeOpacity={0.8}
       >
         {updateProfile.isPending ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={colors.textOnPrimary} />
         ) : (
-          <Save color="#fff" size={20} />
+          <Save color={colors.textOnPrimary} size={20} />
         )}
         <Text style={styles.buttonText}>
           {updateProfile.isPending ? 'Guardando...' : 'Guardar cambios'}
@@ -178,102 +268,10 @@ export default function ProfileScreen() {
         onPress={handleSignOut}
         activeOpacity={0.7}
       >
-        <LogOut color="#dc2626" size={20} />
+        <LogOut color={colors.errorText} size={20} />
         <Text style={styles.signOutText}>Cerrar sesión</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 80,
-    gap: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#111827',
-    marginBottom: 4,
-  },
-  section: {
-    gap: 8,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  emailText: {
-    fontSize: 16,
-    color: '#6b7280',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 10,
-    padding: 14,
-    fontSize: 16,
-    color: '#111827',
-    backgroundColor: '#fff',
-  },
-  themeRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  themeOption: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 10,
-    padding: 14,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  themeOptionActive: {
-    borderColor: '#2563eb',
-    backgroundColor: '#eff6ff',
-  },
-  themeOptionText: {
-    fontSize: 16,
-    color: '#374151',
-    fontWeight: '600',
-  },
-  themeOptionTextActive: {
-    color: '#2563eb',
-  },
-  button: {
-    backgroundColor: '#2563eb',
-    borderRadius: 10,
-    padding: 14,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  signOutButton: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-    padding: 14,
-  },
-  signOutText: {
-    color: '#dc2626',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

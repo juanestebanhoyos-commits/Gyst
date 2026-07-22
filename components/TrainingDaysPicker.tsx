@@ -1,7 +1,8 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Check } from 'lucide-react-native';
 import { DAYS } from '@/constants/days';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 interface TrainingDaysPickerProps {
   selectedDays: number[];
@@ -12,6 +13,52 @@ export const TrainingDaysPicker = memo(function TrainingDaysPicker({
   selectedDays,
   onChange,
 }: TrainingDaysPickerProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          gap: spacing.sm,
+        },
+        dayChip: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: spacing.md,
+          borderWidth: 1,
+          borderColor: colors.border,
+          borderRadius: borderRadius.md,
+          padding: spacing.md,
+          backgroundColor: colors.bgWhite,
+        },
+        dayChipSelected: {
+          borderColor: colors.primary,
+          backgroundColor: colors.primaryBg,
+        },
+        checkbox: {
+          width: 22,
+          height: 22,
+          borderRadius: borderRadius.sm,
+          borderWidth: 2,
+          borderColor: colors.border,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        checkboxSelected: {
+          backgroundColor: colors.primary,
+          borderColor: colors.primary,
+        },
+        dayText: {
+          fontSize: typography.body.fontSize,
+          color: colors.textSecondary,
+        },
+        dayTextSelected: {
+          color: colors.primary,
+          fontWeight: '600',
+        },
+      }),
+    [colors],
+  );
+
   const toggleDay = (dayIndex: number) => {
     onChange(
       selectedDays.includes(dayIndex)
@@ -38,7 +85,7 @@ export const TrainingDaysPicker = memo(function TrainingDaysPicker({
                 isSelected && styles.checkboxSelected,
               ]}
             >
-              {isSelected ? <Check color="#fff" size={16} /> : null}
+              {isSelected ? <Check color={colors.textOnPrimary} size={16} /> : null}
             </View>
             <Text
               style={[
@@ -53,45 +100,4 @@ export const TrainingDaysPicker = memo(function TrainingDaysPicker({
       })}
     </View>
   );
-});
-
-const styles = StyleSheet.create({
-  container: {
-    gap: 10,
-  },
-  dayChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 10,
-    padding: 14,
-    backgroundColor: '#fff',
-  },
-  dayChipSelected: {
-    borderColor: '#2563eb',
-    backgroundColor: '#eff6ff',
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: '#d1d5db',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxSelected: {
-    backgroundColor: '#2563eb',
-    borderColor: '#2563eb',
-  },
-  dayText: {
-    fontSize: 16,
-    color: '#374151',
-  },
-  dayTextSelected: {
-    color: '#2563eb',
-    fontWeight: '600',
-  },
 });

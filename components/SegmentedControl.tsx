@@ -1,5 +1,6 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 interface SegmentedControlProps {
   options: readonly string[];
@@ -12,6 +13,39 @@ export const SegmentedControl = memo(function SegmentedControl({
   selectedIndex,
   onChange,
 }: SegmentedControlProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flexDirection: 'row',
+          borderRadius: borderRadius.md,
+          overflow: 'hidden',
+          borderWidth: 1,
+          borderColor: colors.border,
+        },
+        segment: {
+          flex: 1,
+          paddingVertical: spacing.sm,
+          alignItems: 'center',
+          backgroundColor: colors.bgWhite,
+        },
+        segmentActive: {
+          backgroundColor: colors.primary,
+        },
+        segmentText: {
+          fontSize: typography.caption.fontSize,
+          color: colors.textSecondary,
+          fontWeight: '500',
+        },
+        segmentTextActive: {
+          color: colors.textOnPrimary,
+          fontWeight: '600',
+        },
+      }),
+    [colors],
+  );
+
   return (
     <View style={styles.container}>
       {options.map((option, index) => {
@@ -31,32 +65,4 @@ export const SegmentedControl = memo(function SegmentedControl({
       })}
     </View>
   );
-});
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    borderRadius: 10,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-  },
-  segment: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  segmentActive: {
-    backgroundColor: '#2563eb',
-  },
-  segmentText: {
-    fontSize: 14,
-    color: '#374151',
-    fontWeight: '500',
-  },
-  segmentTextActive: {
-    color: '#fff',
-    fontWeight: '600',
-  },
 });

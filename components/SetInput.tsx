@@ -1,6 +1,7 @@
-import { useState, memo } from 'react';
+import { useState, memo, useMemo } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Check } from 'lucide-react-native';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 interface SetInputProps {
   exerciseName: string;
@@ -13,6 +14,73 @@ export const SetInput = memo(function SetInput({ exerciseName, setIndex, onSubmi
   const [weight, setWeight] = useState('');
   const [reps, setReps] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    card: {
+      backgroundColor: colors.bgWhite,
+      borderRadius: 12,
+      padding: 14,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+      gap: 10,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    exerciseName: {
+      ...typography.captionBold,
+      color: colors.textSecondary,
+      flex: 1,
+      marginRight: spacing.sm,
+    },
+    setNumber: {
+      ...typography.small,
+      fontWeight: '600',
+      color: colors.primary,
+    },
+    row: {
+      flexDirection: 'row',
+      gap: 10,
+      alignItems: 'flex-end',
+    },
+    field: {
+      flex: 1,
+    },
+    label: {
+      ...typography.small,
+      fontWeight: '600',
+      color: colors.textMuted,
+      marginBottom: spacing.xs,
+    },
+    input: {
+      backgroundColor: colors.bgLight,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.sm,
+      padding: 10,
+      ...typography.body,
+      color: colors.text,
+      textAlign: 'center',
+    },
+    submitButton: {
+      backgroundColor: colors.primary,
+      width: 44,
+      height: 44,
+      borderRadius: borderRadius.md,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    error: {
+      color: colors.error,
+      ...typography.small,
+      textAlign: 'center',
+      backgroundColor: colors.errorBg,
+      padding: spacing.sm,
+      borderRadius: borderRadius.sm,
+    },
+  }), [colors]);
 
   function handleWeightChange(text: string) {
     if (text.startsWith('-')) return;
@@ -61,7 +129,7 @@ export const SetInput = memo(function SetInput({ exerciseName, setIndex, onSubmi
             onChangeText={handleWeightChange}
             keyboardType="decimal-pad"
             placeholder="0"
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={colors.textPlaceholder}
           />
         </View>
         <View style={styles.field}>
@@ -72,7 +140,7 @@ export const SetInput = memo(function SetInput({ exerciseName, setIndex, onSubmi
             onChangeText={handleRepsChange}
             keyboardType="number-pad"
             placeholder="0"
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={colors.textPlaceholder}
           />
         </View>
         <TouchableOpacity
@@ -82,80 +150,12 @@ export const SetInput = memo(function SetInput({ exerciseName, setIndex, onSubmi
           activeOpacity={0.8}
         >
           {isLoading ? (
-            <ActivityIndicator color="#fff" size="small" />
+            <ActivityIndicator color={colors.bgWhite} size="small" />
           ) : (
-            <Check color="#fff" size={20} />
+            <Check color={colors.bgWhite} size={20} />
           )}
         </TouchableOpacity>
       </View>
     </View>
   );
-});
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    gap: 10,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  exerciseName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    flex: 1,
-    marginRight: 8,
-  },
-  setNumber: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#2563eb',
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'flex-end',
-  },
-  field: {
-    flex: 1,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#6b7280',
-    marginBottom: 4,
-  },
-  input: {
-    backgroundColor: '#f9fafb',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 16,
-    color: '#111827',
-    textAlign: 'center',
-  },
-  submitButton: {
-    backgroundColor: '#2563eb',
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  error: {
-    color: '#dc2626',
-    fontSize: 13,
-    textAlign: 'center',
-    backgroundColor: '#fef2f2',
-    padding: 8,
-    borderRadius: 8,
-  },
 });

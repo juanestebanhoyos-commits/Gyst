@@ -1,10 +1,75 @@
+import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Flame } from 'lucide-react-native';
 import { useWeeklyStreak } from '@/hooks/useWeeklyStreak';
-import { colors, spacing, borderRadius } from '@/constants/theme';
+import { useAppTheme, spacing, borderRadius } from '@/lib/theme';
 
 export function StreakCard() {
+  const { colors } = useAppTheme();
   const { data, isLoading, isError } = useWeeklyStreak();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      padding: spacing.lg,
+      marginHorizontal: spacing.lg,
+      marginVertical: spacing.sm,
+      backgroundColor: colors.bgWhite,
+      borderRadius: borderRadius.lg,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+      alignItems: 'center',
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+    },
+    title: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.text,
+      marginLeft: spacing.sm,
+    },
+    progressText: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginBottom: spacing.md,
+    },
+    dotsRow: {
+      flexDirection: 'row',
+      gap: spacing.xs,
+      marginBottom: spacing.md,
+    },
+    dot: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+    },
+    dotFilled: {
+      backgroundColor: colors.primary,
+    },
+    dotEmpty: {
+      backgroundColor: colors.borderLight,
+    },
+    streakRow: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+      gap: spacing.xs,
+    },
+    streakCount: {
+      fontSize: 28,
+      fontWeight: '800',
+      color: colors.primary,
+    },
+    streakLabel: {
+      fontSize: 14,
+      color: colors.textMuted,
+    },
+    loadingText: {
+      fontSize: 14,
+      color: colors.textPlaceholder,
+    },
+  }), [colors]);
 
   if (isLoading) {
     return (
@@ -50,66 +115,3 @@ export function StreakCard() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: spacing.lg,
-    marginHorizontal: spacing.lg,
-    marginVertical: spacing.sm,
-    backgroundColor: colors.bgWhite,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginLeft: spacing.sm,
-  },
-  progressText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginBottom: spacing.md,
-  },
-  dotsRow: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-    marginBottom: spacing.md,
-  },
-  dot: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-  },
-  dotFilled: {
-    backgroundColor: colors.primary,
-  },
-  dotEmpty: {
-    backgroundColor: colors.borderLight,
-  },
-  streakRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: spacing.xs,
-  },
-  streakCount: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: colors.primary,
-  },
-  streakLabel: {
-    fontSize: 14,
-    color: colors.textMuted,
-  },
-  loadingText: {
-    fontSize: 14,
-    color: colors.textPlaceholder,
-  },
-});

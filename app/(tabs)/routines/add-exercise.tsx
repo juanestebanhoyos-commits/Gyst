@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { router, Redirect, useLocalSearchParams } from 'expo-router';
 import {
   View,
@@ -15,10 +16,11 @@ import { useAddExerciseToRoutine } from '@/hooks/useAddExerciseToRoutine';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import ExercisePicker from '@/components/ExercisePicker';
-import { colors, spacing, typography } from '@/constants/theme';
+import { useAppTheme, spacing, typography } from '@/lib/theme';
 import type { ExerciseEntry } from '@/components/ExercisePicker';
 
 export default function AddExerciseScreen() {
+  const { colors } = useAppTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useSession();
   const { data: routine, isLoading: loadingRoutine } = useRoutine(id);
@@ -54,6 +56,13 @@ export default function AddExerciseScreen() {
 
   const existingIds = new Set(currentExercises?.map((e) => e.exercise_id) ?? []);
 
+  const styles = useMemo(() => StyleSheet.create({
+    flex: { flex: 1, backgroundColor: colors.bg },
+    container: { flex: 1 },
+    content: { padding: spacing.lg, gap: spacing.sm, paddingBottom: 40 },
+    title: { ...typography.h1, color: colors.text, marginBottom: spacing.sm },
+  }), [colors]);
+
   return (
     <KeyboardAvoidingView
       style={styles.flex}
@@ -77,10 +86,3 @@ export default function AddExerciseScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.bg },
-  container: { flex: 1 },
-  content: { padding: spacing.lg, gap: spacing.sm, paddingBottom: 40 },
-  title: { ...typography.h1, color: colors.text, marginBottom: spacing.sm },
-});

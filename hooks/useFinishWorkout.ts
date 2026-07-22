@@ -17,6 +17,7 @@ export function useFinishWorkout() {
     onSuccess: (_data, workoutLogId) => {
       queryClient.invalidateQueries({ queryKey: ['workout_logs'] });
       queryClient.invalidateQueries({ queryKey: ['workout_logs', workoutLogId] });
+      queryClient.invalidateQueries({ queryKey: ['weekly-streak'] });
     },
   });
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { router, Redirect } from 'expo-router';
 import {
   View,
@@ -15,7 +15,7 @@ import { Plus } from 'lucide-react-native';
 import { useCreateCustomExercise } from '@/hooks/useCreateCustomExercise';
 import { useSession } from '@/hooks/useSession';
 import { LoadingScreen } from '@/components/LoadingScreen';
-import { colors, spacing, borderRadius, typography } from '@/constants/theme';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 const MUSCLE_GROUPS = [
   'Pecho',
@@ -30,6 +30,7 @@ const MUSCLE_GROUPS = [
 ];
 
 export default function NewExerciseScreen() {
+  const { colors } = useAppTheme();
   const [name, setName] = useState('');
   const [primaryMuscle, setPrimaryMuscle] = useState('');
   const [equipment, setEquipment] = useState('');
@@ -65,6 +66,88 @@ export default function NewExerciseScreen() {
       },
     );
   }
+
+  const styles = useMemo(() => StyleSheet.create({
+    flex: {
+      flex: 1,
+      backgroundColor: colors.bg,
+    },
+    container: {
+      flex: 1,
+    },
+    content: {
+      padding: spacing.lg,
+      gap: spacing.sm,
+      paddingBottom: 40,
+    },
+    title: {
+      ...typography.h1,
+      color: colors.text,
+      marginBottom: spacing.sm,
+    },
+    label: {
+      ...typography.captionBold,
+      color: colors.textSecondary,
+      marginTop: spacing.md,
+      marginBottom: spacing.xs,
+    },
+    input: {
+      backgroundColor: colors.bgWhite,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg - 2,
+      ...typography.body,
+      color: colors.text,
+    },
+    muscleGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    muscleChip: {
+      backgroundColor: colors.bgWhite,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.sm,
+      paddingHorizontal: spacing.lg - 2,
+      paddingVertical: spacing.sm,
+    },
+    muscleChipActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    muscleChipText: {
+      ...typography.caption,
+      color: colors.textSecondary,
+      fontWeight: '500',
+    },
+    muscleChipTextActive: {
+      color: colors.textOnPrimary,
+    },
+    button: {
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg - 2,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginTop: 20,
+    },
+    buttonText: {
+      color: colors.textOnPrimary,
+      ...typography.bodyBold,
+    },
+    error: {
+      color: colors.errorText,
+      ...typography.caption,
+      textAlign: 'center',
+      backgroundColor: colors.errorBg,
+      padding: 10,
+      borderRadius: borderRadius.sm,
+    },
+  }), [colors]);
 
   return (
     <KeyboardAvoidingView
@@ -129,9 +212,9 @@ export default function NewExerciseScreen() {
           activeOpacity={0.8}
         >
           {isPending ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={colors.textOnPrimary} />
           ) : (
-            <Plus color="#fff" size={20} />
+            <Plus color={colors.textOnPrimary} size={20} />
           )}
           <Text style={styles.buttonText}>
             {isPending ? 'Creando...' : 'Crear ejercicio'}
@@ -141,87 +224,3 @@ export default function NewExerciseScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: spacing.lg,
-    gap: spacing.sm,
-    paddingBottom: 40,
-  },
-  title: {
-    ...typography.h1,
-    color: colors.text,
-    marginBottom: spacing.sm,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    marginTop: spacing.md,
-    marginBottom: spacing.xs,
-  },
-  input: {
-    backgroundColor: colors.bgWhite,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg - 2,
-    fontSize: 16,
-    color: colors.text,
-  },
-  muscleGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  muscleChip: {
-    backgroundColor: colors.bgWhite,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.sm,
-    paddingHorizontal: spacing.lg - 2,
-    paddingVertical: spacing.sm,
-  },
-  muscleChipActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  muscleChipText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    fontWeight: '500',
-  },
-  muscleChipTextActive: {
-    color: '#fff',
-  },
-  button: {
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg - 2,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginTop: 20,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  error: {
-    color: colors.errorText,
-    fontSize: 14,
-    textAlign: 'center',
-    backgroundColor: colors.errorBg,
-    padding: 10,
-    borderRadius: borderRadius.sm,
-  },
-});

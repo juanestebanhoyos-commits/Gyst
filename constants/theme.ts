@@ -1,3 +1,7 @@
+/**
+ * @deprecated Use `@/lib/theme` with `useAppTheme()` hook instead.
+ * This file will be removed once all consumers have migrated.
+ */
 export const colors = {
   primary: '#2563eb',
   primaryLight: '#93c5fd',
