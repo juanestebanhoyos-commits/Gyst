@@ -31,44 +31,6 @@ export default function RoutinesScreen() {
     });
   }, [cloneMutation]);
 
-  const renderItem = useCallback(({ item }: { item: Routine }) => {
-    const isOwner = user ? item.user_id === user.id : false;
-    const showClone = !isOwner && item.is_public;
-    const isCloning = cloningId === item.id;
-
-    return (
-      <View style={styles.card}>
-        <TouchableOpacity
-          style={styles.cardContent}
-          activeOpacity={0.7}
-          onPress={() => router.push(`/(tabs)/routines/${item.id}`)}
-        >
-          <Text style={styles.cardName}>{item.name}</Text>
-          {item.description ? (
-            <Text style={styles.cardDescription}>{item.description}</Text>
-          ) : null}
-        </TouchableOpacity>
-        {showClone ? (
-          <TouchableOpacity
-            style={styles.cloneBadge}
-            activeOpacity={0.7}
-            onPress={() => handleClone(item.id)}
-            disabled={isCloning}
-          >
-            {isCloning ? (
-              <ActivityIndicator size="small" color={colors.textOnPrimary} />
-            ) : (
-              <Copy color={colors.textOnPrimary} size={14} />
-            )}
-            <Text style={styles.cloneBadgeText}>
-              {isCloning ? 'Clonando' : 'Clonar'}
-            </Text>
-          </TouchableOpacity>
-        ) : null}
-      </View>
-    );
-  }, [user, cloningId, handleClone]);
-
   const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
@@ -140,6 +102,44 @@ export default function RoutinesScreen() {
       marginTop: 32,
     },
   }), [colors]);
+
+  const renderItem = useCallback(({ item }: { item: Routine }) => {
+    const isOwner = user ? item.user_id === user.id : false;
+    const showClone = !isOwner && item.is_public;
+    const isCloning = cloningId === item.id;
+
+    return (
+      <View style={styles.card}>
+        <TouchableOpacity
+          style={styles.cardContent}
+          activeOpacity={0.7}
+          onPress={() => router.push(`/(tabs)/routines/${item.id}`)}
+        >
+          <Text style={styles.cardName}>{item.name}</Text>
+          {item.description ? (
+            <Text style={styles.cardDescription}>{item.description}</Text>
+          ) : null}
+        </TouchableOpacity>
+        {showClone ? (
+          <TouchableOpacity
+            style={styles.cloneBadge}
+            activeOpacity={0.7}
+            onPress={() => handleClone(item.id)}
+            disabled={isCloning}
+          >
+            {isCloning ? (
+              <ActivityIndicator size="small" color={colors.textOnPrimary} />
+            ) : (
+              <Copy color={colors.textOnPrimary} size={14} />
+            )}
+            <Text style={styles.cloneBadgeText}>
+              {isCloning ? 'Clonando' : 'Clonar'}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
+    );
+  }, [styles, user, cloningId, handleClone]);
 
   if (isLoading) return <LoadingScreen />;
   if (error) return <ErrorScreen message="Error al cargar rutinas" />;

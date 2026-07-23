@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,8 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import { Save, LogOut } from 'lucide-react-native';
+import Save from 'lucide-react-native/icons/save';
+import LogOut from 'lucide-react-native/icons/log-out';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -30,13 +31,13 @@ export default function ProfileScreen() {
   const updateProfile = useUpdateProfile();
   const { themePreference, setThemePreference } = useTheme();
 
-  function handleDarkTheme() {
+  const handleDarkTheme = useCallback(() => {
     setThemePreference('dark');
-  }
+  }, [setThemePreference]);
 
-  function handleLightTheme() {
+  const handleLightTheme = useCallback(() => {
     setThemePreference('light');
-  }
+  }, [setThemePreference]);
 
   const {
     data: profile,
@@ -68,7 +69,7 @@ export default function ProfileScreen() {
     }
   }, [profile, hydrated]);
 
-  async function handleSave() {
+  const handleSave = useCallback(() => {
     if (!user?.id) return;
 
     updateProfile.mutate(
@@ -79,14 +80,14 @@ export default function ProfileScreen() {
         },
       },
     );
-  }
+  }, [user?.id, username, selectedDays, updateProfile, queryClient]);
 
-  async function handleSignOut() {
+  const handleSignOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut();
     if (!error) {
       router.replace('/(auth)/login');
     }
-  }
+  }, [router]);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {

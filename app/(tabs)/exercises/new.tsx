@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { router, Redirect } from 'expo-router';
 import {
   View,
@@ -11,7 +11,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { Plus } from 'lucide-react-native';
+import Plus from 'lucide-react-native/icons/plus';
 import { useCreateCustomExercise } from '@/hooks/useCreateCustomExercise';
 import { useSession } from '@/hooks/useSession';
 import { LoadingScreen } from '@/components/LoadingScreen';
@@ -41,7 +41,7 @@ export default function NewExerciseScreen() {
   if (sessionLoading) return <LoadingScreen />;
   if (!user) return <Redirect href="/(auth)/login" />;
 
-  function handleCreate() {
+  const handleCreate = useCallback(() => {
     if (!user) return;
     setError(null);
 
@@ -65,7 +65,7 @@ export default function NewExerciseScreen() {
         onError: (err) => setError(err.message),
       },
     );
-  }
+  }, [user, name, primaryMuscle, equipment, mutate, router]);
 
   const styles = useMemo(() => StyleSheet.create({
     flex: {
@@ -161,7 +161,7 @@ export default function NewExerciseScreen() {
       >
         <Text style={styles.title}>Nuevo ejercicio</Text>
 
-        {error && <Text style={styles.error}>{error}</Text>}
+        {error != null && <Text style={styles.error}>{error}</Text>}
 
         <Text style={styles.label}>Nombre</Text>
         <TextInput

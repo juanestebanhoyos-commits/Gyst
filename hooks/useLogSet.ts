@@ -27,7 +27,7 @@ export function useLogSet(workoutLogId: string) {
           rir: input.rir ?? null,
           is_warmup: input.is_warmup ?? false,
         })
-        .select()
+        .select('id')
         .single();
       if (error) throw error;
       return data;

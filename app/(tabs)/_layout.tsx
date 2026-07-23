@@ -1,4 +1,5 @@
 import { Redirect, Tabs } from 'expo-router';
+import { useMemo } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -7,6 +8,12 @@ import { useAppTheme } from '@/lib/theme';
 export default function TabLayout() {
   const { colors } = useAppTheme();
   const { session, isLoading } = useSession();
+  const screenOptions = useMemo(() => ({
+    headerShown: false,
+    tabBarStyle: { backgroundColor: colors.bgWhite, borderTopColor: colors.borderLight },
+    tabBarActiveTintColor: colors.primary,
+    tabBarInactiveTintColor: colors.textMuted,
+  }), [colors]);
 
   if (isLoading) return <LoadingScreen />;
 
@@ -16,14 +23,7 @@ export default function TabLayout() {
 
   return (
     <ErrorBoundary>
-      <Tabs
-        screenOptions={{
-          headerShown: false,
-          tabBarStyle: { backgroundColor: colors.bgWhite, borderTopColor: colors.borderLight },
-          tabBarActiveTintColor: colors.primary,
-          tabBarInactiveTintColor: colors.textMuted,
-        }}
-      >
+      <Tabs screenOptions={screenOptions}>
         <Tabs.Screen name="index" options={{ title: 'Inicio' }} />
         <Tabs.Screen name="exercises" options={{ title: 'Ejercicios' }} />
         <Tabs.Screen name="exercises/new" options={{ href: null }} />

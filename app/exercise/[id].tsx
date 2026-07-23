@@ -37,12 +37,9 @@ export default function ExerciseDetailScreen() {
   const error = exerciseError || logsError;
 
   const nextSetNumber = activeWorkoutId && setLogs
-    ? Math.max(
-        ...setLogs
-          .filter((s) => s.workout_log_id === activeWorkoutId)
-          .map((s) => s.set_number),
-        0,
-      ) + 1
+    ? (setLogs
+        .filter((s) => s.workout_log_id === activeWorkoutId)
+        .reduce((max, s) => Math.max(max, s.set_number), 0)) + 1
     : 1;
 
   const styles = useMemo(

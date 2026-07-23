@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useState, useMemo, useCallback, type ReactNode } from 'react';
 import {
   View,
   Text,
@@ -79,18 +79,18 @@ export default function ExercisePicker({
     return filtered;
   }, [allExercises, existingIds, search]);
 
-  function handleSelect(exercise: Exercise | null) {
+  const handleSelect = useCallback((exercise: Exercise | null) => {
     setSelectedExercise(exercise);
-  }
+  }, []);
 
-  function handleAdd(config: ExerciseConfig) {
+  const handleAdd = useCallback((config: ExerciseConfig) => {
     if (!selectedExercise) return;
     onAdd({
       exercise: selectedExercise,
       ...config,
     });
     setSelectedExercise(null);
-  }
+  }, [selectedExercise, onAdd]);
 
   const styles = useMemo(
     () =>
@@ -172,7 +172,7 @@ export default function ExercisePicker({
     [colors],
   );
 
-  const ctx: ExercisePickerContextType = {
+  const ctx = useMemo<ExercisePickerContextType>(() => ({
     search,
     setSearch,
     selectedExercise,
@@ -181,7 +181,7 @@ export default function ExercisePicker({
     allExercises,
     handleAddConfig: handleAdd,
     styles,
-  };
+  }), [search, selectedExercise, available, allExercises, styles, handleAdd, handleSelect]);
 
   if (children) {
     return (

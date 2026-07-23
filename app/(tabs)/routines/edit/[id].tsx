@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   View,
@@ -45,35 +45,38 @@ export default function EditRoutineScreen() {
 
   const addedIds = useMemo(() => new Set(exercises.map((e) => e.exercise.id)), [exercises]);
 
+  const initialized = useRef(false);
+
   useEffect(() => {
-    if (routine) {
-      setName(routine.name || '');
-      setDescription(routine.description || '');
-      setIsPublic(routine.is_public || false);
-      setScheduledDays(routine.scheduled_days || []);
-      setExercises(routineExercises?.flatMap((entry) => 
-        entry.exercises ? [{
-          exercise: entry.exercises as Exercise,
-          target_sets: entry.target_sets,
-          target_reps_min: entry.target_reps_min,
-          target_reps_max: entry.target_reps_max,
-          rest_seconds: entry.rest_seconds,
-          notes: entry.notes,
-        }] : [],
-      ) || []);
-    }
+    if (!routine) return;
+    if (initialized.current) return;
+    initialized.current = true;
+    setName(routine.name || '');
+    setDescription(routine.description || '');
+    setIsPublic(routine.is_public || false);
+    setScheduledDays(routine.scheduled_days || []);
+    setExercises(routineExercises?.flatMap((entry) => 
+      entry.exercises ? [{
+        exercise: entry.exercises as Exercise,
+        target_sets: entry.target_sets,
+        target_reps_min: entry.target_reps_min,
+        target_reps_max: entry.target_reps_max,
+        rest_seconds: entry.rest_seconds,
+        notes: entry.notes,
+      }] : [],
+    ) || []);
   }, [routine, routineExercises]);
 
-  function handleAddExercise(entry: ExerciseEntry) {
+  const handleAddExercise = useCallback((entry: ExerciseEntry) => {
     setExercises((prev) => [...prev, entry]);
     setShowPicker(false);
-  }
+  }, []);
 
-  function handleRemoveExercise(index: number) {
+  const handleRemoveExercise = useCallback((index: number) => {
     setExercises((prev) => prev.filter((_, i) => i !== index));
-  }
+  }, []);
 
-  function handleSave() {
+  const handleSave = useCallback(() => {
     setError(null);
 
     if (!name.trim()) {
@@ -93,6 +96,15 @@ export default function EditRoutineScreen() {
         description: description.trim() || null,
         is_public: isPublic,
         scheduled_days: scheduledDays,
+        exercises: exercises.map((entry, i) => ({
+          exercise_id: entry.exercise.id,
+          order_index: i,
+          target_sets: entry.target_sets,
+          target_reps_min: entry.target_reps_min,
+          target_reps_max: entry.target_reps_max,
+          rest_seconds: entry.rest_seconds,
+          notes: entry.notes,
+        })),
       },
       {
         onSuccess: () => {
@@ -103,7 +115,7 @@ export default function EditRoutineScreen() {
         },
       },
     );
-  }
+  }, [name, description, isPublic, scheduledDays, exercises, id, user?.id, updateRoutine, router]);
 
   const styles = useMemo(() => StyleSheet.create({
     flex: {
@@ -312,10 +324,10 @@ export default function EditRoutineScreen() {
 
         <Text style={styles.sectionTitle}>Ejercicios</Text>
 
-        {exercises.length > 0 ? (
+        {useMemo(() => exercises.length > 0 ? (
           <View style={styles.exerciseList}>
             {exercises.map((entry, i) => (
-              <View key={`${entry.exercise.id}-${i}`} style={styles.exerciseListItem}>
+              <View key={entry.exercise.id} style={styles.exerciseListItem}>
                 <View style={styles.exerciseInfo}>
                   <Text style={styles.exerciseName}>{entry.exercise.name}</Text>
                   <Text style={styles.exerciseDetail}>
@@ -328,9 +340,9 @@ export default function EditRoutineScreen() {
               </View>
             ))}
           </View>
-        ) : null}
+        ) : null, [exercises, styles, handleRemoveExercise])}
 
-        {!showPicker ? (
+        {!showPicker && (
           <TouchableOpacity
             style={styles.addExerciseButton}
             onPress={() => setShowPicker(true)}
@@ -338,7 +350,8 @@ export default function EditRoutineScreen() {
           >
             <Text style={styles.addExerciseButtonText}>+ Agregar ejercicio</Text>
           </TouchableOpacity>
-        ) : (
+        )}
+        <View style={showPicker ? undefined : { display: 'none' }}>
           <ExercisePicker
             allExercises={allExercises}
             existingIds={addedIds}
@@ -346,7 +359,7 @@ export default function EditRoutineScreen() {
             onClose={() => setShowPicker(false)}
             submitLabel="Agregar ejercicio"
           />
-        )}
+        </View>
 
         <TouchableOpacity
           style={[styles.saveButton, isPending && styles.saveButtonDisabled]}

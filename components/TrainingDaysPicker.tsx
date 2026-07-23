@@ -4,6 +4,8 @@ import { Check } from 'lucide-react-native';
 import { DAYS } from '@/constants/days';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
+const DAY_OPTIONS = DAYS.slice(1);
+
 interface TrainingDaysPickerProps {
   selectedDays: number[];
   onChange: (days: number[]) => void;
@@ -69,7 +71,7 @@ export const TrainingDaysPicker = memo(function TrainingDaysPicker({
 
   return (
     <View style={styles.container}>
-      {DAYS.slice(1).map((day, i) => {
+      {DAY_OPTIONS.map((day, i) => {
         const dayIndex = i + 1;
         const isSelected = selectedDays.includes(dayIndex);
         return (

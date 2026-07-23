@@ -6,14 +6,15 @@ import { supabase } from '@/lib/supabase';
 import { useRoutines } from '@/hooks/useRoutines';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
+const DISPLAY_LIMIT = 5;
+
 export function RoutinesSection() {
   const { colors } = useAppTheme();
   const router = useRouter();
   const { data: routines, isLoading } = useRoutines();
-  const DISPLAY_LIMIT = 5;
 
-  const displayRoutines = routines?.slice(0, DISPLAY_LIMIT) ?? [];
-  const routineIds = displayRoutines.map(r => r.id);
+  const displayRoutines = useMemo(() => routines?.slice(0, DISPLAY_LIMIT) ?? [], [routines]);
+  const routineIds = useMemo(() => displayRoutines.map(r => r.id), [displayRoutines]);
 
   const { data: exerciseCounts } = useQuery({
     queryKey: ['routine-exercise-counts', ...routineIds],

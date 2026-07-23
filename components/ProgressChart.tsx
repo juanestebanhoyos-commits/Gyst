@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { G, Path, Circle, Line, Text as SvgText } from 'react-native-svg';
-import { useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { useChartView, VIEW_OPTIONS, VIEW_TITLES, Y_AXIS_SUFFIX } from '@/hooks/useChartView';
 import { useAppTheme, spacing, typography } from '@/lib/theme';
@@ -12,7 +12,7 @@ interface ProgressChartProps {
   height?: number;
 }
 
-export function ProgressChart({ data, width = 300, height = 200 }: ProgressChartProps) {
+export const ProgressChart = memo(function ProgressChart({ data, width = 300, height = 200 }: ProgressChartProps) {
   const { colors } = useAppTheme();
   const {
     selectedView,
@@ -52,6 +52,11 @@ export function ProgressChart({ data, width = 300, height = 200 }: ProgressChart
     Math.round((minValue + (range / yTicks) * i) * 10) / 10,
   );
 
+  const handleViewChange = useCallback(
+    (i: number) => setSelectedView(i as 0 | 1 | 2),
+    [setSelectedView],
+  );
+
   const styles = useMemo(() => StyleSheet.create({
     container: {
       alignItems: 'center',
@@ -70,15 +75,21 @@ export function ProgressChart({ data, width = 300, height = 200 }: ProgressChart
     },
   }), [colors]);
 
+  const chartHeader = useMemo(() => (
+    <>
+      <Text style={styles.title}>{currentTitle}</Text>
+      <SegmentedControl
+        options={VIEW_OPTIONS}
+        selectedIndex={selectedView}
+        onChange={handleViewChange}
+      />
+    </>
+  ), [currentTitle, selectedView, handleViewChange, styles.title]);
+
   if (chartPoints.length < 2) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>{currentTitle}</Text>
-        <SegmentedControl
-          options={VIEW_OPTIONS}
-          selectedIndex={selectedView}
-          onChange={(i) => setSelectedView(i as 0 | 1 | 2)}
-        />
+        {chartHeader}
         <Text style={styles.emptyText}>
           {data.length === 0
             ? 'No hay datos de progreso para este ejercicio'
@@ -90,12 +101,7 @@ export function ProgressChart({ data, width = 300, height = 200 }: ProgressChart
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{currentTitle}</Text>
-        <SegmentedControl
-          options={VIEW_OPTIONS}
-          selectedIndex={selectedView}
-          onChange={(i) => setSelectedView(i as 0 | 1 | 2)}
-        />
+      {chartHeader}
       <Svg width={width} height={height}>
         {tickValues.map((val, i) => {
           const y = padding.top + chartHeight - ((val - minValue) / range) * chartHeight;
@@ -141,4 +147,4 @@ export function ProgressChart({ data, width = 300, height = 200 }: ProgressChart
       </Svg>
     </View>
   );
-}
+});

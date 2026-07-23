@@ -23,7 +23,6 @@ export function useTodayRoutine() {
         .select('id, name, scheduled_days')
         .eq('user_id', user.id)
         .contains('scheduled_days', [today])
-        .limit(1)
         .single();
 
       if (error && error.code === 'PGRST116') return null;

@@ -11,10 +11,10 @@ export function TodayExercisesSection() {
   const { colors } = useAppTheme();
   const router = useRouter();
   const { data: todayRoutine, isLoading: routineLoading } = useTodayRoutine();
+  const { data: activeWorkoutId } = useActiveWorkout();
   const { data: exercises, isLoading: exercisesLoading } = useRoutineExercises(
     todayRoutine?.id ?? '',
   );
-  const { data: activeWorkoutId } = useActiveWorkout();
 
   const routineId = todayRoutine?.id;
 

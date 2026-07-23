@@ -48,25 +48,6 @@ export default function RoutineDetailScreen() {
     }
   };
 
-  const renderItem = useCallback(({ item, index }: { item: { id: string; exercises: { name: string; primary_muscle: string } | null; target_sets: number; target_reps_min: number; target_reps_max: number }; index: number }) => (
-    <View style={styles.exerciseCard}>
-      <Text style={styles.exerciseIndex}>{index + 1}</Text>
-      <View style={styles.exerciseInfo}>
-        <Text style={styles.exerciseName}>
-          {item.exercises?.name ?? 'Ejercicio desconocido'}
-        </Text>
-        {item.exercises?.primary_muscle ? (
-          <Text style={styles.exerciseMuscle}>
-            {item.exercises.primary_muscle}
-          </Text>
-        ) : null}
-      </View>
-      <Text style={styles.exerciseSets}>
-        {item.target_sets} × {item.target_reps_min}-{item.target_reps_max}
-      </Text>
-    </View>
-  ), []);
-
   const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
@@ -207,6 +188,25 @@ export default function RoutineDetailScreen() {
       marginBottom: spacing.md,
     },
   }), [colors]);
+
+  const renderItem = useCallback(({ item, index }: { item: { id: string; exercises: { name: string; primary_muscle: string } | null; target_sets: number; target_reps_min: number; target_reps_max: number }; index: number }) => (
+    <View style={styles.exerciseCard}>
+      <Text style={styles.exerciseIndex}>{index + 1}</Text>
+      <View style={styles.exerciseInfo}>
+        <Text style={styles.exerciseName}>
+          {item.exercises?.name ?? 'Ejercicio desconocido'}
+        </Text>
+        {item.exercises?.primary_muscle ? (
+          <Text style={styles.exerciseMuscle}>
+            {item.exercises.primary_muscle}
+          </Text>
+        ) : null}
+      </View>
+      <Text style={styles.exerciseSets}>
+        {item.target_sets} × {item.target_reps_min}-{item.target_reps_max}
+      </Text>
+    </View>
+  ), [styles]);
 
   if (routineError || exercisesError) return <ErrorScreen message="Error al cargar la rutina" />;
   if (loadingRoutine && !routine) return <LoadingScreen />;

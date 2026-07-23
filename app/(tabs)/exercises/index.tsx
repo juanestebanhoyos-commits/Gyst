@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { Search, Plus } from 'lucide-react-native';
+import Search from 'lucide-react-native/icons/search';
+import Plus from 'lucide-react-native/icons/plus';
 import { router } from 'expo-router';
 import { useExercises } from '@/hooks/useExercises';
 import { ExerciseCard } from '@/components/ExerciseCard';
@@ -26,11 +27,15 @@ export default function ExercisesScreen() {
 
   const { data: exercises, isLoading, error } = useExercises({ search: debouncedSearch });
 
+  const handleExercisePress = useCallback((id: string) => {
+    router.push(`/exercise/${id}`);
+  }, [router]);
+
   const renderExerciseItem = useCallback(({ item }: { item: Exercise }) => (
-    <TouchableOpacity onPress={() => router.push(`/exercise/${item.id}`)} activeOpacity={0.7}>
+    <TouchableOpacity onPress={() => handleExercisePress(item.id)} activeOpacity={0.7}>
       <ExerciseCard exercise={item} />
     </TouchableOpacity>
-  ), []);
+  ), [handleExercisePress]);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { router, Redirect, useLocalSearchParams } from 'expo-router';
 import {
   View,
@@ -30,22 +30,25 @@ export default function AddExerciseScreen() {
 
   const isLoading = loadingExercises || loadingRoutine;
 
-  function handleAdd(entry: ExerciseEntry) {
-    mutate(
-      {
-        exercise_id: entry.exercise.id,
-        order_index: (currentExercises?.length ?? 0) + 1,
-        target_sets: entry.target_sets,
-        target_reps_min: entry.target_reps_min,
-        target_reps_max: entry.target_reps_max,
-        rest_seconds: entry.rest_seconds,
-        notes: entry.notes,
-      },
-      {
-        onSuccess: () => router.back(),
-      },
-    );
-  }
+  const handleAdd = useCallback(
+    (entry: ExerciseEntry) => {
+      mutate(
+        {
+          exercise_id: entry.exercise.id,
+          order_index: (currentExercises?.length ?? 0) + 1,
+          target_sets: entry.target_sets,
+          target_reps_min: entry.target_reps_min,
+          target_reps_max: entry.target_reps_max,
+          rest_seconds: entry.rest_seconds,
+          notes: entry.notes,
+        },
+        {
+          onSuccess: () => router.back(),
+        },
+      );
+    },
+    [currentExercises?.length, mutate, router],
+  );
 
   if (isLoading) return <LoadingScreen />;
   if (error) return <ErrorScreen message="Error al cargar ejercicios" />;
@@ -54,7 +57,10 @@ export default function AddExerciseScreen() {
     return <Redirect href="/(tabs)/routines" />;
   }
 
-  const existingIds = new Set(currentExercises?.map((e) => e.exercise_id) ?? []);
+  const existingIds = useMemo(
+    () => new Set(currentExercises?.map((e) => e.exercise_id) ?? []),
+    [currentExercises],
+  );
 
   const styles = useMemo(() => StyleSheet.create({
     flex: { flex: 1, backgroundColor: colors.bg },

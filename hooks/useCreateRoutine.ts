@@ -21,23 +21,16 @@ export function useCreateRoutine() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (input: CreateRoutineInput) => {
-      const { exercises, scheduled_days, ...routineData } = input;
+      const { exercises, ...routineData } = input;
 
       const { data: routineId, error } = await supabase.rpc('create_routine', {
         name: routineData.name,
         description: routineData.description ?? null,
         is_public: routineData.is_public ?? false,
         exercises: exercises ?? [],
+        scheduled_days: routineData.scheduled_days ?? [],
       });
       if (error) throw error;
-
-      if (scheduled_days && scheduled_days.length > 0) {
-        const { error: updateError } = await supabase
-          .from('routines')
-          .update({ scheduled_days })
-          .eq('id', routineId);
-        if (updateError) throw updateError;
-      }
 
       return routineId;
     },

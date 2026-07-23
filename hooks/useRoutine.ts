@@ -8,7 +8,7 @@ export function useRoutine(id: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('routines')
-        .select('*')
+        .select('id, user_id, name, description, scheduled_days, is_public, created_at, updated_at')
         .eq('id', id)
         .single();
       if (error) throw error;

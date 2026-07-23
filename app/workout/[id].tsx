@@ -1,7 +1,7 @@
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useCallback, useMemo } from 'react';
-import { Square } from 'lucide-react-native';
+import Square from 'lucide-react-native/icons/square';
 import { useRoutine } from '@/hooks/useRoutine';
 import { useRoutineExercises } from '@/hooks/useRoutineExercises';
 import { useStartWorkout } from '@/hooks/useStartWorkout';
@@ -37,7 +37,7 @@ export default function WorkoutSessionScreen() {
     }
   }, [id, user?.id]);
 
-  function handleFinish() {
+  const handleFinish = useCallback(() => {
     const logId = workoutLogIdRef.current;
     if (!logId) {
       router.replace('/(tabs)/routines');
@@ -48,38 +48,11 @@ export default function WorkoutSessionScreen() {
         router.replace('/(tabs)/routines');
       },
     });
-  }
+  }, [router, finishWorkout]);
 
   const isMutating = startWorkout.isPending || finishWorkout.isPending;
 
   const keyExtractor = useCallback((item: { id: string }) => item.id, []);
-
-  const renderItem = useCallback(({ item, index }: { item: { id: string; exercise_id: string; exercises: { name: string; primary_muscle: string } | null; target_sets: number; target_reps_min: number; target_reps_max: number }; index: number }) => (
-    <TouchableOpacity
-      style={styles.exerciseCard}
-      activeOpacity={0.7}
-      onPress={() => router.push(`/exercise/${item.exercise_id}`)}
-    >
-      <Text style={styles.exerciseIndex}>{index + 1}</Text>
-      <View style={styles.exerciseInfo}>
-        <Text style={styles.exerciseName}>
-          {item.exercises?.name ?? 'Ejercicio desconocido'}
-        </Text>
-        {item.exercises?.primary_muscle ? (
-          <Text style={styles.exerciseMuscle}>
-            {item.exercises.primary_muscle}
-          </Text>
-        ) : null}
-      </View>
-      <Text style={styles.exerciseSets}>
-        {item.target_sets} × {item.target_reps_min}-{item.target_reps_max}
-      </Text>
-    </TouchableOpacity>
-  ), []);
-
-  if (loadingRoutine || loadingExercises || isMutating) return <LoadingScreen />;
-  if (startWorkout.isError || !routine)
-    return <ErrorScreen message={startWorkout.error?.message ?? 'No se pudo iniciar la sesión'} />;
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -158,6 +131,33 @@ export default function WorkoutSessionScreen() {
       marginTop: 24,
     },
   }), [colors]);
+
+  const renderItem = useCallback(({ item, index }: { item: { id: string; exercise_id: string; exercises: { name: string; primary_muscle: string } | null; target_sets: number; target_reps_min: number; target_reps_max: number }; index: number }) => (
+    <TouchableOpacity
+      style={styles.exerciseCard}
+      activeOpacity={0.7}
+      onPress={() => router.push(`/exercise/${item.exercise_id}`)}
+    >
+      <Text style={styles.exerciseIndex}>{index + 1}</Text>
+      <View style={styles.exerciseInfo}>
+        <Text style={styles.exerciseName}>
+          {item.exercises?.name ?? 'Ejercicio desconocido'}
+        </Text>
+        {item.exercises?.primary_muscle ? (
+          <Text style={styles.exerciseMuscle}>
+            {item.exercises.primary_muscle}
+          </Text>
+        ) : null}
+      </View>
+      <Text style={styles.exerciseSets}>
+        {item.target_sets} × {item.target_reps_min}-{item.target_reps_max}
+      </Text>
+    </TouchableOpacity>
+  ), [styles]);
+
+  if (loadingRoutine || loadingExercises || isMutating) return <LoadingScreen />;
+  if (startWorkout.isError || !routine)
+    return <ErrorScreen message={startWorkout.error?.message ?? 'No se pudo iniciar la sesión'} />;
 
   return (
     <View style={styles.container}>

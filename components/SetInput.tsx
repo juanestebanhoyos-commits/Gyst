@@ -1,4 +1,4 @@
-import { useState, memo, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Check } from 'lucide-react-native';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
@@ -10,7 +10,7 @@ interface SetInputProps {
   isLoading?: boolean;
 }
 
-export const SetInput = memo(function SetInput({ exerciseName, setIndex, onSubmit, isLoading = false }: SetInputProps) {
+export function SetInput({ exerciseName, setIndex, onSubmit, isLoading = false }: SetInputProps) {
   const [weight, setWeight] = useState('');
   const [reps, setReps] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -158,4 +158,4 @@ export const SetInput = memo(function SetInput({ exerciseName, setIndex, onSubmi
       </View>
     </View>
   );
-});
+}

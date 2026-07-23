@@ -8,7 +8,7 @@ export function useTheme() {
   const updateProfile = useUpdateProfile();
 
   const { data: themePreference, isLoading } = useQuery<string>({
-    queryKey: ['profile'],
+    queryKey: ['profile', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')

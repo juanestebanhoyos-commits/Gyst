@@ -1,7 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
-import { useSession } from '@/hooks/useSession';
 import { useProfile } from '@/hooks/useProfile';
 import { useTodayRoutine } from '@/hooks/useTodayRoutine';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
@@ -9,7 +8,6 @@ import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 export function WelcomeHeader() {
   const { colors } = useAppTheme();
   const router = useRouter();
-  const { user } = useSession();
   const { data: todayRoutine } = useTodayRoutine();
   const { data: profile } = useProfile();
 
