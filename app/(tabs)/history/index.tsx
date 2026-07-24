@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { Clock } from 'lucide-react-native';
+import { Clock, ClipboardList } from 'lucide-react-native';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
@@ -55,7 +55,7 @@ export default function HistoryScreen() {
       backgroundColor: colors.bgWhite,
       borderRadius: borderRadius.md,
       borderWidth: 1,
-      borderColor: colors.borderLight,
+      borderColor: colors.border,
       padding: spacing.lg,
     },
     topRow: {
@@ -88,6 +88,11 @@ export default function HistoryScreen() {
     duration: {
       ...typography.caption,
       color: colors.textMuted,
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      marginTop: 32,
+      gap: spacing.sm,
     },
     emptyText: {
       ...typography.body,
@@ -130,7 +135,10 @@ export default function HistoryScreen() {
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={ListSeparator}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No hay sesiones registradas</Text>
+          <View style={styles.emptyContainer}>
+            <ClipboardList size={32} color={colors.textPlaceholder} />
+            <Text style={styles.emptyText}>No hay sesiones registradas</Text>
+          </View>
         }
       />
     </View>

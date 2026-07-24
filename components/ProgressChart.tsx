@@ -65,7 +65,7 @@ export const ProgressChart = memo(function ProgressChart({ data, width = 300, he
       backgroundColor: colors.bgWhite,
       borderRadius: borderRadius.md,
       borderWidth: 1,
-      borderColor: colors.borderLight,
+      borderColor: colors.border,
     },
     cardHeader: {
       flexDirection: 'row',

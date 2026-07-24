@@ -66,8 +66,10 @@ export default function ExerciseDetailScreen() {
           padding: spacing.xs,
         },
         title: {
-          ...typography.h1,
-          color: colors.text,
+          ...typography.caption,
+          color: colors.textMuted,
+          textTransform: 'uppercase',
+          letterSpacing: 1,
           textAlign: 'center',
         },
       }),

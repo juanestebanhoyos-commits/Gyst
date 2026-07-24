@@ -120,7 +120,7 @@ export function RoutinesSection() {
           justifyContent: 'center',
           alignItems: 'center',
           borderWidth: 1,
-          borderColor: colors.borderLight,
+          borderColor: colors.border,
         },
         cardIcon: {
           marginBottom: spacing.sm,

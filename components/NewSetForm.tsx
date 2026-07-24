@@ -67,7 +67,7 @@ export function NewSetForm({ workoutLogId, exerciseId, nextSetNumber, onSuccess 
       marginHorizontal: spacing.lg,
       marginVertical: spacing.sm,
       borderWidth: 1,
-      borderColor: colors.borderLight,
+      borderColor: colors.border,
     },
     heading: {
       ...typography.h3,

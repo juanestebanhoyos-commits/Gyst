@@ -99,8 +99,10 @@ export default function NewRoutineScreen() {
       paddingBottom: 40,
     },
     title: {
-      ...typography.h1,
-      color: colors.text,
+      ...typography.caption,
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
       marginBottom: spacing.sm,
     },
     label: {

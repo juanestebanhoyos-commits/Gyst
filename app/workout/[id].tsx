@@ -65,8 +65,10 @@ export default function WorkoutSessionScreen() {
       marginBottom: 20,
     },
     title: {
-      ...typography.h1,
-      color: colors.text,
+      ...typography.caption,
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
       marginBottom: spacing.xs,
     },
     subtitle: {

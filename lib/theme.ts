@@ -15,14 +15,14 @@ export const borderRadius = {
 } as const;
 
 export const typography = {
-  h1: { fontSize: 28, fontWeight: '800' as const },
-  h2: { fontSize: 24, fontWeight: '700' as const },
-  h3: { fontSize: 18, fontWeight: '700' as const },
-  body: { fontSize: 16, fontWeight: '400' as const },
-  bodyBold: { fontSize: 16, fontWeight: '600' as const },
-  caption: { fontSize: 14, fontWeight: '400' as const },
-  captionBold: { fontSize: 14, fontWeight: '600' as const },
-  small: { fontSize: 13, fontWeight: '400' as const },
+  h1: { fontFamily: 'Montserrat_800ExtraBold', fontSize: 28, fontWeight: '800' as const },
+  h2: { fontFamily: 'Montserrat_700Bold', fontSize: 24, fontWeight: '700' as const },
+  h3: { fontFamily: 'Montserrat_600SemiBold', fontSize: 18, fontWeight: '700' as const },
+  body: { fontFamily: 'Inter_400Regular', fontSize: 16, fontWeight: '400' as const },
+  bodyBold: { fontFamily: 'Inter_600SemiBold', fontSize: 16, fontWeight: '600' as const },
+  caption: { fontFamily: 'Inter_400Regular', fontSize: 14, fontWeight: '400' as const },
+  captionBold: { fontFamily: 'Inter_600SemiBold', fontSize: 14, fontWeight: '600' as const },
+  small: { fontFamily: 'Inter_500Medium', fontSize: 13, fontWeight: '400' as const },
 } as const;
 
 export const lightColors = {

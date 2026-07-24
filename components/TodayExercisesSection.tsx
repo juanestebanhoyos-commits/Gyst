@@ -39,7 +39,7 @@ export function TodayExercisesSection() {
           backgroundColor: colors.bgWhite,
           borderRadius: borderRadius.md,
           borderWidth: 1,
-          borderColor: colors.borderLight,
+          borderColor: colors.border,
           padding: spacing.lg,
         },
         cardTop: {

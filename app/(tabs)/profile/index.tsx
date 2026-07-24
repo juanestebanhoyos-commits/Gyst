@@ -100,8 +100,11 @@ export default function ProfileScreen() {
       gap: 20,
     },
     title: {
-      ...typography.h1,
-      color: colors.text,
+      ...typography.caption,
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      textAlign: 'center',
       marginBottom: spacing.xs,
     },
     section: {
@@ -122,7 +125,7 @@ export default function ProfileScreen() {
       padding: spacing.md,
       ...typography.body,
       color: colors.text,
-      backgroundColor: colors.bgWhite,
+      backgroundColor: colors.bgLight,
     },
     themeRow: {
       flexDirection: 'row',
@@ -150,7 +153,7 @@ export default function ProfileScreen() {
     },
     button: {
       backgroundColor: colors.primary,
-      borderRadius: borderRadius.md,
+      borderRadius: borderRadius.lg,
       padding: spacing.md,
       flexDirection: 'row',
       justifyContent: 'center',

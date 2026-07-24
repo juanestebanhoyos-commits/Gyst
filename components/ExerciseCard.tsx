@@ -16,7 +16,7 @@ export const ExerciseCard = memo(function ExerciseCard({ exercise }: ExerciseCar
       backgroundColor: colors.bgWhite,
       borderRadius: borderRadius.md,
       borderWidth: 1,
-      borderColor: colors.borderLight,
+      borderColor: colors.border,
       padding: spacing.lg,
     },
     category: {
@@ -73,7 +73,7 @@ export const ExerciseCard = memo(function ExerciseCard({ exercise }: ExerciseCar
         <View style={styles.iconContainer}>
           <Dumbbell size={20} color={colors.primary} />
         </View>
-        <Text style={styles.recordsText}>registros</Text>
+        <Text style={styles.recordsText}>Historial de series</Text>
         <View style={styles.verButton}>
           <Text style={styles.verText}>Ver</Text>
           <ChevronRight size={14} color={colors.text} />

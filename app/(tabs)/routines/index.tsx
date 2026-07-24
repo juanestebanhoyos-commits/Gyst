@@ -53,7 +53,7 @@ export default function RoutinesScreen() {
       backgroundColor: colors.bgWhite,
       borderRadius: borderRadius.md,
       borderWidth: 1,
-      borderColor: colors.borderLight,
+      borderColor: colors.border,
       padding: spacing.lg,
     },
     category: {
@@ -136,6 +136,11 @@ export default function RoutinesScreen() {
       shadowOpacity: 0.25,
       shadowRadius: 4,
     },
+    emptyContainer: {
+      alignItems: 'center',
+      marginTop: 32,
+      gap: spacing.sm,
+    },
     emptyText: {
       ...typography.body,
       color: colors.textPlaceholder,
@@ -204,7 +209,10 @@ export default function RoutinesScreen() {
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={ListSeparator}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No hay rutinas disponibles</Text>
+          <View style={styles.emptyContainer}>
+            <ClipboardList size={32} color={colors.textPlaceholder} />
+            <Text style={styles.emptyText}>No hay rutinas disponibles</Text>
+          </View>
         }
       />
       <TouchableOpacity

@@ -56,8 +56,10 @@ export default function RoutineDetailScreen() {
       paddingTop: spacing.lg,
     },
     title: {
-      ...typography.h1,
-      color: colors.text,
+      ...typography.caption,
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
       marginBottom: spacing.xs,
     },
     description: {

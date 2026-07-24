@@ -131,8 +131,10 @@ export default function EditRoutineScreen() {
       paddingBottom: 40,
     },
     title: {
-      ...typography.h1,
-      color: colors.text,
+      ...typography.caption,
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
       marginBottom: spacing.sm,
     },
     label: {
@@ -257,6 +259,24 @@ export default function EditRoutineScreen() {
     },
   }), [colors]);
 
+  const exerciseListContent = useMemo(() => exercises.length > 0 ? (
+    <View style={styles.exerciseList}>
+      {exercises.map((entry, i) => (
+        <View key={entry.exercise.id} style={styles.exerciseListItem}>
+          <View style={styles.exerciseInfo}>
+            <Text style={styles.exerciseName}>{entry.exercise.name}</Text>
+            <Text style={styles.exerciseDetail}>
+              {entry.target_sets} series × {entry.target_reps_min}–{entry.target_reps_max} reps · {entry.rest_seconds}s descanso
+            </Text>
+          </View>
+          <TouchableOpacity onPress={() => handleRemoveExercise(i)}>
+            <Text style={styles.removeText}>Eliminar</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+    </View>
+  ) : null, [exercises, styles, handleRemoveExercise]);
+
   if (sessionLoading || loadingRoutine) return <LoadingScreen />;
   if (routineError) return <ErrorScreen message="Error al cargar la rutina" />;
   if (!routine) return <ErrorScreen message="Rutina no encontrada" />;
@@ -324,23 +344,7 @@ export default function EditRoutineScreen() {
 
         <Text style={styles.sectionTitle}>Ejercicios</Text>
 
-        {useMemo(() => exercises.length > 0 ? (
-          <View style={styles.exerciseList}>
-            {exercises.map((entry, i) => (
-              <View key={entry.exercise.id} style={styles.exerciseListItem}>
-                <View style={styles.exerciseInfo}>
-                  <Text style={styles.exerciseName}>{entry.exercise.name}</Text>
-                  <Text style={styles.exerciseDetail}>
-                    {entry.target_sets} series × {entry.target_reps_min}–{entry.target_reps_max} reps · {entry.rest_seconds}s descanso
-                  </Text>
-                </View>
-                <TouchableOpacity onPress={() => handleRemoveExercise(i)}>
-                  <Text style={styles.removeText}>Eliminar</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
-        ) : null, [exercises, styles, handleRemoveExercise])}
+        {exerciseListContent}
 
         {!showPicker && (
           <TouchableOpacity

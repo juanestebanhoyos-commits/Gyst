@@ -19,7 +19,7 @@ export function SetHistoryList({ exerciseId }: SetHistoryListProps) {
       backgroundColor: colors.bgWhite,
       borderRadius: borderRadius.md,
       borderWidth: 1,
-      borderColor: colors.borderLight,
+      borderColor: colors.border,
     },
     center: {
       padding: spacing.xl,

@@ -110,7 +110,7 @@ export function StreakCard() {
           <BarChart3 size={20} color={colors.primary} />
           <View style={styles.titleBlock}>
             <Text style={styles.title}>Progreso semanal</Text>
-            <Text style={styles.subtitle}>Sigue así, vas muy bien!</Text>
+            <Text style={styles.subtitle}>Racha de esta semana</Text>
           </View>
         </View>
 

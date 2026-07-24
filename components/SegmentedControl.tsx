@@ -40,7 +40,7 @@ export const SegmentedControl = memo(function SegmentedControl({
         },
         segmentTextActive: {
           color: colors.textOnPrimary,
-          fontWeight: '600',
+          fontWeight: '700',
         },
       }),
     [colors],

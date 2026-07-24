@@ -35,35 +35,35 @@ export default function TabLayout() {
         <Tabs.Screen
           name="history"
           options={{
-            title: 'History',
+            title: 'Historial',
             tabBarIcon: ({ color, size }) => <Clock size={size} color={color} />,
           }}
         />
         <Tabs.Screen
           name="exercises"
           options={{
-            title: 'Exercise',
+            title: 'Ejercicios',
             tabBarIcon: ({ color, size }) => <Dumbbell size={size} color={color} />,
           }}
         />
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Home',
+            title: 'Inicio',
             tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
           }}
         />
         <Tabs.Screen
           name="routines"
           options={{
-            title: 'Routines',
+            title: 'Rutinas',
             tabBarIcon: ({ color, size }) => <ClipboardList size={size} color={color} />,
           }}
         />
         <Tabs.Screen
           name="profile"
           options={{
-            title: 'Profile',
+            title: 'Perfil',
             tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
           }}
         />

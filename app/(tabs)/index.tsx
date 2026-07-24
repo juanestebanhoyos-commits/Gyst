@@ -4,7 +4,7 @@ import { WelcomeHeader } from '@/components/WelcomeHeader';
 import { StreakCard } from '@/components/StreakCard';
 import { TodayExercisesSection } from '@/components/TodayExercisesSection';
 import { RoutinesSection } from '@/components/RoutinesSection';
-import { useAppTheme } from '@/lib/theme';
+import { useAppTheme, spacing } from '@/lib/theme';
 
 export default function HomeScreen() {
   const { colors } = useAppTheme();
@@ -16,7 +16,7 @@ export default function HomeScreen() {
           backgroundColor: colors.bg,
         },
         content: {
-          paddingBottom: 32,
+          paddingBottom: spacing.xl,
         },
       }),
     [colors],

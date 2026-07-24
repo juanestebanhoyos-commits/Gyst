@@ -18,11 +18,11 @@ export function SetInput({ exerciseName, setIndex, onSubmit, isLoading = false }
   const styles = useMemo(() => StyleSheet.create({
     card: {
       backgroundColor: colors.bgWhite,
-      borderRadius: 12,
-      padding: 14,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg,
       borderWidth: 1,
-      borderColor: colors.borderLight,
-      gap: 10,
+      borderColor: colors.border,
+      gap: spacing.md,
     },
     header: {
       flexDirection: 'row',
@@ -59,7 +59,8 @@ export function SetInput({ exerciseName, setIndex, onSubmit, isLoading = false }
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: borderRadius.sm,
-      padding: 10,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.md,
       ...typography.body,
       color: colors.text,
       textAlign: 'center',

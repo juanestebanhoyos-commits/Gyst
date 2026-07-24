@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import Search from 'lucide-react-native/icons/search';
 import Plus from 'lucide-react-native/icons/plus';
+import Dumbbell from 'lucide-react-native/icons/dumbbell';
 import { router } from 'expo-router';
 import { useExercises } from '@/hooks/useExercises';
 import { ExerciseCard } from '@/components/ExerciseCard';
@@ -72,6 +73,11 @@ export default function ExercisesScreen() {
     list: {
       paddingBottom: spacing.xl,
     },
+    emptyContainer: {
+      alignItems: 'center',
+      marginTop: 32,
+      gap: spacing.sm,
+    },
     emptyText: {
       ...typography.body,
       color: colors.textPlaceholder,
@@ -122,7 +128,10 @@ export default function ExercisesScreen() {
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={ListSeparator}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No hay ejercicios disponibles</Text>
+          <View style={styles.emptyContainer}>
+            <Dumbbell size={32} color={colors.textPlaceholder} />
+            <Text style={styles.emptyText}>No hay ejercicios disponibles</Text>
+          </View>
         }
       />
       <TouchableOpacity

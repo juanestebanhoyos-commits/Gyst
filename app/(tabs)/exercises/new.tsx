@@ -38,9 +38,6 @@ export default function NewExerciseScreen() {
   const { user, isLoading: sessionLoading } = useSession();
   const { mutate, isPending } = useCreateCustomExercise();
 
-  if (sessionLoading) return <LoadingScreen />;
-  if (!user) return <Redirect href="/(auth)/login" />;
-
   const handleCreate = useCallback(() => {
     if (!user) return;
     setError(null);
@@ -148,6 +145,9 @@ export default function NewExerciseScreen() {
       borderRadius: borderRadius.sm,
     },
   }), [colors]);
+
+  if (sessionLoading) return <LoadingScreen />;
+  if (!user) return <Redirect href="/(auth)/login" />;
 
   return (
     <KeyboardAvoidingView
