@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useMemo, useCallback, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  useCallback,
+  useDeferredValue,
+  type ReactNode,
+} from 'react';
 import {
   View,
   Text,
@@ -6,6 +14,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import { Search, X } from 'lucide-react-native';
 import ExerciseConfigForm, { ExerciseConfig } from './ExerciseConfigForm';
@@ -21,9 +30,12 @@ export interface ExerciseEntry {
   notes: string | null;
 }
 
-interface ExercisePickerContextType {
+interface SearchContextType {
   search: string;
   setSearch: (s: string) => void;
+}
+
+interface PickerContextType {
   selectedExercise: Exercise | null;
   select: (e: Exercise | null) => void;
   available: Exercise[];
@@ -32,11 +44,18 @@ interface ExercisePickerContextType {
   styles: ReturnType<typeof StyleSheet.create>;
 }
 
-const ExercisePickerContext = createContext<ExercisePickerContextType | null>(null);
+const SearchCtx = createContext<SearchContextType | null>(null);
+const PickerCtx = createContext<PickerContextType | null>(null);
 
-function usePickerContext() {
-  const ctx = useContext(ExercisePickerContext);
-  if (!ctx) throw new Error('ExercisePicker sub-components must be used within <ExercisePicker>');
+function useSearchCtx() {
+  const ctx = useContext(SearchCtx);
+  if (!ctx) throw new Error('useSearchCtx must be used within <ExercisePicker>');
+  return ctx;
+}
+
+function usePickerCtx() {
+  const ctx = useContext(PickerCtx);
+  if (!ctx) throw new Error('usePickerCtx must be used within <ExercisePicker>');
   return ctx;
 }
 
@@ -65,11 +84,13 @@ export default function ExercisePicker({
   const [search, setSearch] = useState('');
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
+  const deferredSearch = useDeferredValue(search);
+
   const available = useMemo(() => {
     if (!allExercises) return [];
     let filtered = allExercises.filter((e) => !existingIds.has(e.id));
-    if (search.trim()) {
-      const q = search.toLowerCase();
+    if (deferredSearch.trim()) {
+      const q = deferredSearch.toLowerCase();
       filtered = filtered.filter(
         (e) =>
           e.name.toLowerCase().includes(q) ||
@@ -77,20 +98,23 @@ export default function ExercisePicker({
       );
     }
     return filtered;
-  }, [allExercises, existingIds, search]);
+  }, [allExercises, existingIds, deferredSearch]);
 
   const handleSelect = useCallback((exercise: Exercise | null) => {
     setSelectedExercise(exercise);
   }, []);
 
-  const handleAdd = useCallback((config: ExerciseConfig) => {
-    if (!selectedExercise) return;
-    onAdd({
-      exercise: selectedExercise,
-      ...config,
-    });
-    setSelectedExercise(null);
-  }, [selectedExercise, onAdd]);
+  const handleAdd = useCallback(
+    (config: ExerciseConfig) => {
+      if (!selectedExercise) return;
+      onAdd({
+        exercise: selectedExercise,
+        ...config,
+      });
+      setSelectedExercise(null);
+    },
+    [selectedExercise, onAdd],
+  );
 
   const styles = useMemo(
     () =>
@@ -172,37 +196,48 @@ export default function ExercisePicker({
     [colors],
   );
 
-  const ctx = useMemo<ExercisePickerContextType>(() => ({
-    search,
-    setSearch,
-    selectedExercise,
-    select: handleSelect,
-    available,
-    allExercises,
-    handleAddConfig: handleAdd,
-    styles,
-  }), [search, selectedExercise, available, allExercises, styles, handleAdd, handleSelect]);
+  const searchCtx = useMemo<SearchContextType>(
+    () => ({ search, setSearch }),
+    [search],
+  );
 
-  if (children) {
-    return (
-      <ExercisePickerContext.Provider value={ctx}>
-        <View style={styles.container}>{children}</View>
-      </ExercisePickerContext.Provider>
-    );
-  }
+  const pickerCtx = useMemo<PickerContextType>(
+    () => ({
+      selectedExercise,
+      select: handleSelect,
+      available,
+      allExercises,
+      handleAddConfig: handleAdd,
+      styles,
+    }),
+    [selectedExercise, handleSelect, available, allExercises, handleAdd, styles],
+  );
+
+  const inner = (
+    <>
+      <ExercisePicker.Header onClose={onClose} />
+      <ExercisePicker.Search />
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      <ExercisePicker.List />
+      {selectedExercise ? (
+        <ExercisePicker.ConfigForm
+          submitLabel={submitLabel}
+          isLoading={isLoading}
+        />
+      ) : null}
+    </>
+  );
 
   return (
-    <ExercisePickerContext.Provider value={ctx}>
-      <View style={styles.container}>
-        <ExercisePicker.Header onClose={onClose} />
-        <ExercisePicker.Search />
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-        <ExercisePicker.List />
-        {selectedExercise ? (
-          <ExercisePicker.ConfigForm submitLabel={submitLabel} isLoading={isLoading} />
-        ) : null}
-      </View>
-    </ExercisePickerContext.Provider>
+    <SearchCtx.Provider value={searchCtx}>
+      <PickerCtx.Provider value={pickerCtx}>
+        {children ? (
+          <View style={styles.container}>{children}</View>
+        ) : (
+          <View style={styles.container}>{inner}</View>
+        )}
+      </PickerCtx.Provider>
+    </SearchCtx.Provider>
   );
 }
 
@@ -211,13 +246,16 @@ ExercisePicker.Header = function PickerHeader({
 }: {
   onClose?: () => void;
 }) {
-  const { styles } = usePickerContext();
+  const { styles } = usePickerCtx();
   const { colors } = useAppTheme();
   return (
     <View style={styles.header}>
       <Text style={styles.title}>Seleccionar ejercicio</Text>
       {onClose ? (
-        <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+        <TouchableOpacity
+          onPress={onClose}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <X color={colors.textMuted} size={20} />
         </TouchableOpacity>
       ) : null}
@@ -226,7 +264,8 @@ ExercisePicker.Header = function PickerHeader({
 };
 
 ExercisePicker.Search = function PickerSearch() {
-  const { search, setSearch, styles } = usePickerContext();
+  const { search, setSearch } = useSearchCtx();
+  const { styles } = usePickerCtx();
   const { colors } = useAppTheme();
   return (
     <View style={styles.searchRow}>
@@ -244,29 +283,48 @@ ExercisePicker.Search = function PickerSearch() {
 };
 
 ExercisePicker.List = function PickerList() {
-  const { available, allExercises, selectedExercise, select, styles } = usePickerContext();
+  const { available, allExercises, selectedExercise, select, styles } =
+    usePickerCtx();
   const { colors } = useAppTheme();
 
-  return !allExercises ? (
-    <ActivityIndicator size="small" color={colors.primary} style={styles.loadingIndicator} />
-  ) : available.length === 0 ? (
-    <Text style={styles.emptyText}>No hay ejercicios disponibles</Text>
-  ) : (
-    <View style={styles.list}>
-      {available.map((exercise) => {
-        const isSelected = selectedExercise?.id === exercise.id;
-        return (
-          <TouchableOpacity
-            key={exercise.id}
-            style={[styles.card, isSelected && styles.cardActive]}
-            onPress={() => select(exercise)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.cardName}>{exercise.name}</Text>
-            <Text style={styles.cardMuscle}>{exercise.primary_muscle}</Text>
-          </TouchableOpacity>
-        );
-      })}
+  if (!allExercises) {
+    return (
+      <View style={[styles.list, { height: 370, justifyContent: 'center' }]}>
+        <ActivityIndicator
+          size="small"
+          color={colors.primary}
+          style={styles.loadingIndicator}
+        />
+      </View>
+    );
+  }
+
+  if (available.length === 0) {
+    return (
+      <View style={[styles.list, { height: 370, justifyContent: 'center' }]}>
+        <Text style={styles.emptyText}>No hay ejercicios disponibles</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[styles.list, { height: 370 }]}>
+      <ScrollView>
+        {available.map((exercise) => {
+          const isSelected = selectedExercise?.id === exercise.id;
+          return (
+            <TouchableOpacity
+              key={exercise.id}
+              style={[styles.card, isSelected && styles.cardActive]}
+              onPress={() => select(exercise)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.cardName}>{exercise.name}</Text>
+              <Text style={styles.cardMuscle}>{exercise.primary_muscle}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
     </View>
   );
 };
@@ -278,7 +336,7 @@ ExercisePicker.ConfigForm = function PickerConfigForm({
   submitLabel?: string;
   isLoading?: boolean;
 }) {
-  const { selectedExercise, handleAddConfig, select } = usePickerContext();
+  const { selectedExercise, handleAddConfig, select } = usePickerCtx();
   if (!selectedExercise) return null;
   return (
     <ExerciseConfigForm
@@ -290,5 +348,3 @@ ExercisePicker.ConfigForm = function PickerConfigForm({
     />
   );
 };
-
-

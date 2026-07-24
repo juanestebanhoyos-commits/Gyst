@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Exercise } from '@/types/supabase';
 
@@ -10,7 +10,7 @@ interface PaginationOptions {
 
 export function useExercises(options?: PaginationOptions) {
   const page = options?.page;
-  const pageSize = options?.pageSize ?? 50;
+  const pageSize = options?.pageSize ?? 20;
   const search = options?.search;
   const paginated = page !== undefined;
 
@@ -18,6 +18,7 @@ export function useExercises(options?: PaginationOptions) {
     queryKey: paginated
       ? ['exercises', 'paginated', page, pageSize, search]
       : ['exercises', search],
+    placeholderData: keepPreviousData,
     queryFn: async () => {
       let query = supabase
         .from('exercises')
@@ -33,8 +34,6 @@ export function useExercises(options?: PaginationOptions) {
       if (paginated) {
         const from = page * pageSize;
         query = query.range(from, from + pageSize);
-      } else {
-        query = query.limit(pageSize);
       }
 
       const { data, error } = await query;
