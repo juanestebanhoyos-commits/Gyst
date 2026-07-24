@@ -16,6 +16,7 @@ export default function HomeScreen() {
           backgroundColor: colors.bg,
         },
         content: {
+          paddingTop: 10,
           paddingBottom: spacing.xl,
         },
       }),

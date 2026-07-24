@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { useProfile } from '@/hooks/useProfile';
+import { useSession } from '@/hooks/useSession';
 import { useTodayRoutine } from '@/hooks/useTodayRoutine';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
@@ -12,8 +13,10 @@ export function WelcomeHeader() {
   const router = useRouter();
   const { data: todayRoutine } = useTodayRoutine();
   const { data: profile } = useProfile();
+  const { user } = useSession();
 
-  const displayName = profile?.username ?? 'atleta';
+  const displayName = profile?.username?.trim() || (user?.user_metadata?.name as string)?.trim() || 'atleta';
+  const avatarInitial = displayName.charAt(0).toUpperCase();
   const hasRoutine = !!todayRoutine;
 
   const styles = useMemo(() => StyleSheet.create({
@@ -29,6 +32,12 @@ export function WelcomeHeader() {
       borderRadius: AVATAR_SIZE / 2,
       backgroundColor: colors.bgLight,
       marginBottom: spacing.lg,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    avatarText: {
+      ...typography.h2,
+      color: colors.primary,
     },
     greeting: {
       ...typography.caption,
@@ -65,7 +74,9 @@ export function WelcomeHeader() {
           accessibilityLabel="Foto de perfil"
         />
       ) : (
-        <View style={styles.avatar} />
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>{avatarInitial}</Text>
+        </View>
       )}
 
       <Text style={styles.greeting}>Hola de nuevo</Text>

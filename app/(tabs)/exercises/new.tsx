@@ -73,13 +73,16 @@ export default function NewExerciseScreen() {
       flex: 1,
     },
     content: {
-      padding: spacing.lg,
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.xl,
       gap: spacing.sm,
       paddingBottom: 40,
     },
     title: {
-      ...typography.h1,
-      color: colors.text,
+      ...typography.caption,
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
       marginBottom: spacing.sm,
     },
     label: {

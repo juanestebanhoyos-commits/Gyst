@@ -54,16 +54,23 @@ export default function ExerciseDetailScreen() {
         header: {
           flexDirection: 'row',
           alignItems: 'center',
-          justifyContent: 'center',
           paddingHorizontal: spacing.lg,
           paddingTop: spacing.xl,
           paddingBottom: spacing.lg,
-          position: 'relative',
         },
         backButton: {
-          position: 'absolute',
-          left: spacing.lg,
-          padding: spacing.xs,
+          width: 40,
+          height: 40,
+          borderRadius: 20,
+          backgroundColor: colors.bgLight,
+          borderWidth: 1,
+          borderColor: colors.border,
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginRight: spacing.sm,
+        },
+        headerSpacer: {
+          width: 40,
         },
         title: {
           ...typography.caption,
@@ -91,6 +98,7 @@ export default function ExerciseDetailScreen() {
           <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.title}>{exercise.name}</Text>
+        <View style={styles.headerSpacer} />
       </View>
 
       <ProgressChart data={setLogs ?? []} />

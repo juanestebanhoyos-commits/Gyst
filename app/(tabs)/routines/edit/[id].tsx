@@ -126,7 +126,8 @@ export default function EditRoutineScreen() {
       flex: 1,
     },
     content: {
-      padding: spacing.lg,
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.xl,
       gap: spacing.sm,
       paddingBottom: 40,
     },
