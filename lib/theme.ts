@@ -51,26 +51,26 @@ export const lightColors = {
 } as const;
 
 export const darkColors = {
-  primary: '#D4FF17',
-  primaryLight: '#E5FF6E',
-  primaryBg: '#1A2E00',
-  text: '#FFFFFF',
-  textSecondary: '#A0A0A0',
-  textMuted: '#6B7280',
-  textPlaceholder: '#4B5563',
-  textTertiary: '#6B7280',
-  textOnPrimary: '#000000',
-  bg: '#0A0A0A',
-  bgWhite: '#1C1C1C',
-  bgLight: '#161616',
-  border: '#333333',
-  borderLight: '#262626',
-  error: '#EF4444',
-  errorText: '#FCA5A5',
-  errorBg: '#450A0A',
-  success: '#22C55E',
-  successText: '#86EFAC',
-  successBg: '#052E16',
+  primary: '#caf300',        // primary-container: Electric Lime accent
+  primaryLight: '#b0d500',   // primary-fixed-dim: dimmer lime variant
+  primaryBg: '#2a2a2a',     // surface-container-high: elevated bg for primary-tinted areas
+  text: '#e5e2e1',           // on-surface / on-background
+  textSecondary: '#c5c9ac', // on-surface-variant
+  textMuted: '#8f9378',     // outline
+  textPlaceholder: '#444932', // outline-variant
+  textTertiary: '#656464',  // on-tertiary-container
+  textOnPrimary: '#2a3400', // on-primary
+  bg: '#131313',             // surface / background
+  bgWhite: '#1c1b1b',       // surface-container-low (cards)
+  bgLight: '#201f1f',       // surface-container (elevated surfaces)
+  border: '#353534',         // surface-container-highest / surface-variant (ghost borders)
+  borderLight: '#444932',   // outline-variant
+  error: '#ffb4ab',          // error
+  errorText: '#ffdad6',     // on-error-container
+  errorBg: '#93000a',       // error-container
+  success: '#caf300',        // primary-container (brand: "Success mapped to Primary")
+  successText: '#596c00',   // on-primary-container
+  successBg: '#2a2a2a',     // surface-container-high
   shadow: '#000000',
 } as const;
 

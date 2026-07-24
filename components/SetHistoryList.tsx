@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useExerciseSetLogs } from '@/hooks/useExerciseSetLogs';
-import { useAppTheme, spacing, typography } from '@/lib/theme';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 interface SetHistoryListProps {
   exerciseId: string;
@@ -12,10 +12,14 @@ export function SetHistoryList({ exerciseId }: SetHistoryListProps) {
   const { data, isLoading, isError, error } = useExerciseSetLogs(exerciseId);
 
   const styles = useMemo(() => StyleSheet.create({
-    container: {
+    card: {
       padding: spacing.lg,
       marginHorizontal: spacing.lg,
       marginVertical: spacing.sm,
+      backgroundColor: colors.bgWhite,
+      borderRadius: borderRadius.md,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
     },
     center: {
       padding: spacing.xl,
@@ -27,14 +31,21 @@ export function SetHistoryList({ exerciseId }: SetHistoryListProps) {
       marginBottom: spacing.md,
     },
     row: {
-      paddingVertical: spacing.sm,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: spacing.md,
       borderBottomWidth: 1,
-      borderBottomColor: colors.bgLight,
+      borderBottomColor: colors.borderLight,
     },
-    rowText: {
+    rowLabel: {
+      ...typography.body,
+      color: colors.text,
+      fontWeight: '500',
+    },
+    rowDetail: {
       ...typography.caption,
-      color: colors.textSecondary,
-      fontFamily: 'monospace',
+      color: colors.textMuted,
     },
     emptyText: {
       ...typography.caption,
@@ -69,20 +80,21 @@ export function SetHistoryList({ exerciseId }: SetHistoryListProps) {
 
   if (lastFive.length === 0) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.heading}>Historial de series</Text>
+      <View style={styles.card}>
+        <Text style={styles.heading}>Series registradas</Text>
         <Text style={styles.emptyText}>Aún no hay series registradas para este ejercicio</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Historial de series</Text>
+    <View style={styles.card}>
+      <Text style={styles.heading}>Series registradas</Text>
       {lastFive.map((set) => (
         <View key={set.id} style={styles.row}>
-          <Text style={styles.rowText}>
-            {`Serie #${set.set_number}     ${set.weight_kg} x ${set.reps} reps - Rir ${set.rir ?? '-'}`}
+          <Text style={styles.rowLabel}>Serie #{set.set_number}</Text>
+          <Text style={styles.rowDetail}>
+            {set.weight_kg} kg x {set.reps} Reps · RIR {set.rir ?? '-'}
           </Text>
         </View>
       ))}

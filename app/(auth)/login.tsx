@@ -46,33 +46,35 @@ export default function LoginScreen() {
       justifyContent: 'center',
       padding: spacing.xl,
       gap: spacing.lg,
-      backgroundColor: colors.bgWhite,
+      backgroundColor: colors.bg,
     },
-    title: {
-      fontSize: 36,
+    logo: {
+      fontSize: 42,
       fontWeight: '800',
       textAlign: 'center',
       color: colors.primary,
+      letterSpacing: 2,
+      marginBottom: spacing.xs,
     },
     subtitle: {
-      fontSize: 18,
-      fontWeight: '600',
+      ...typography.body,
       textAlign: 'center',
-      color: colors.textSecondary,
-      marginBottom: spacing.sm,
+      color: colors.textMuted,
+      marginBottom: spacing.lg,
     },
     input: {
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.borderLight,
       borderRadius: borderRadius.md,
-      padding: spacing.lg - 2,
+      padding: spacing.lg,
       ...typography.body,
       color: colors.text,
+      backgroundColor: colors.bgWhite,
     },
     button: {
       backgroundColor: colors.primary,
-      borderRadius: borderRadius.md,
-      padding: spacing.lg - 2,
+      borderRadius: borderRadius.lg,
+      padding: spacing.lg,
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
@@ -87,20 +89,22 @@ export default function LoginScreen() {
       ...typography.caption,
       textAlign: 'center',
       backgroundColor: colors.errorBg,
-      padding: 10,
+      padding: spacing.md,
       borderRadius: borderRadius.sm,
+    },
+    footer: {
+      marginTop: spacing.md,
     },
     link: {
       color: colors.primary,
       ...typography.caption,
       textAlign: 'center',
-      marginTop: spacing.sm,
     },
   }), [colors]);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>GYST</Text>
+      <Text style={styles.logo}>GYST</Text>
       <Text style={styles.subtitle}>Iniciar sesión</Text>
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -108,6 +112,7 @@ export default function LoginScreen() {
       <TextInput
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor={colors.textPlaceholder}
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -118,6 +123,7 @@ export default function LoginScreen() {
       <TextInput
         style={styles.input}
         placeholder="Contraseña"
+        placeholderTextColor={colors.textPlaceholder}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -140,9 +146,11 @@ export default function LoginScreen() {
         </Text>
       </TouchableOpacity>
 
-      <Link href="/(auth)/onboarding/step-1" style={styles.link}>
-        ¿No tienes cuenta? Créala aquí
-      </Link>
+      <View style={styles.footer}>
+        <Link href="/(auth)/onboarding/step-1" style={styles.link}>
+          ¿No tienes cuenta? Créala aquí
+        </Link>
+      </View>
     </View>
   );
 }

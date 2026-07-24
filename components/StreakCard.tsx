@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Flame } from 'lucide-react-native';
+import { BarChart3 } from 'lucide-react-native';
 import { useWeeklyStreak } from '@/hooks/useWeeklyStreak';
-import { useAppTheme, spacing, borderRadius } from '@/lib/theme';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
+
+const DAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
 export function StreakCard() {
   const { colors } = useAppTheme();
@@ -10,35 +12,63 @@ export function StreakCard() {
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
-      padding: spacing.lg,
       marginHorizontal: spacing.lg,
       marginVertical: spacing.sm,
+      padding: spacing.lg,
       backgroundColor: colors.bgWhite,
-      borderRadius: borderRadius.lg,
-      borderWidth: 1,
-      borderColor: colors.borderLight,
-      alignItems: 'center',
+      borderRadius: borderRadius.md,
+      borderLeftWidth: 4,
+      borderLeftColor: colors.primary,
     },
-    header: {
+    topRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: spacing.lg,
+    },
+    topLeft: {
+      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: spacing.sm,
+      gap: spacing.sm,
     },
-    title: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: colors.text,
+    titleBlock: {
       marginLeft: spacing.sm,
     },
-    progressText: {
-      fontSize: 14,
-      color: colors.textSecondary,
-      marginBottom: spacing.md,
+    title: {
+      ...typography.bodyBold,
+      color: colors.text,
     },
-    dotsRow: {
+    subtitle: {
+      ...typography.small,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    streakBlock: {
+      alignItems: 'flex-end',
+    },
+    streakNumber: {
+      fontSize: 32,
+      fontWeight: '800',
+      color: colors.primary,
+    },
+    streakLabel: {
+      ...typography.small,
+      color: colors.textMuted,
+      textAlign: 'right',
+    },
+    daysRow: {
       flexDirection: 'row',
-      gap: spacing.xs,
-      marginBottom: spacing.md,
+      justifyContent: 'space-between',
+    },
+    dayCell: {
+      alignItems: 'center',
+      width: 36,
+    },
+    dayLabel: {
+      ...typography.small,
+      color: colors.textMuted,
+      marginBottom: spacing.xs,
     },
     dot: {
       width: 24,
@@ -51,23 +81,11 @@ export function StreakCard() {
     dotEmpty: {
       backgroundColor: colors.borderLight,
     },
-    streakRow: {
-      flexDirection: 'row',
-      alignItems: 'baseline',
-      gap: spacing.xs,
-    },
-    streakCount: {
-      fontSize: 28,
-      fontWeight: '800',
-      color: colors.primary,
-    },
-    streakLabel: {
-      fontSize: 14,
-      color: colors.textMuted,
-    },
     loadingText: {
-      fontSize: 14,
+      ...typography.caption,
       color: colors.textPlaceholder,
+      textAlign: 'center',
+      paddingVertical: spacing.xl,
     },
   }), [colors]);
 
@@ -83,34 +101,37 @@ export function StreakCard() {
     return null;
   }
 
-  const { currentWeekProgress, weeklyGoal, streak } = data;
+  const { currentWeekProgress } = data;
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Flame size={20} color={colors.primary} />
-        <Text style={styles.title}>Progreso semanal</Text>
+      <View style={styles.topRow}>
+        <View style={styles.topLeft}>
+          <BarChart3 size={20} color={colors.primary} />
+          <View style={styles.titleBlock}>
+            <Text style={styles.title}>Progreso semanal</Text>
+            <Text style={styles.subtitle}>Sigue así, vas muy bien!</Text>
+          </View>
+        </View>
+
+        <View style={styles.streakBlock}>
+          <Text style={styles.streakNumber}>{currentWeekProgress}</Text>
+          <Text style={styles.streakLabel}>Días de{'\n'}racha</Text>
+        </View>
       </View>
 
-      <Text style={styles.progressText}>
-        Vas {currentWeekProgress} de {weeklyGoal} días
-      </Text>
-
-      <View style={styles.dotsRow}>
-        {Array.from({ length: 7 }, (_, i) => (
-          <View
-            key={i}
-            style={[
-              styles.dot,
-              i < currentWeekProgress ? styles.dotFilled : styles.dotEmpty,
-            ]}
-          />
+      <View style={styles.daysRow}>
+        {DAY_LABELS.map((label, i) => (
+          <View key={i} style={styles.dayCell}>
+            <Text style={styles.dayLabel}>{label}</Text>
+            <View
+              style={[
+                styles.dot,
+                i < currentWeekProgress ? styles.dotFilled : styles.dotEmpty,
+              ]}
+            />
+          </View>
         ))}
-      </View>
-
-      <View style={styles.streakRow}>
-        <Text style={styles.streakCount}>{streak}</Text>
-        <Text style={styles.streakLabel}>semanas consecutivas</Text>
       </View>
     </View>
   );

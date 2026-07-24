@@ -63,20 +63,20 @@ export function NewSetForm({ workoutLogId, exerciseId, nextSetNumber, onSuccess 
     container: {
       padding: spacing.lg,
       backgroundColor: colors.bgWhite,
-      borderRadius: 12,
+      borderRadius: borderRadius.md,
       marginHorizontal: spacing.lg,
       marginVertical: spacing.sm,
       borderWidth: 1,
       borderColor: colors.borderLight,
     },
     heading: {
-      ...typography.bodyBold,
+      ...typography.h3,
       color: colors.text,
-      marginBottom: spacing.md,
+      marginBottom: spacing.lg,
     },
     row: {
       flexDirection: 'row',
-      gap: spacing.sm,
+      gap: spacing.md,
     },
     field: {
       flex: 1,
@@ -85,16 +85,19 @@ export function NewSetForm({ workoutLogId, exerciseId, nextSetNumber, onSuccess 
       ...typography.small,
       color: colors.textMuted,
       marginBottom: spacing.xs,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
     },
     input: {
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: borderRadius.sm,
       paddingHorizontal: spacing.md,
-      paddingVertical: 10,
+      paddingVertical: spacing.md,
       fontSize: typography.body.fontSize,
       color: colors.text,
       textAlign: 'center',
+      backgroundColor: colors.bgLight,
     },
     error: {
       color: colors.error,
@@ -103,10 +106,10 @@ export function NewSetForm({ workoutLogId, exerciseId, nextSetNumber, onSuccess 
     },
     button: {
       backgroundColor: colors.primary,
-      borderRadius: borderRadius.sm,
+      borderRadius: borderRadius.lg,
       paddingVertical: spacing.md,
       alignItems: 'center',
-      marginTop: spacing.md,
+      marginTop: spacing.lg,
     },
     buttonDisabled: {
       opacity: 0.6,
@@ -119,10 +122,10 @@ export function NewSetForm({ workoutLogId, exerciseId, nextSetNumber, onSuccess 
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Registrar serie</Text>
+      <Text style={styles.heading}>Nueva serie</Text>
       <View style={styles.row}>
         <View style={styles.field}>
-          <Text style={styles.label}>Peso (kg)</Text>
+          <Text style={styles.label}>Peso (KG)</Text>
           <TextInput
             style={styles.input}
             value={weight}
@@ -165,7 +168,7 @@ export function NewSetForm({ workoutLogId, exerciseId, nextSetNumber, onSuccess 
         {logSet.isPending ? (
           <ActivityIndicator color={colors.textOnPrimary} />
         ) : (
-          <Text style={styles.buttonText}>Guardar serie</Text>
+          <Text style={styles.buttonText}>Registrar serie</Text>
         )}
       </TouchableOpacity>
     </View>

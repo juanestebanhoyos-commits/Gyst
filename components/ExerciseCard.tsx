@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Dumbbell } from 'lucide-react-native';
+import { Dumbbell, ChevronRight } from 'lucide-react-native';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { Exercise } from '@/types/supabase';
 
@@ -10,78 +10,74 @@ interface ExerciseCardProps {
 
 export const ExerciseCard = memo(function ExerciseCard({ exercise }: ExerciseCardProps) {
   const { colors } = useAppTheme();
+
   const styles = useMemo(() => StyleSheet.create({
     card: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: spacing.lg,
       backgroundColor: colors.bgWhite,
-      borderRadius: 12,
+      borderRadius: borderRadius.md,
       borderWidth: 1,
       borderColor: colors.borderLight,
-      gap: 14,
+      padding: spacing.lg,
+    },
+    category: {
+      ...typography.small,
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: spacing.xs,
+    },
+    name: {
+      ...typography.h3,
+      color: colors.text,
+      marginBottom: spacing.md,
+    },
+    bottomRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     },
     iconContainer: {
-      width: 44,
-      height: 44,
-      borderRadius: borderRadius.md,
-      backgroundColor: colors.primaryBg,
+      width: 40,
+      height: 40,
+      borderRadius: borderRadius.sm,
+      backgroundColor: colors.bgLight,
       justifyContent: 'center',
       alignItems: 'center',
     },
-    info: {
-      flex: 1,
-      gap: 2,
-    },
-    nameRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-    },
-    name: {
-      ...typography.bodyBold,
-      color: colors.text,
-    },
-    badge: {
-      backgroundColor: colors.bg,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: 2,
-      borderRadius: 6,
-    },
-    badgeText: {
-      fontSize: 11,
-      fontWeight: '600',
-      color: colors.textMuted,
-    },
-    muscle: {
+    recordsText: {
       ...typography.caption,
       color: colors.textMuted,
+      flex: 1,
+      marginLeft: spacing.sm,
     },
-    equipment: {
-      fontSize: 12,
-      color: colors.textPlaceholder,
-      marginTop: 2,
+    verButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      backgroundColor: colors.bgLight,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderRadius: borderRadius.sm,
+    },
+    verText: {
+      ...typography.captionBold,
+      color: colors.text,
     },
   }), [colors]);
 
   return (
     <View style={styles.card}>
-      <View style={styles.iconContainer}>
-        <Dumbbell color={colors.primary} size={24} />
-      </View>
-      <View style={styles.info}>
-        <View style={styles.nameRow}>
-          <Text style={styles.name}>{exercise.name}</Text>
-          {exercise.is_custom ? (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>Propio</Text>
-            </View>
-          ) : null}
+      <Text style={styles.category}>{exercise.primary_muscle}</Text>
+      <Text style={styles.name}>{exercise.name}</Text>
+      <View style={styles.bottomRow}>
+        <View style={styles.iconContainer}>
+          <Dumbbell size={20} color={colors.primary} />
         </View>
-        <Text style={styles.muscle}>{exercise.primary_muscle}</Text>
-        {exercise.equipment ? (
-          <Text style={styles.equipment}>{exercise.equipment}</Text>
-        ) : null}
+        <Text style={styles.recordsText}>registros</Text>
+        <View style={styles.verButton}>
+          <Text style={styles.verText}>Ver</Text>
+          <ChevronRight size={14} color={colors.text} />
+        </View>
       </View>
     </View>
   );

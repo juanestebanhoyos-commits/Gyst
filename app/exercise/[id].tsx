@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { ArrowLeft } from 'lucide-react-native';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useExerciseSetLogs } from '@/hooks/useExerciseSetLogs';
@@ -16,6 +17,7 @@ import type { Exercise } from '@/types/supabase';
 export default function ExerciseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors } = useAppTheme();
+  const router = useRouter();
 
   const { data: exercise, isLoading: loadingExercise, error: exerciseError } = useQuery<Exercise>({
     queryKey: ['exercise', id],
@@ -50,18 +52,23 @@ export default function ExerciseDetailScreen() {
           backgroundColor: colors.bg,
         },
         header: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
           paddingHorizontal: spacing.lg,
-          paddingTop: spacing.lg,
-          paddingBottom: spacing.sm,
+          paddingTop: spacing.xl,
+          paddingBottom: spacing.lg,
+          position: 'relative',
+        },
+        backButton: {
+          position: 'absolute',
+          left: spacing.lg,
+          padding: spacing.xs,
         },
         title: {
-          ...typography.h2,
+          ...typography.h1,
           color: colors.text,
-        },
-        subtitle: {
-          ...typography.caption,
-          color: colors.textMuted,
-          marginTop: spacing.xs,
+          textAlign: 'center',
         },
       }),
     [colors],
@@ -74,8 +81,14 @@ export default function ExerciseDetailScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+          accessibilityLabel="Volver"
+        >
+          <ArrowLeft size={24} color={colors.text} />
+        </TouchableOpacity>
         <Text style={styles.title}>{exercise.name}</Text>
-        <Text style={styles.subtitle}>{exercise.primary_muscle}</Text>
       </View>
 
       <ProgressChart data={setLogs ?? []} />

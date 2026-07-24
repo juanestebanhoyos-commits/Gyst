@@ -3,7 +3,7 @@ import Svg, { G, Path, Circle, Line, Text as SvgText } from 'react-native-svg';
 import { memo, useCallback, useMemo } from 'react';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { useChartView, VIEW_OPTIONS, VIEW_TITLES, Y_AXIS_SUFFIX } from '@/hooks/useChartView';
-import { useAppTheme, spacing, typography } from '@/lib/theme';
+import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { SetLog } from '@/types/supabase';
 
 interface ProgressChartProps {
@@ -58,14 +58,31 @@ export const ProgressChart = memo(function ProgressChart({ data, width = 300, he
   );
 
   const styles = useMemo(() => StyleSheet.create({
-    container: {
-      alignItems: 'center',
-      paddingVertical: spacing.sm,
+    card: {
+      marginHorizontal: spacing.lg,
+      marginVertical: spacing.sm,
+      padding: spacing.lg,
+      backgroundColor: colors.bgWhite,
+      borderRadius: borderRadius.md,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
     },
-    title: {
+    cardHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.md,
+    },
+    cardTitle: {
       ...typography.bodyBold,
       color: colors.text,
-      marginBottom: spacing.sm,
+    },
+    cardSubtitle: {
+      ...typography.small,
+      color: colors.textMuted,
+    },
+    chartContainer: {
+      alignItems: 'center',
     },
     emptyText: {
       color: colors.textPlaceholder,
@@ -73,78 +90,91 @@ export const ProgressChart = memo(function ProgressChart({ data, width = 300, he
       textAlign: 'center',
       paddingVertical: 40,
     },
+    controlWrapper: {
+      marginTop: spacing.md,
+    },
   }), [colors]);
 
   const chartHeader = useMemo(() => (
-    <>
-      <Text style={styles.title}>{currentTitle}</Text>
+    <View style={styles.cardHeader}>
+      <Text style={styles.cardTitle}>{currentTitle}</Text>
+      <Text style={styles.cardSubtitle}>Últimas {chartPoints.length} series</Text>
+    </View>
+  ), [currentTitle, chartPoints.length, styles.cardHeader, styles.cardTitle, styles.cardSubtitle]);
+
+  const control = useMemo(() => (
+    <View style={styles.controlWrapper}>
       <SegmentedControl
         options={VIEW_OPTIONS}
         selectedIndex={selectedView}
         onChange={handleViewChange}
       />
-    </>
-  ), [currentTitle, selectedView, handleViewChange, styles.title]);
+    </View>
+  ), [selectedView, handleViewChange, styles.controlWrapper]);
 
   if (chartPoints.length < 2) {
     return (
-      <View style={styles.container}>
+      <View style={styles.card}>
         {chartHeader}
         <Text style={styles.emptyText}>
           {data.length === 0
             ? 'No hay datos de progreso para este ejercicio'
             : 'Se necesitan al menos 2 sesiones para mostrar el progreso'}
         </Text>
+        {control}
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.card}>
       {chartHeader}
-      <Svg width={width} height={height}>
-        {tickValues.map((val, i) => {
-          const y = padding.top + chartHeight - ((val - minValue) / range) * chartHeight;
-          return (
-            <G key={`tick-${i}`}>
-              <Line
-                x1={padding.left}
-                y1={y}
-                x2={width - padding.right}
-                y2={y}
-                stroke={colors.borderLight}
-                strokeWidth={1}
-              />
+      <View style={styles.chartContainer}>
+        <Svg width={width} height={height}>
+          {tickValues.map((val, i) => {
+            const y = padding.top + chartHeight - ((val - minValue) / range) * chartHeight;
+            return (
+              <G key={`tick-${i}`}>
+                <Line
+                  x1={padding.left}
+                  y1={y}
+                  x2={width - padding.right}
+                  y2={y}
+                  stroke={colors.borderLight}
+                  strokeWidth={1}
+                />
+                <SvgText
+                  x={padding.left - 6}
+                  y={y + 4}
+                  fill={colors.textPlaceholder}
+                  fontSize={11}
+                  textAnchor="end"
+                >
+                  {Math.round(val)}{currentSuffix}
+                </SvgText>
+              </G>
+            );
+          })}
+
+          <Path d={linePath} stroke={colors.primary} strokeWidth={2} fill="none" strokeLinejoin="round" />
+
+          {linePoints.map((p, i) => (
+            <G key={`dot-${i}`}>
+              <Circle cx={p.x} cy={p.y} r={4} fill={colors.primary} />
               <SvgText
-                x={padding.left - 6}
-                y={y + 4}
-                fill={colors.textPlaceholder}
-                fontSize={11}
-                textAnchor="end"
+                x={p.x}
+                y={height - 6}
+                fill={colors.textMuted}
+                fontSize={10}
+                textAnchor="middle"
               >
-                {Math.round(val)}{currentSuffix}
+                {p.label}
               </SvgText>
             </G>
-          );
-        })}
-
-        <Path d={linePath} stroke={colors.primary} strokeWidth={2} fill="none" strokeLinejoin="round" />
-
-        {linePoints.map((p, i) => (
-          <G key={`dot-${i}`}>
-            <Circle cx={p.x} cy={p.y} r={4} fill={colors.primary} />
-            <SvgText
-              x={p.x}
-              y={height - 6}
-              fill={colors.textMuted}
-              fontSize={10}
-              textAnchor="middle"
-            >
-              {p.label}
-            </SvgText>
-          </G>
-        ))}
-      </Svg>
+          ))}
+        </Svg>
+      </View>
+      {control}
     </View>
   );
 });

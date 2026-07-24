@@ -42,11 +42,14 @@ export default function ExercisesScreen() {
       flex: 1,
       backgroundColor: colors.bg,
       paddingHorizontal: spacing.lg,
-      paddingTop: spacing.lg,
+      paddingTop: spacing.xl,
     },
     title: {
-      ...typography.h1,
-      color: colors.text,
+      ...typography.caption,
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      textAlign: 'center',
       marginBottom: spacing.lg,
     },
     searchContainer: {
@@ -54,16 +57,17 @@ export default function ExercisesScreen() {
       alignItems: 'center',
       backgroundColor: colors.bgWhite,
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.borderLight,
       borderRadius: borderRadius.md,
       paddingHorizontal: spacing.md,
-      marginBottom: spacing.md,
+      marginBottom: spacing.lg,
       gap: spacing.sm,
     },
     searchInput: {
       flex: 1,
       paddingVertical: spacing.md,
       color: colors.text,
+      ...typography.body,
     },
     list: {
       paddingBottom: spacing.xl,
@@ -97,12 +101,13 @@ export default function ExercisesScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Ejercicios</Text>
+      <Text style={styles.title}>Ejercicios (Buscar)</Text>
       <View style={styles.searchContainer}>
         <Search color={colors.textPlaceholder} size={20} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Buscar ejercicio..."
+          placeholder="Busca un ejercicio"
+          placeholderTextColor={colors.textPlaceholder}
           value={search}
           onChangeText={setSearch}
           autoCapitalize="none"

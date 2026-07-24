@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
-import { Plus, Copy } from 'lucide-react-native';
+import { Plus, Copy, ChevronRight, ClipboardList } from 'lucide-react-native';
 import { useRoutines } from '@/hooks/useRoutines';
 import { useSession } from '@/hooks/useSession';
 import { useCloneRoutine } from '@/hooks/useCloneRoutine';
@@ -36,43 +36,84 @@ export default function RoutinesScreen() {
       flex: 1,
       backgroundColor: colors.bg,
       paddingHorizontal: spacing.lg,
-      paddingTop: spacing.lg,
+      paddingTop: spacing.xl,
     },
     title: {
-      ...typography.h1,
-      color: colors.text,
+      ...typography.caption,
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      textAlign: 'center',
       marginBottom: spacing.lg,
     },
     list: {
-      paddingBottom: 80,
+      paddingBottom: spacing.xl,
     },
     card: {
       backgroundColor: colors.bgWhite,
-      borderRadius: borderRadius.lg,
+      borderRadius: borderRadius.md,
       borderWidth: 1,
       borderColor: colors.borderLight,
-    },
-    cardContent: {
       padding: spacing.lg,
+    },
+    category: {
+      ...typography.small,
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: spacing.xs,
     },
     cardName: {
       ...typography.h3,
       color: colors.text,
+      marginBottom: spacing.sm,
     },
     cardDescription: {
       ...typography.caption,
       color: colors.textMuted,
-      marginTop: spacing.xs,
+      marginBottom: spacing.md,
+    },
+    bottomRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    iconContainer: {
+      width: 40,
+      height: 40,
+      borderRadius: borderRadius.sm,
+      backgroundColor: colors.bgLight,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    recordsText: {
+      ...typography.caption,
+      color: colors.textMuted,
+      flex: 1,
+      marginLeft: spacing.sm,
+    },
+    verButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      backgroundColor: colors.bgLight,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderRadius: borderRadius.sm,
+    },
+    verText: {
+      ...typography.captionBold,
+      color: colors.text,
     },
     cloneBadge: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
       gap: spacing.xs,
-      backgroundColor: colors.success,
-      borderBottomLeftRadius: borderRadius.lg,
-      borderBottomRightRadius: borderRadius.lg,
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.sm,
       paddingVertical: spacing.sm,
+      marginTop: spacing.md,
     },
     cloneBadgeText: {
       color: colors.textOnPrimary,
@@ -110,16 +151,25 @@ export default function RoutinesScreen() {
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity
-          style={styles.cardContent}
-          activeOpacity={0.7}
-          onPress={() => router.push(`/(tabs)/routines/${item.id}`)}
-        >
-          <Text style={styles.cardName}>{item.name}</Text>
-          {item.description ? (
-            <Text style={styles.cardDescription}>{item.description}</Text>
-          ) : null}
-        </TouchableOpacity>
+        <Text style={styles.category}>Rutina</Text>
+        <Text style={styles.cardName}>{item.name}</Text>
+        {item.description ? (
+          <Text style={styles.cardDescription}>{item.description}</Text>
+        ) : null}
+        <View style={styles.bottomRow}>
+          <View style={styles.iconContainer}>
+            <ClipboardList size={20} color={colors.primary} />
+          </View>
+          <Text style={styles.recordsText}>rutina personalizada</Text>
+          <TouchableOpacity
+            style={styles.verButton}
+            activeOpacity={0.7}
+            onPress={() => router.push(`/(tabs)/routines/${item.id}`)}
+          >
+            <Text style={styles.verText}>Ver</Text>
+            <ChevronRight size={14} color={colors.text} />
+          </TouchableOpacity>
+        </View>
         {showClone ? (
           <TouchableOpacity
             style={styles.cloneBadge}
@@ -139,7 +189,7 @@ export default function RoutinesScreen() {
         ) : null}
       </View>
     );
-  }, [styles, user, cloningId, handleClone]);
+  }, [styles, user, cloningId, handleClone, colors]);
 
   if (isLoading) return <LoadingScreen />;
   if (error) return <ErrorScreen message="Error al cargar rutinas" />;
@@ -167,4 +217,3 @@ export default function RoutinesScreen() {
     </View>
   );
 }
-

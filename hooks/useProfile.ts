@@ -5,7 +5,7 @@ import type { Database } from '@/types/supabase';
 
 type Profile = Pick<
   Database['public']['Tables']['profiles']['Row'],
-  'username' | 'training_days' | 'theme_preference'
+  'username' | 'avatar_url' | 'training_days' | 'theme_preference'
 >;
 
 export function useProfile() {
@@ -17,7 +17,7 @@ export function useProfile() {
       if (!user) return null;
       const { data, error } = await supabase
         .from('profiles')
-        .select('username, training_days, theme_preference')
+        .select('username, avatar_url, training_days, theme_preference')
         .eq('id', user.id)
         .single();
       if (error && error.code === 'PGRST116') return null;

@@ -25,8 +25,8 @@ export default function HomeScreen() {
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <WelcomeHeader />
       <StreakCard />
-      <TodayExercisesSection />
       <RoutinesSection />
+      <TodayExercisesSection />
     </ScrollView>
   );
 }

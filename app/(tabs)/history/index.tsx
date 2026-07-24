@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { Clock } from 'lucide-react-native';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
@@ -37,36 +38,56 @@ export default function HistoryScreen() {
       flex: 1,
       backgroundColor: colors.bg,
       paddingHorizontal: spacing.lg,
-      paddingTop: spacing.lg,
+      paddingTop: spacing.xl,
     },
     title: {
-      ...typography.h1,
-      color: colors.text,
+      ...typography.caption,
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      textAlign: 'center',
       marginBottom: spacing.lg,
     },
     list: {
-      paddingBottom: 80,
+      paddingBottom: spacing.xl,
     },
     card: {
       backgroundColor: colors.bgWhite,
-      borderRadius: borderRadius.lg,
-      padding: spacing.lg,
+      borderRadius: borderRadius.md,
       borderWidth: 1,
       borderColor: colors.borderLight,
+      padding: spacing.lg,
     },
-    date: {
-      ...typography.captionBold,
+    topRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginBottom: spacing.xs,
+    },
+    category: {
+      ...typography.small,
       color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
     },
     routineName: {
       ...typography.h3,
       color: colors.text,
-      marginTop: spacing.xs,
+      marginBottom: spacing.sm,
+    },
+    bottomRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    durationContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
     },
     duration: {
       ...typography.caption,
       color: colors.textMuted,
-      marginTop: spacing.xs,
     },
     emptyText: {
       ...typography.body,
@@ -78,15 +99,23 @@ export default function HistoryScreen() {
 
   const renderItem = useCallback(({ item }: { item: { started_at: string; finished_at: string | null; routines: { name: string } | null } }) => (
     <View style={styles.card}>
-      <Text style={styles.date}>{formatDate(item.started_at)}</Text>
+      <View style={styles.topRow}>
+        <Text style={styles.category}>Sesión</Text>
+      </View>
       <Text style={styles.routineName}>
         {item.routines?.name ?? 'Sesión libre'}
       </Text>
-      <Text style={styles.duration}>
-        Duración: {formatDuration(item.started_at, item.finished_at)}
-      </Text>
+      <View style={styles.bottomRow}>
+        <View style={styles.durationContainer}>
+          <Clock size={14} color={colors.textMuted} />
+          <Text style={styles.duration}>
+            {formatDuration(item.started_at, item.finished_at)}
+          </Text>
+        </View>
+        <Text style={styles.duration}>{formatDate(item.started_at)}</Text>
+      </View>
     </View>
-  ), [styles]);
+  ), [styles, colors]);
 
   if (isLoading) return <LoadingScreen />;
   if (error) return <ErrorScreen message="Error al cargar historial" />;

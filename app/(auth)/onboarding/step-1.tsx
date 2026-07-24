@@ -8,7 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import { User } from 'lucide-react-native';
+import { ArrowRight } from 'lucide-react-native';
 import { useOnboardingLocal } from '@/hooks/useOnboardingLocal';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
@@ -25,11 +25,13 @@ export default function OnboardingStep1Screen() {
       justifyContent: 'center',
       padding: spacing.xl,
       gap: spacing.lg,
-      backgroundColor: colors.bgWhite,
+      backgroundColor: colors.bg,
     },
     stepIndicator: {
-      ...typography.captionBold,
+      ...typography.small,
       color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
       textAlign: 'center',
       marginBottom: spacing.xs,
     },
@@ -39,24 +41,25 @@ export default function OnboardingStep1Screen() {
       color: colors.text,
     },
     subtitle: {
-      fontSize: 15,
+      ...typography.body,
       textAlign: 'center',
       color: colors.textMuted,
-      marginBottom: spacing.sm,
+      marginBottom: spacing.lg,
       lineHeight: 22,
     },
     input: {
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.borderLight,
       borderRadius: borderRadius.md,
-      padding: spacing.lg - 2,
+      padding: spacing.lg,
       ...typography.body,
       color: colors.text,
+      backgroundColor: colors.bgWhite,
     },
     button: {
       backgroundColor: colors.primary,
-      borderRadius: borderRadius.md,
-      padding: spacing.lg - 2,
+      borderRadius: borderRadius.lg,
+      padding: spacing.lg,
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
@@ -67,11 +70,11 @@ export default function OnboardingStep1Screen() {
       ...typography.bodyBold,
     },
     error: {
-      color: colors.error,
+      color: colors.errorText,
       ...typography.caption,
       textAlign: 'center',
       backgroundColor: colors.errorBg,
-      padding: 10,
+      padding: spacing.md,
       borderRadius: borderRadius.sm,
     },
   }), [colors]);
@@ -116,6 +119,7 @@ export default function OnboardingStep1Screen() {
       <TextInput
         style={styles.input}
         placeholder="Tu nombre"
+        placeholderTextColor={colors.textPlaceholder}
         value={name}
         onChangeText={setName}
         autoCapitalize="words"
@@ -131,7 +135,7 @@ export default function OnboardingStep1Screen() {
         {saving ? (
           <ActivityIndicator color={colors.textOnPrimary} />
         ) : (
-          <User color={colors.textOnPrimary} size={20} />
+          <ArrowRight color={colors.textOnPrimary} size={20} />
         )}
         <Text style={styles.buttonText}>
           {saving ? 'Guardando...' : 'Continuar'}
