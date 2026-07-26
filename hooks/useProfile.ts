@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/hooks/useSession';
 import type { Database } from '@/types/supabase';
@@ -10,20 +10,29 @@ type Profile = Pick<
 
 export function useProfile() {
   const { user } = useSession();
+  const [profile, setProfile] = useState<Profile | null>(null);
 
-  return useQuery<Profile | null>({
-    queryKey: ['profile'],
-    queryFn: async () => {
-      if (!user) return null;
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('username, avatar_url, training_days, theme_preference')
-        .eq('id', user.id)
-        .single();
-      if (error && error.code === 'PGRST116') return null;
-      if (error) throw error;
-      return data;
-    },
-    staleTime: 60 * 1000,
-  });
+  useEffect(() => {
+    if (!user) {
+      setProfile(null);
+      return;
+    }
+
+    supabase
+      .from('profiles')
+      .select('username, avatar_url, training_days, theme_preference')
+      .eq('id', user.id)
+      .single()
+      .then(({ data, error }) => {
+        if (error && error.code === 'PGRST116') {
+          setProfile(null);
+        } else if (error) {
+          setProfile(null);
+        } else {
+          setProfile(data);
+        }
+      });
+  }, [user?.id]);
+
+  return { data: profile };
 }
