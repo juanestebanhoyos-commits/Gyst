@@ -9,6 +9,7 @@ import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
 import { SegmentedControl } from '@/components/SegmentedControl';
+import { SearchInput } from '@/components/SearchInput';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { Routine } from '@/types/supabase';
 
@@ -33,6 +34,18 @@ export default function RoutinesScreen() {
   );
 
   const activeRoutines = tabIndex === 0 ? myRoutines : publicRoutines;
+
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  const filteredRoutines = useMemo(() => {
+    if (!debouncedSearch) return activeRoutines;
+    const q = debouncedSearch.toLowerCase().trim();
+    return activeRoutines.filter(
+      (r) =>
+        r.name.toLowerCase().includes(q) ||
+        (r.description ?? '').toLowerCase().includes(q),
+    );
+  }, [activeRoutines, debouncedSearch]);
 
   const handleClone = useCallback((routineId: string) => {
     setCloningId(routineId);
@@ -287,8 +300,9 @@ export default function RoutinesScreen() {
           onChange={setTabIndex}
         />
       </View>
+      <SearchInput onSearch={setDebouncedSearch} placeholder="Buscar rutinas..." />
       <FlatList<Routine>
-        data={activeRoutines}
+        data={filteredRoutines}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         contentContainerStyle={styles.list}

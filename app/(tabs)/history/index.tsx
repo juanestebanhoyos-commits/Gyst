@@ -1,7 +1,8 @@
-import { useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { Clock, ClipboardList } from 'lucide-react-native';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
+import { SearchInput } from '@/components/SearchInput';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
@@ -32,6 +33,17 @@ const keyExtractor = (item: { id: string }) => item.id;
 export default function HistoryScreen() {
   const { colors } = useAppTheme();
   const { data: logs, isLoading, error } = useWorkoutHistory();
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  const filteredLogs = useMemo(() => {
+    if (!debouncedSearch) return logs;
+    const q = debouncedSearch.toLowerCase().trim();
+    return logs?.filter((log) => {
+      const routineName = (log.routines?.name ?? 'Sesión libre').toLowerCase();
+      const dateStr = formatDate(log.started_at).toLowerCase();
+      return routineName.includes(q) || dateStr.includes(q);
+    });
+  }, [logs, debouncedSearch]);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -128,8 +140,9 @@ export default function HistoryScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Historial</Text>
+      <SearchInput onSearch={setDebouncedSearch} placeholder="Buscar en historial..." />
       <FlatList
-        data={logs}
+        data={filteredLogs}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         contentContainerStyle={styles.list}

@@ -1,63 +1,16 @@
-import { memo, useState, useCallback, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity } from 'react-native';
-import Search from 'lucide-react-native/icons/search';
+import { memo, useState, useCallback } from 'react';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import Plus from 'lucide-react-native/icons/plus';
 import Dumbbell from 'lucide-react-native/icons/dumbbell';
 import { router } from 'expo-router';
 import { useExercises } from '@/hooks/useExercises';
 import { ExerciseCard } from '@/components/ExerciseCard';
+import { SearchInput } from '@/components/SearchInput';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { Exercise } from '@/types/supabase';
-
-const SearchInput = memo(function SearchInput({
-  onSearch,
-}: {
-  onSearch: (q: string) => void;
-}) {
-  const [value, setValue] = useState('');
-  const { colors } = useAppTheme();
-
-  useEffect(() => {
-    const t = setTimeout(() => onSearch(value), 300);
-    return () => clearTimeout(t);
-  }, [value, onSearch]);
-
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: colors.bgWhite,
-        borderWidth: 1,
-        borderColor: colors.borderLight,
-        borderRadius: borderRadius.md,
-        paddingHorizontal: spacing.md,
-        marginBottom: spacing.lg,
-        gap: spacing.sm,
-      }}
-    >
-      <Search color={colors.textPlaceholder} size={20} />
-      <TextInput
-        style={{
-          flex: 1,
-          paddingVertical: spacing.md,
-          color: colors.text,
-          ...typography.body,
-        }}
-        placeholder="Busca un ejercicio"
-        placeholderTextColor={colors.textPlaceholder}
-        value={value}
-        onChangeText={setValue}
-        autoCapitalize="none"
-        autoCorrect={false}
-        clearButtonMode="while-editing"
-      />
-    </View>
-  );
-});
 
 const ExerciseList = memo(function ExerciseList({
   exercises,
@@ -173,7 +126,7 @@ export default function ExercisesScreen() {
       >
         Ejercicios (Buscar)
       </Text>
-      <SearchInput onSearch={setDebouncedSearch} />
+      <SearchInput onSearch={setDebouncedSearch} placeholder="Busca un ejercicio" />
       <ExerciseList exercises={exercises ?? []} onPress={handleExercisePress} />
       <Fab />
     </View>
