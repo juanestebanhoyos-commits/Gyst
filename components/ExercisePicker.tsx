@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 import { Search, X } from 'lucide-react-native';
 import ExerciseConfigForm, { ExerciseConfig } from './ExerciseConfigForm';
+import { useExercises } from '@/hooks/useExercises';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { Exercise } from '@/types/supabase';
 
@@ -39,7 +40,7 @@ interface PickerContextType {
   selectedExercise: Exercise | null;
   select: (e: Exercise | null) => void;
   available: Exercise[];
-  allExercises: Exercise[] | undefined;
+  isLoading: boolean;
   handleAddConfig: (config: ExerciseConfig) => void;
   styles: ReturnType<typeof StyleSheet.create>;
 }
@@ -60,7 +61,6 @@ function usePickerCtx() {
 }
 
 interface ExercisePickerRootProps {
-  allExercises: Exercise[] | undefined;
   existingIds: Set<string>;
   onAdd: (entry: ExerciseEntry) => void;
   submitLabel?: string;
@@ -71,11 +71,10 @@ interface ExercisePickerRootProps {
 }
 
 export default function ExercisePicker({
-  allExercises,
   existingIds,
   onAdd,
   submitLabel,
-  isLoading,
+  isLoading: externalLoading,
   onClose,
   error,
   children,
@@ -86,19 +85,16 @@ export default function ExercisePicker({
 
   const deferredSearch = useDeferredValue(search);
 
+  const { data: exercises, isLoading: exercisesLoading } = useExercises({
+    search: deferredSearch || undefined,
+  });
+
+  const isLoading = externalLoading || exercisesLoading;
+
   const available = useMemo(() => {
-    if (!allExercises) return [];
-    let filtered = allExercises.filter((e) => !existingIds.has(e.id));
-    if (deferredSearch.trim()) {
-      const q = deferredSearch.toLowerCase();
-      filtered = filtered.filter(
-        (e) =>
-          e.name.toLowerCase().includes(q) ||
-          e.primary_muscle.toLowerCase().includes(q),
-      );
-    }
-    return filtered;
-  }, [allExercises, existingIds, deferredSearch]);
+    if (!exercises) return [];
+    return exercises.filter((e) => !existingIds.has(e.id));
+  }, [exercises, existingIds]);
 
   const handleSelect = useCallback((exercise: Exercise | null) => {
     setSelectedExercise(exercise);
@@ -206,11 +202,11 @@ export default function ExercisePicker({
       selectedExercise,
       select: handleSelect,
       available,
-      allExercises,
+      isLoading,
       handleAddConfig: handleAdd,
       styles,
     }),
-    [selectedExercise, handleSelect, available, allExercises, handleAdd, styles],
+    [selectedExercise, handleSelect, available, isLoading, handleAdd, styles],
   );
 
   const inner = (
@@ -283,11 +279,11 @@ ExercisePicker.Search = function PickerSearch() {
 };
 
 ExercisePicker.List = function PickerList() {
-  const { available, allExercises, selectedExercise, select, styles } =
+  const { available, isLoading, selectedExercise, select, styles } =
     usePickerCtx();
   const { colors } = useAppTheme();
 
-  if (!allExercises) {
+  if (isLoading) {
     return (
       <View style={[styles.list, { height: 370, justifyContent: 'center' }]}>
         <ActivityIndicator
@@ -309,7 +305,7 @@ ExercisePicker.List = function PickerList() {
 
   return (
     <View style={[styles.list, { height: 370 }]}>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ gap: 6 }} nestedScrollEnabled>
         {available.map((exercise) => {
           const isSelected = selectedExercise?.id === exercise.id;
           return (

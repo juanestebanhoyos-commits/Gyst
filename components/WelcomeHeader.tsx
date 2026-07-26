@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { useProfile } from '@/hooks/useProfile';
@@ -14,6 +14,7 @@ export function WelcomeHeader() {
   const { data: profile } = useProfile();
 
   const displayName = profile?.username ?? 'atleta';
+  const initial = displayName.charAt(0).toUpperCase();
   const hasRoutine = !!todayRoutine;
 
   const styles = useMemo(() => StyleSheet.create({
@@ -29,6 +30,16 @@ export function WelcomeHeader() {
       borderRadius: AVATAR_SIZE / 2,
       backgroundColor: colors.bgLight,
       marginBottom: spacing.lg,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    initial: {
+      fontSize: 34,
+      fontWeight: '700',
+      color: colors.primary,
+      textAlign: 'center',
+      includeFontPadding: false,
+      lineHeight: 36,
     },
     greeting: {
       ...typography.caption,
@@ -58,15 +69,9 @@ export function WelcomeHeader() {
 
   return (
     <View style={styles.container}>
-      {profile?.avatar_url ? (
-        <Image
-          source={{ uri: profile.avatar_url }}
-          style={styles.avatar}
-          accessibilityLabel="Foto de perfil"
-        />
-      ) : (
-        <View style={styles.avatar} />
-      )}
+      <View style={styles.avatar}>
+        <Text style={styles.initial}>{initial}</Text>
+      </View>
 
       <Text style={styles.greeting}>Hola de nuevo</Text>
       <Text style={styles.headline}>

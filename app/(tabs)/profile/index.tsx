@@ -95,7 +95,8 @@ export default function ProfileScreen() {
       backgroundColor: colors.bg,
     },
     content: {
-      padding: spacing.lg,
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.xl,
       paddingBottom: 80,
       gap: 20,
     },

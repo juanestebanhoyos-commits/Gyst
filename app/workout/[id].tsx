@@ -59,7 +59,7 @@ export default function WorkoutSessionScreen() {
       flex: 1,
       backgroundColor: colors.bg,
       paddingHorizontal: spacing.lg,
-      paddingTop: spacing.lg,
+      paddingTop: spacing.xl,
     },
     header: {
       marginBottom: 20,

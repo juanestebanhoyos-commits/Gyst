@@ -99,14 +99,14 @@ export function RoutinesSection() {
     () =>
       StyleSheet.create({
         section: {
-          marginTop: spacing.lg,
-          marginBottom: spacing.sm,
+          marginTop: spacing.xs,
+          marginBottom: spacing.xs,
         },
         title: {
           ...typography.h3,
           color: colors.text,
           marginHorizontal: spacing.lg,
-          marginBottom: spacing.md,
+          marginBottom: spacing.lg,
         },
         scrollContent: {
           paddingHorizontal: spacing.lg,
@@ -130,6 +130,8 @@ export function RoutinesSection() {
           color: colors.text,
           fontWeight: '600',
           textAlign: 'center',
+          marginRight: spacing.md,
+          marginLeft: spacing.md
         },
         cardCount: {
           ...typography.small,

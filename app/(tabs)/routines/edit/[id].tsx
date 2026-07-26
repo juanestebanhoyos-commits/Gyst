@@ -15,7 +15,6 @@ import {
 import { Save } from 'lucide-react-native';
 import { useUpdateRoutine } from '@/hooks/useUpdateRoutine';
 import { useRoutineExercises } from '@/hooks/useRoutineExercises';
-import { useExercises } from '@/hooks/useExercises';
 import { useSession } from '@/hooks/useSession';
 import { useRoutine } from '@/hooks/useRoutine';
 import { LoadingScreen } from '@/components/LoadingScreen';
@@ -31,7 +30,6 @@ export default function EditRoutineScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user, isLoading: sessionLoading } = useSession();
   const { data: routine, isLoading: loadingRoutine, error: routineError } = useRoutine(id);
-  const { data: allExercises } = useExercises();
   const { data: routineExercises } = useRoutineExercises(id);
   const { mutate: updateRoutine, isPending } = useUpdateRoutine();
 
@@ -126,7 +124,8 @@ export default function EditRoutineScreen() {
       flex: 1,
     },
     content: {
-      padding: spacing.lg,
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.xl,
       gap: spacing.sm,
       paddingBottom: 40,
     },
@@ -357,7 +356,6 @@ export default function EditRoutineScreen() {
         )}
         <View style={showPicker ? undefined : { display: 'none' }}>
           <ExercisePicker
-            allExercises={allExercises}
             existingIds={addedIds}
             onAdd={handleAddExercise}
             onClose={() => setShowPicker(false)}

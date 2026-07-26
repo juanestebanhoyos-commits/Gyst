@@ -22,14 +22,14 @@ export function TodayExercisesSection() {
     () =>
       StyleSheet.create({
         section: {
-          marginTop: spacing.lg,
+          marginTop: spacing.sm,
           marginBottom: spacing.sm,
         },
         title: {
           ...typography.h3,
           color: colors.text,
           marginHorizontal: spacing.lg,
-          marginBottom: spacing.md,
+          marginBottom: spacing.lg,
         },
         list: {
           gap: spacing.sm,

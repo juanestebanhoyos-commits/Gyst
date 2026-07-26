@@ -14,7 +14,6 @@ import {
 } from 'react-native';
 import { Plus, X } from 'lucide-react-native';
 import { useCreateRoutine } from '@/hooks/useCreateRoutine';
-import { useExercises } from '@/hooks/useExercises';
 import ExercisePicker from '@/components/ExercisePicker';
 import { TrainingDaysPicker } from '@/components/TrainingDaysPicker';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
@@ -32,7 +31,6 @@ export default function NewRoutineScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { mutate: createRoutine } = useCreateRoutine();
-  const { data: allExercises } = useExercises();
 
   const addedIds = useMemo(() => new Set(exercises.map((e) => e.exercise.id)), [exercises]);
 
@@ -94,7 +92,8 @@ export default function NewRoutineScreen() {
       flex: 1,
     },
     content: {
-      padding: spacing.lg,
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.xl,
       gap: spacing.sm,
       paddingBottom: 40,
     },
@@ -307,7 +306,6 @@ export default function NewRoutineScreen() {
           </TouchableOpacity>
         ) : (
           <ExercisePicker
-            allExercises={allExercises}
             existingIds={addedIds}
             onAdd={handleAddExercise}
             onClose={() => setShowPicker(false)}

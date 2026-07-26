@@ -8,7 +8,6 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { useExercises } from '@/hooks/useExercises';
 import { useRoutineExercises } from '@/hooks/useRoutineExercises';
 import { useRoutine } from '@/hooks/useRoutine';
 import { useSession } from '@/hooks/useSession';
@@ -23,12 +22,11 @@ export default function AddExerciseScreen() {
   const { colors } = useAppTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useSession();
-  const { data: routine, isLoading: loadingRoutine } = useRoutine(id);
-  const { data: allExercises, isLoading: loadingExercises, error } = useExercises();
+  const { data: routine, isLoading: loadingRoutine, error } = useRoutine(id);
   const { data: currentExercises } = useRoutineExercises(id);
   const { mutate, isPending } = useAddExerciseToRoutine(id);
 
-  const isLoading = loadingExercises || loadingRoutine;
+  const isLoading = loadingRoutine;
 
   const handleAdd = useCallback(
     (entry: ExerciseEntry) => {
@@ -65,7 +63,7 @@ export default function AddExerciseScreen() {
   const styles = useMemo(() => StyleSheet.create({
     flex: { flex: 1, backgroundColor: colors.bg },
     container: { flex: 1 },
-    content: { padding: spacing.lg, gap: spacing.sm, paddingBottom: 40 },
+    content: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl, gap: spacing.sm, paddingBottom: 40 },
     title: { ...typography.h1, color: colors.text, marginBottom: spacing.sm },
   }), [colors]);
 
@@ -82,7 +80,6 @@ export default function AddExerciseScreen() {
         <Text style={styles.title}>Agregar ejercicio</Text>
 
         <ExercisePicker
-          allExercises={allExercises}
           existingIds={existingIds}
           onAdd={handleAdd}
           submitLabel="Agregar a rutina"

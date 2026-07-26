@@ -12,7 +12,7 @@ export function useProfile() {
   const { user } = useSession();
 
   return useQuery<Profile | null>({
-    queryKey: ['profile', user?.id],
+    queryKey: ['profile'],
     queryFn: async () => {
       if (!user) return null;
       const { data, error } = await supabase
@@ -24,6 +24,6 @@ export function useProfile() {
       if (error) throw error;
       return data;
     },
-    enabled: !!user,
+    staleTime: 60 * 1000,
   });
 }

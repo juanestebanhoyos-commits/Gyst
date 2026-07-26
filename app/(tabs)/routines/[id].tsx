@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Copy, Plus } from 'lucide-react-native';
+import { Copy } from 'lucide-react-native';
 import { useRoutine } from '@/hooks/useRoutine';
 import { useRoutineExercises } from '@/hooks/useRoutineExercises';
 import { useSession } from '@/hooks/useSession';
@@ -53,7 +53,7 @@ export default function RoutineDetailScreen() {
       flex: 1,
       backgroundColor: colors.bg,
       paddingHorizontal: spacing.lg,
-      paddingTop: spacing.lg,
+      paddingTop: spacing.xl,
     },
     title: {
       ...typography.caption,
@@ -126,20 +126,6 @@ export default function RoutineDetailScreen() {
     exerciseSets: {
       ...typography.captionBold,
       color: colors.primary,
-    },
-    addButton: {
-      backgroundColor: colors.primary,
-      borderRadius: borderRadius.md,
-      padding: spacing.lg - 2,
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: spacing.sm,
-      marginTop: spacing.lg,
-    },
-    addButtonText: {
-      color: colors.textOnPrimary,
-      ...typography.bodyBold,
     },
     cloneButton: {
       backgroundColor: colors.success,
@@ -269,18 +255,6 @@ export default function RoutineDetailScreen() {
             <Text style={styles.emptyText}>
               Esta rutina no tiene ejercicios asignados
             </Text>
-          }
-          ListFooterComponent={
-            canEdit ? (
-              <TouchableOpacity
-                style={styles.addButton}
-                activeOpacity={0.8}
-                onPress={() => router.push(`/(tabs)/routines/add-exercise?id=${id}`)}
-              >
-                <Plus color={colors.textOnPrimary} size={20} />
-                <Text style={styles.addButtonText}>Agregar ejercicio</Text>
-              </TouchableOpacity>
-            ) : undefined
           }
         />
       )}
