@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Copy } from 'lucide-react-native';
+import { Copy, User, Globe } from 'lucide-react-native';
 import { useRoutine } from '@/hooks/useRoutine';
 import { useRoutineExercises } from '@/hooks/useRoutineExercises';
 import { useSession } from '@/hooks/useSession';
@@ -55,12 +55,32 @@ export default function RoutineDetailScreen() {
       paddingHorizontal: spacing.lg,
       paddingTop: spacing.xl,
     },
+    titleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginBottom: spacing.xs,
+    },
     title: {
       ...typography.caption,
       color: colors.textMuted,
       textTransform: 'uppercase',
       letterSpacing: 1,
-      marginBottom: spacing.xs,
+      flex: 1,
+    },
+    detailBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+      borderRadius: borderRadius.sm,
+    },
+    detailBadgeText: {
+      fontSize: 11,
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
     },
     description: {
       fontSize: 15,
@@ -202,7 +222,24 @@ export default function RoutineDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{routine.name}</Text>
+      <View style={styles.titleRow}>
+        <Text style={styles.title}>{routine.name}</Text>
+        <View style={[
+          styles.detailBadge,
+          { backgroundColor: isOwner ? colors.primaryBg : colors.bgLight },
+        ]}>
+          {isOwner
+            ? <User size={12} color={colors.primary} />
+            : <Globe size={12} color={colors.textMuted} />
+          }
+          <Text style={[
+            styles.detailBadgeText,
+            { color: isOwner ? colors.primary : colors.textMuted },
+          ]}>
+            {isOwner ? 'Personal' : 'Pública'}
+          </Text>
+        </View>
+      </View>
       {routine.description ? (
         <Text style={styles.description}>{routine.description}</Text>
       ) : null}

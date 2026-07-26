@@ -1,15 +1,18 @@
 import { useState, useCallback, useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
-import { Plus, Copy, ChevronRight, ClipboardList } from 'lucide-react-native';
+import { Plus, Copy, ChevronRight, ClipboardList, User, Globe } from 'lucide-react-native';
 import { useRoutines } from '@/hooks/useRoutines';
 import { useSession } from '@/hooks/useSession';
 import { useCloneRoutine } from '@/hooks/useCloneRoutine';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
+import { SegmentedControl } from '@/components/SegmentedControl';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { Routine } from '@/types/supabase';
+
+const TABS = ['Mis rutinas', 'Explorar'] as const;
 
 export default function RoutinesScreen() {
   const { colors } = useAppTheme();
@@ -17,6 +20,19 @@ export default function RoutinesScreen() {
   const { data: routines, isLoading, error } = useRoutines();
   const cloneMutation = useCloneRoutine();
   const [cloningId, setCloningId] = useState<string | null>(null);
+  const [tabIndex, setTabIndex] = useState(0);
+
+  const myRoutines = useMemo(
+    () => routines?.filter((r) => r.user_id === user?.id) ?? [],
+    [routines, user?.id],
+  );
+
+  const publicRoutines = useMemo(
+    () => routines?.filter((r) => r.user_id !== user?.id && r.is_public) ?? [],
+    [routines, user?.id],
+  );
+
+  const activeRoutines = tabIndex === 0 ? myRoutines : publicRoutines;
 
   const handleClone = useCallback((routineId: string) => {
     setCloningId(routineId);
@@ -31,6 +47,10 @@ export default function RoutinesScreen() {
     });
   }, [cloneMutation]);
 
+  const handleCardPress = useCallback((routine: Routine) => {
+    router.push(`/(tabs)/routines/${routine.id}`);
+  }, []);
+
   const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
@@ -44,29 +64,49 @@ export default function RoutinesScreen() {
       textTransform: 'uppercase',
       letterSpacing: 1,
       textAlign: 'center',
+      marginBottom: spacing.md,
+    },
+    segmentedWrapper: {
       marginBottom: spacing.lg,
     },
     list: {
       paddingBottom: spacing.xl,
     },
     card: {
+      flexDirection: 'row',
       backgroundColor: colors.bgWhite,
       borderRadius: borderRadius.md,
       borderWidth: 1,
       borderColor: colors.border,
+      overflow: 'hidden',
+    },
+    cardAccent: {
+      width: 4,
+    },
+    cardContent: {
+      flex: 1,
       padding: spacing.lg,
     },
-    category: {
-      ...typography.small,
-      color: colors.textMuted,
+    badge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      alignSelf: 'flex-start',
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+      borderRadius: borderRadius.sm,
+      marginBottom: spacing.sm,
+    },
+    badgeText: {
+      fontSize: 11,
+      fontWeight: '700',
       textTransform: 'uppercase',
       letterSpacing: 0.5,
-      marginBottom: spacing.xs,
     },
     cardName: {
       ...typography.h3,
       color: colors.text,
-      marginBottom: spacing.sm,
+      marginBottom: spacing.xs,
     },
     cardDescription: {
       ...typography.caption,
@@ -77,20 +117,17 @@ export default function RoutinesScreen() {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
+      marginTop: spacing.xs,
     },
-    iconContainer: {
-      width: 40,
-      height: 40,
-      borderRadius: borderRadius.sm,
-      backgroundColor: colors.bgLight,
-      justifyContent: 'center',
+    metaRow: {
+      flexDirection: 'row',
       alignItems: 'center',
-    },
-    recordsText: {
-      ...typography.caption,
-      color: colors.textMuted,
+      gap: spacing.xs,
       flex: 1,
-      marginLeft: spacing.sm,
+    },
+    metaText: {
+      ...typography.small,
+      color: colors.textMuted,
     },
     verButton: {
       flexDirection: 'row',
@@ -100,25 +137,26 @@ export default function RoutinesScreen() {
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
       borderRadius: borderRadius.sm,
+      marginLeft: spacing.sm,
     },
     verText: {
       ...typography.captionBold,
       color: colors.text,
     },
-    cloneBadge: {
+    cloneButton: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
       gap: spacing.xs,
       backgroundColor: colors.primary,
-      borderRadius: borderRadius.sm,
+      paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
-      marginTop: spacing.md,
+      borderRadius: borderRadius.sm,
+      marginLeft: spacing.sm,
     },
-    cloneBadgeText: {
+    cloneButtonText: {
       color: colors.textOnPrimary,
-      ...typography.small,
-      fontWeight: '600',
+      ...typography.captionBold,
     },
     fab: {
       position: 'absolute',
@@ -145,56 +183,96 @@ export default function RoutinesScreen() {
       ...typography.body,
       color: colors.textPlaceholder,
       textAlign: 'center',
-      marginTop: 32,
+      marginTop: 16,
+    },
+    emptySubtext: {
+      ...typography.caption,
+      color: colors.textPlaceholder,
+      textAlign: 'center',
+      marginTop: 4,
+    },
+    emptyAction: {
+      marginTop: spacing.md,
+      backgroundColor: colors.primary,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      borderRadius: borderRadius.sm,
+    },
+    emptyActionText: {
+      color: colors.textOnPrimary,
+      ...typography.captionBold,
     },
   }), [colors]);
 
   const renderItem = useCallback(({ item }: { item: Routine }) => {
     const isOwner = user ? item.user_id === user.id : false;
-    const showClone = !isOwner && item.is_public;
     const isCloning = cloningId === item.id;
+    const scheduleDays = item.scheduled_days?.length ?? 0;
+
+    const accentColor = isOwner ? colors.primary : colors.textMuted;
+    const badgeBg = isOwner ? colors.primaryBg : colors.bgLight;
+    const badgeTextColor = isOwner ? colors.primary : colors.textMuted;
+    const Icon = isOwner ? User : Globe;
+
+    const scheduleText = scheduleDays > 0
+      ? `${scheduleDays} días/sem`
+      : 'Sin horario';
 
     return (
-      <View style={styles.card}>
-        <Text style={styles.category}>Rutina</Text>
-        <Text style={styles.cardName}>{item.name}</Text>
-        {item.description ? (
-          <Text style={styles.cardDescription}>{item.description}</Text>
-        ) : null}
-        <View style={styles.bottomRow}>
-          <View style={styles.iconContainer}>
-            <ClipboardList size={20} color={colors.primary} />
-          </View>
-          <Text style={styles.recordsText}>rutina personalizada</Text>
-          <TouchableOpacity
-            style={styles.verButton}
-            activeOpacity={0.7}
-            onPress={() => router.push(`/(tabs)/routines/${item.id}`)}
-          >
-            <Text style={styles.verText}>Ver</Text>
-            <ChevronRight size={14} color={colors.text} />
-          </TouchableOpacity>
-        </View>
-        {showClone ? (
-          <TouchableOpacity
-            style={styles.cloneBadge}
-            activeOpacity={0.7}
-            onPress={() => handleClone(item.id)}
-            disabled={isCloning}
-          >
-            {isCloning ? (
-              <ActivityIndicator size="small" color={colors.textOnPrimary} />
-            ) : (
-              <Copy color={colors.textOnPrimary} size={14} />
-            )}
-            <Text style={styles.cloneBadgeText}>
-              {isCloning ? 'Clonando' : 'Clonar'}
+      <TouchableOpacity
+        style={styles.card}
+        activeOpacity={0.7}
+        onPress={() => handleCardPress(item)}
+      >
+        <View style={[styles.cardAccent, { backgroundColor: accentColor }]} />
+        <View style={styles.cardContent}>
+          <View style={[styles.badge, { backgroundColor: badgeBg }]}>
+            <Icon size={12} color={badgeTextColor} />
+            <Text style={[styles.badgeText, { color: badgeTextColor }]}>
+              {isOwner ? 'Personal' : 'Pública'}
             </Text>
-          </TouchableOpacity>
-        ) : null}
-      </View>
+          </View>
+          <Text style={styles.cardName}>{item.name}</Text>
+          {item.description ? (
+            <Text style={styles.cardDescription} numberOfLines={2}>
+              {item.description}
+            </Text>
+          ) : null}
+          <View style={styles.bottomRow}>
+            <View style={styles.metaRow}>
+              <ClipboardList size={14} color={colors.textMuted} />
+              <Text style={styles.metaText}>{scheduleText}</Text>
+            </View>
+            {isOwner ? (
+              <View style={styles.verButton}>
+                <Text style={styles.verText}>Ver</Text>
+                <ChevronRight size={14} color={colors.text} />
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={styles.cloneButton}
+                activeOpacity={0.7}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleClone(item.id);
+                }}
+                disabled={isCloning}
+              >
+                {isCloning ? (
+                  <ActivityIndicator size="small" color={colors.textOnPrimary} />
+                ) : (
+                  <>
+                    <Copy color={colors.textOnPrimary} size={14} />
+                    <Text style={styles.cloneButtonText}>Clonar</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </TouchableOpacity>
     );
-  }, [styles, user, cloningId, handleClone, colors]);
+  }, [styles, user, cloningId, handleClone, handleCardPress, colors]);
 
   if (isLoading) return <LoadingScreen />;
   if (error) return <ErrorScreen message="Error al cargar rutinas" />;
@@ -202,8 +280,15 @@ export default function RoutinesScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Rutinas</Text>
+      <View style={styles.segmentedWrapper}>
+        <SegmentedControl
+          options={TABS}
+          selectedIndex={tabIndex}
+          onChange={setTabIndex}
+        />
+      </View>
       <FlatList<Routine>
-        data={routines}
+        data={activeRoutines}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
@@ -211,7 +296,23 @@ export default function RoutinesScreen() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <ClipboardList size={32} color={colors.textPlaceholder} />
-            <Text style={styles.emptyText}>No hay rutinas disponibles</Text>
+            <Text style={styles.emptyText}>
+              {tabIndex === 0 ? 'Aún no tienes rutinas' : 'No hay rutinas públicas disponibles'}
+            </Text>
+            <Text style={styles.emptySubtext}>
+              {tabIndex === 0
+                ? 'Crea tu primera rutina para empezar'
+                : 'Vuelve más tarde para descubrir nuevas rutinas'}
+            </Text>
+            {tabIndex === 0 && (
+              <TouchableOpacity
+                style={styles.emptyAction}
+                activeOpacity={0.7}
+                onPress={() => router.push('/(tabs)/routines/new')}
+              >
+                <Text style={styles.emptyActionText}>Crear rutina</Text>
+              </TouchableOpacity>
+            )}
           </View>
         }
       />
