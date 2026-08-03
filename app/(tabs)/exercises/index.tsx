@@ -1,31 +1,41 @@
-import { memo, useState, useCallback } from 'react';
+import { memo, useState, useCallback, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import Plus from 'lucide-react-native/icons/plus';
 import Dumbbell from 'lucide-react-native/icons/dumbbell';
 import { router } from 'expo-router';
 import { useExercises } from '@/hooks/useExercises';
+import { useLatestExerciseSets } from '@/hooks/useLatestExerciseSets';
 import { ExerciseCard } from '@/components/ExerciseCard';
 import { SearchInput } from '@/components/SearchInput';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
+import { SegmentedControl } from '@/components/SegmentedControl';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { Exercise } from '@/types/supabase';
+
+const TABS = ['Todos', 'Con series', 'Sin series'] as const;
 
 const ExerciseList = memo(function ExerciseList({
   exercises,
   onPress,
+  latestByExercise,
 }: {
   exercises: Exercise[];
   onPress: (id: string) => void;
+  latestByExercise: Map<string, { weight_kg: number; reps: number }>;
 }) {
   const { colors } = useAppTheme();
 
   const renderItem = useCallback(
     ({ item }: { item: Exercise }) => (
-      <ExerciseCard exercise={item} onPress={() => onPress(item.id)} />
+      <ExerciseCard
+        exercise={item}
+        lastSet={latestByExercise.get(item.id)}
+        onPress={() => onPress(item.id)}
+      />
     ),
-    [onPress],
+    [onPress, latestByExercise],
   );
 
   return (
@@ -91,10 +101,22 @@ function Fab() {
 export default function ExercisesScreen() {
   const { colors } = useAppTheme();
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [tabIndex, setTabIndex] = useState(0);
 
   const { data: exercises, isLoading, error } = useExercises({
     search: debouncedSearch,
   });
+  const { data: setsData } = useLatestExerciseSets();
+
+  const hasHistory = setsData?.hasHistory ?? new Set<string>();
+  const latestByExercise =
+    setsData?.latestByExercise ?? new Map<string, { weight_kg: number; reps: number }>();
+
+  const visibleExercises = useMemo(() => {
+    if (tabIndex === 0) return exercises ?? [];
+    const wantWithHistory = tabIndex === 1;
+    return (exercises ?? []).filter((ex) => hasHistory.has(ex.id) === wantWithHistory);
+  }, [exercises, tabIndex, hasHistory]);
 
   const handleExercisePress = useCallback((id: string) => {
     router.push(`/exercise/${id}`);
@@ -119,13 +141,20 @@ export default function ExercisesScreen() {
           textTransform: 'uppercase',
           letterSpacing: 1,
           textAlign: 'center',
-          marginBottom: spacing.lg,
+          marginBottom: spacing.md,
         }}
       >
         Ejercicios (Buscar)
       </Text>
+      <View style={{ marginBottom: spacing.lg }}>
+        <SegmentedControl
+          options={TABS}
+          selectedIndex={tabIndex}
+          onChange={setTabIndex}
+        />
+      </View>
       <SearchInput onSearch={setDebouncedSearch} placeholder="Busca un ejercicio" />
-      <ExerciseList exercises={exercises ?? []} onPress={handleExercisePress} />
+      <ExerciseList exercises={visibleExercises} onPress={handleExercisePress} latestByExercise={latestByExercise} />
       <Fab />
     </View>
   );

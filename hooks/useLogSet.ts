@@ -35,6 +35,7 @@ export function useLogSet(workoutLogId: string) {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['set_logs', workoutLogId] });
       queryClient.invalidateQueries({ queryKey: ['set_logs', 'exercise', variables.exercise_id] });
+      queryClient.invalidateQueries({ queryKey: ['latest_exercise_sets'] });
     },
   });
 }

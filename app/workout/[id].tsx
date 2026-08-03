@@ -1,4 +1,4 @@
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useCallback, useMemo } from 'react';
 import Square from 'lucide-react-native/icons/square';
@@ -49,6 +49,21 @@ export default function WorkoutSessionScreen() {
       },
     });
   }, [router, finishWorkout]);
+
+  const confirmFinish = useCallback(() => {
+    Alert.alert(
+      'Finalizar sesión',
+      '¿Seguro que quieres finalizar la sesión?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Finalizar',
+          style: 'destructive',
+          onPress: handleFinish,
+        },
+      ],
+    );
+  }, [handleFinish]);
 
   const isMutating = startWorkout.isPending || finishWorkout.isPending;
 
@@ -128,7 +143,7 @@ export default function WorkoutSessionScreen() {
       fontSize: 15,
     },
     finishButton: {
-      backgroundColor: colors.error,
+      backgroundColor: colors.primary,
       borderRadius: borderRadius.lg,
       padding: spacing.lg,
       flexDirection: 'row',
@@ -203,7 +218,7 @@ export default function WorkoutSessionScreen() {
       <TouchableOpacity
         style={styles.finishButton}
         activeOpacity={0.8}
-        onPress={handleFinish}
+        onPress={confirmFinish}
         disabled={finishWorkout.isPending}
       >
         <Square color={colors.textOnPrimary} size={20} />

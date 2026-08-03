@@ -15,6 +15,7 @@ export function useActiveWorkout() {
         .select('id')
         .eq('user_id', user.id)
         .is('finished_at', null)
+        .limit(1)
         .maybeSingle();
       if (error) throw error;
       return data?.id ?? null;

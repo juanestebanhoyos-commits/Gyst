@@ -261,11 +261,7 @@ export function TodayExercisesSection() {
       <TouchableOpacity
         style={styles.ctaButton}
         onPress={() => {
-          if (activeWorkoutId) {
-            router.push(`/workout/${activeWorkoutId}`);
-          } else {
-            router.push(`/workout/${routineId}`);
-          }
+          router.push(`/workout/${routineId}`);
         }}
       >
         <Play color={colors.textOnPrimary} size={20} />
