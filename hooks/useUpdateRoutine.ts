@@ -68,6 +68,9 @@ export function useUpdateRoutine() {
       queryClient.invalidateQueries({ queryKey: ['routines', variables.id] });
       queryClient.invalidateQueries({ queryKey: ['routines'] });
       queryClient.invalidateQueries({ queryKey: ['today-routine'] });
+      queryClient.invalidateQueries({ queryKey: ['routine_exercises', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['routine-exercise-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['routine-muscles'] });
     },
   });
 }

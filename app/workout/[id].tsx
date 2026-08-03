@@ -1,15 +1,18 @@
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useEffect, useRef, useCallback, useMemo } from 'react';
 import Square from 'lucide-react-native/icons/square';
+import X from 'lucide-react-native/icons/x';
 import { useRoutine } from '@/hooks/useRoutine';
 import { useRoutineExercises } from '@/hooks/useRoutineExercises';
 import { useStartWorkout } from '@/hooks/useStartWorkout';
 import { useFinishWorkout } from '@/hooks/useFinishWorkout';
+import { useCancelWorkout } from '@/hooks/useCancelWorkout';
 import { useSession } from '@/hooks/useSession';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
+import { ScreenHeader } from '@/components/ScreenHeader';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 export default function WorkoutSessionScreen() {
@@ -20,8 +23,12 @@ export default function WorkoutSessionScreen() {
   const { user } = useSession();
   const startWorkout = useStartWorkout();
   const finishWorkout = useFinishWorkout();
+  const cancelWorkout = useCancelWorkout();
+  const navigation = useNavigation();
   const workoutLogIdRef = useRef<string | null>(null);
   const hasStarted = useRef(false);
+  const exitedRef = useRef(false);
+  const cancelPendingRef = useRef(false);
 
   useEffect(() => {
     if (user && !hasStarted.current) {
@@ -37,14 +44,37 @@ export default function WorkoutSessionScreen() {
     }
   }, [id, user?.id]);
 
+  useEffect(() => {
+    const unsub = navigation.addListener('beforeRemove', (e) => {
+      const logId = workoutLogIdRef.current;
+      if (!logId || exitedRef.current || finishWorkout.isPending) return;
+      if (cancelPendingRef.current) return;
+      e.preventDefault();
+      cancelPendingRef.current = true;
+      cancelWorkout.mutate(logId, {
+        onSuccess: () => {
+          exitedRef.current = true;
+          navigation.dispatch(e.data.action);
+        },
+        onError: () => {
+          cancelPendingRef.current = false;
+          navigation.dispatch(e.data.action);
+        },
+      });
+    });
+    return unsub;
+  }, [navigation, cancelWorkout, finishWorkout.isPending]);
+
   const handleFinish = useCallback(() => {
     const logId = workoutLogIdRef.current;
     if (!logId) {
+      exitedRef.current = true;
       router.replace('/(tabs)/routines');
       return;
     }
     finishWorkout.mutate(logId, {
       onSuccess: () => {
+        exitedRef.current = true;
         router.replace('/(tabs)/routines');
       },
     });
@@ -65,6 +95,38 @@ export default function WorkoutSessionScreen() {
     );
   }, [handleFinish]);
 
+  const confirmCancel = useCallback(() => {
+    Alert.alert(
+      'Cancelar sesión',
+      '¿Seguro que quieres salir? Si ya registraste series, la sesión se guardará en tu historial.',
+      [
+        { text: 'Seguir entrenando', style: 'cancel' },
+        {
+          text: 'Salir',
+          style: 'destructive',
+          onPress: () => {
+            const logId = workoutLogIdRef.current;
+            if (!logId || cancelPendingRef.current) {
+              exitedRef.current = true;
+              router.back();
+              return;
+            }
+            cancelPendingRef.current = true;
+            cancelWorkout.mutate(logId, {
+              onSuccess: () => {
+                exitedRef.current = true;
+                router.back();
+              },
+              onError: () => {
+                cancelPendingRef.current = false;
+              },
+            });
+          },
+        },
+      ],
+    );
+  }, [router, cancelWorkout]);
+
   const isMutating = startWorkout.isPending || finishWorkout.isPending;
 
   const keyExtractor = useCallback((item: { id: string }) => item.id, []);
@@ -73,23 +135,17 @@ export default function WorkoutSessionScreen() {
     container: {
       flex: 1,
       backgroundColor: colors.bg,
+    },
+    contentInner: {
+      flex: 1,
       paddingHorizontal: spacing.lg,
-      paddingTop: spacing.xl,
-    },
-    header: {
-      marginBottom: 20,
-    },
-    title: {
-      ...typography.caption,
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 1,
-      marginBottom: spacing.xs,
+      paddingBottom: spacing.xl,
     },
     subtitle: {
       fontSize: 15,
       color: colors.success,
       fontWeight: '600',
+      marginBottom: 20,
     },
     list: {
       paddingBottom: 80,
@@ -150,12 +206,28 @@ export default function WorkoutSessionScreen() {
       justifyContent: 'center',
       alignItems: 'center',
       gap: spacing.sm,
-      marginBottom: 24,
+      marginTop: spacing.lg,
+      marginBottom: spacing.xs,
     },
     finishButtonText: {
       color: colors.textOnPrimary,
       fontSize: 17,
       fontWeight: '700',
+    },
+    cancelButton: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: borderRadius.lg,
+      padding: spacing.lg,
+    },
+    cancelButtonText: {
+      color: colors.textSecondary,
+      fontSize: 15,
+      fontWeight: '600',
     },
     emptyText: {
       fontSize: 15,
@@ -197,35 +269,47 @@ export default function WorkoutSessionScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{routine.name}</Text>
+      <ScreenHeader title={routine.name} onBack={confirmCancel} />
+      <View style={styles.contentInner}>
         <Text style={styles.subtitle}>Sesión activa</Text>
-      </View>
 
-      <FlatList
-        data={exercises}
-        keyExtractor={keyExtractor}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
-        ItemSeparatorComponent={ListSeparator}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            Esta rutina no tiene ejercicios asignados
+        <FlatList
+          data={exercises}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          contentContainerStyle={styles.list}
+          ItemSeparatorComponent={ListSeparator}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>
+              Esta rutina no tiene ejercicios asignados
+            </Text>
+          }
+        />
+
+        <TouchableOpacity
+          style={styles.finishButton}
+          activeOpacity={0.8}
+          onPress={confirmFinish}
+          disabled={finishWorkout.isPending}
+        >
+          <Square color={colors.textOnPrimary} size={20} />
+          <Text style={styles.finishButtonText}>
+            {finishWorkout.isPending ? 'Finalizando...' : 'Finalizar'}
           </Text>
-        }
-      />
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.finishButton}
-        activeOpacity={0.8}
-        onPress={confirmFinish}
-        disabled={finishWorkout.isPending}
-      >
-        <Square color={colors.textOnPrimary} size={20} />
-        <Text style={styles.finishButtonText}>
-          {finishWorkout.isPending ? 'Finalizando...' : 'Finalizar'}
-        </Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.cancelButton}
+          activeOpacity={0.8}
+          onPress={confirmCancel}
+          disabled={cancelWorkout.isPending}
+        >
+          <X color={colors.textSecondary} size={20} />
+          <Text style={styles.cancelButtonText}>
+            {cancelWorkout.isPending ? 'Cancelando...' : 'Cancelar sesión'}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

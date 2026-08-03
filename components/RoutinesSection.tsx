@@ -43,7 +43,10 @@ const DISPLAY_LIMIT = 8;
 export function RoutinesSection() {
   const { colors } = useAppTheme();
   const router = useRouter();
-  const { data: routines, isLoading } = useRoutines();
+  const { data: routines, isLoading } = useRoutines({
+    mineOnly: true,
+    pageSize: DISPLAY_LIMIT,
+  });
 
   const displayRoutines = useMemo(
     () => routines?.slice(0, DISPLAY_LIMIT) ?? [],
@@ -156,7 +159,7 @@ export function RoutinesSection() {
   if (isLoading) {
     return (
       <View style={styles.section}>
-        <Text style={styles.title}>Rutinas</Text>
+        <Text style={styles.title}>Mis rutinas</Text>
         <Text style={styles.loadingText}>Cargando rutinas…</Text>
       </View>
     );
@@ -165,7 +168,7 @@ export function RoutinesSection() {
   if (displayRoutines.length === 0) {
     return (
       <View style={styles.section}>
-        <Text style={styles.title}>Rutinas</Text>
+        <Text style={styles.title}>Mis rutinas</Text>
         <Text style={styles.emptyText}>Aún no tienes rutinas</Text>
       </View>
     );
@@ -173,7 +176,7 @@ export function RoutinesSection() {
 
   return (
     <View style={styles.section}>
-      <Text style={styles.title}>Rutinas</Text>
+      <Text style={styles.title}>Mis rutinas</Text>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

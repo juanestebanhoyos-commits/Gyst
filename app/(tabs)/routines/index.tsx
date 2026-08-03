@@ -1,7 +1,7 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
-import { Plus, Copy, ChevronRight, ClipboardList, User, Globe } from 'lucide-react-native';
+import { Plus, Copy, Check, ChevronRight, ClipboardList, User, Globe } from 'lucide-react-native';
 import { useRoutines } from '@/hooks/useRoutines';
 import { useSession } from '@/hooks/useSession';
 import { useCloneRoutine } from '@/hooks/useCloneRoutine';
@@ -21,6 +21,8 @@ export default function RoutinesScreen() {
   const { data: routines, isLoading, error } = useRoutines();
   const cloneMutation = useCloneRoutine();
   const [cloningId, setCloningId] = useState<string | null>(null);
+  const [clonedId, setClonedId] = useState<string | null>(null);
+  const cloneResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [tabIndex, setTabIndex] = useState(0);
 
   const myRoutines = useMemo(
@@ -50,9 +52,11 @@ export default function RoutinesScreen() {
   const handleClone = useCallback((routineId: string) => {
     setCloningId(routineId);
     cloneMutation.mutate(routineId, {
-      onSuccess: (newRoutineId) => {
+      onSuccess: () => {
         setCloningId(null);
-        router.push(`/(tabs)/routines/${newRoutineId}`);
+        setClonedId(routineId);
+        if (cloneResetTimer.current) clearTimeout(cloneResetTimer.current);
+        cloneResetTimer.current = setTimeout(() => setClonedId(null), 1600);
       },
       onError: () => {
         setCloningId(null);
@@ -220,6 +224,7 @@ export default function RoutinesScreen() {
   const renderItem = useCallback(({ item }: { item: Routine }) => {
     const isOwner = user ? item.user_id === user.id : false;
     const isCloning = cloningId === item.id;
+    const isCloned = clonedId === item.id;
     const scheduleDays = item.scheduled_days?.length ?? 0;
 
     const accentColor = isOwner ? colors.primary : colors.textMuted;
@@ -270,9 +275,16 @@ export default function RoutinesScreen() {
                   handleClone(item.id);
                 }}
                 disabled={isCloning}
+                accessibilityRole="button"
+                accessibilityLabel={`Clonar rutina ${item.name}`}
               >
                 {isCloning ? (
                   <ActivityIndicator size="small" color={colors.textOnPrimary} />
+                ) : isCloned ? (
+                  <>
+                    <Check color={colors.textOnPrimary} size={14} />
+                    <Text style={styles.cloneButtonText}>Clonada</Text>
+                  </>
                 ) : (
                   <>
                     <Copy color={colors.textOnPrimary} size={14} />
@@ -285,7 +297,7 @@ export default function RoutinesScreen() {
         </View>
       </TouchableOpacity>
     );
-  }, [styles, user, cloningId, handleClone, handleCardPress, colors]);
+  }, [styles, user, cloningId, clonedId, handleClone, handleCardPress, colors]);
 
   if (isLoading) return <LoadingScreen />;
   if (error) return <ErrorScreen message="Error al cargar rutinas" />;
@@ -330,13 +342,15 @@ export default function RoutinesScreen() {
           </View>
         }
       />
-      <TouchableOpacity
-        style={styles.fab}
-        activeOpacity={0.8}
-        onPress={() => router.push('/(tabs)/routines/new')}
-      >
-        <Plus color={colors.textOnPrimary} size={24} />
-      </TouchableOpacity>
+      {tabIndex === 0 && (
+        <TouchableOpacity
+          style={styles.fab}
+          activeOpacity={0.8}
+          onPress={() => router.push('/(tabs)/routines/new')}
+        >
+          <Plus color={colors.textOnPrimary} size={24} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

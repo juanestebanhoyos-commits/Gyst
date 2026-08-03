@@ -16,6 +16,7 @@ import { Plus, X } from 'lucide-react-native';
 import { useCreateRoutine } from '@/hooks/useCreateRoutine';
 import ExercisePicker from '@/components/ExercisePicker';
 import { TrainingDaysPicker } from '@/components/TrainingDaysPicker';
+import { ScreenHeader } from '@/components/ScreenHeader';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { ExerciseEntry } from '@/components/ExercisePicker';
 
@@ -92,17 +93,11 @@ export default function NewRoutineScreen() {
       flex: 1,
     },
     content: {
-      paddingHorizontal: spacing.lg,
-      paddingTop: spacing.xl,
-      gap: spacing.sm,
       paddingBottom: 40,
     },
-    title: {
-      ...typography.caption,
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 1,
-      marginBottom: spacing.sm,
+    contentInner: {
+      flex: 1,
+      paddingHorizontal: spacing.lg,
     },
     label: {
       ...typography.captionBold,
@@ -228,8 +223,11 @@ export default function NewRoutineScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>Nueva rutina</Text>
-
+        <ScreenHeader
+          title="Nueva rutina"
+          onBack={() => router.navigate('/(tabs)/routines')}
+        />
+        <View style={styles.contentInner}>
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <Text style={styles.label}>Nombre</Text>
@@ -327,6 +325,7 @@ export default function NewRoutineScreen() {
             {isSubmitting ? 'Creando...' : 'Crear rutina'}
           </Text>
         </TouchableOpacity>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

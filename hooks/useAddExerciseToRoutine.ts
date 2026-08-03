@@ -34,6 +34,8 @@ export function useAddExerciseToRoutine(routineId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['routine_exercises', routineId] });
+      queryClient.invalidateQueries({ queryKey: ['routine-exercise-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['routine-muscles'] });
     },
   });
 }

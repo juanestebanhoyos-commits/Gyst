@@ -21,6 +21,7 @@ import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import ExercisePicker from '@/components/ExercisePicker';
 import { TrainingDaysPicker } from '@/components/TrainingDaysPicker';
+import { ScreenHeader } from '@/components/ScreenHeader';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { ExerciseEntry } from '@/components/ExercisePicker';
 import type { Exercise } from '@/types/supabase';
@@ -46,14 +47,24 @@ export default function EditRoutineScreen() {
   const initialized = useRef(false);
 
   useEffect(() => {
-    if (!routine) return;
+    initialized.current = false;
+    setName('');
+    setDescription('');
+    setIsPublic(false);
+    setScheduledDays([]);
+    setExercises([]);
+    setError(null);
+  }, [id]);
+
+  useEffect(() => {
+    if (!routine || !routineExercises) return;
     if (initialized.current) return;
     initialized.current = true;
     setName(routine.name || '');
     setDescription(routine.description || '');
     setIsPublic(routine.is_public || false);
     setScheduledDays(routine.scheduled_days || []);
-    setExercises(routineExercises?.flatMap((entry) => 
+    setExercises(routineExercises.flatMap((entry) =>
       entry.exercises ? [{
         exercise: entry.exercises as Exercise,
         target_sets: entry.target_sets,
@@ -62,7 +73,7 @@ export default function EditRoutineScreen() {
         rest_seconds: entry.rest_seconds,
         notes: entry.notes,
       }] : [],
-    ) || []);
+    ));
   }, [routine, routineExercises]);
 
   const handleAddExercise = useCallback((entry: ExerciseEntry) => {
@@ -124,17 +135,11 @@ export default function EditRoutineScreen() {
       flex: 1,
     },
     content: {
-      paddingHorizontal: spacing.lg,
-      paddingTop: spacing.xl,
-      gap: spacing.sm,
       paddingBottom: 40,
     },
-    title: {
-      ...typography.caption,
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 1,
-      marginBottom: spacing.sm,
+    contentInner: {
+      flex: 1,
+      paddingHorizontal: spacing.lg,
     },
     label: {
       ...typography.captionBold,
@@ -294,8 +299,11 @@ export default function EditRoutineScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>Editar rutina</Text>
-
+        <ScreenHeader
+          title="Editar rutina"
+          onBack={() => router.navigate(`/(tabs)/routines/${id}`)}
+        />
+        <View style={styles.contentInner}>
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <Text style={styles.label}>Nombre</Text>
@@ -378,6 +386,7 @@ export default function EditRoutineScreen() {
             {isPending ? 'Guardando...' : 'Guardar cambios'}
           </Text>
         </TouchableOpacity>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

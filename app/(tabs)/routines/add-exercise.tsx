@@ -15,7 +15,8 @@ import { useAddExerciseToRoutine } from '@/hooks/useAddExerciseToRoutine';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import ExercisePicker from '@/components/ExercisePicker';
-import { useAppTheme, spacing, typography } from '@/lib/theme';
+import { ScreenHeader } from '@/components/ScreenHeader';
+import { useAppTheme, spacing } from '@/lib/theme';
 import type { ExerciseEntry } from '@/components/ExercisePicker';
 
 export default function AddExerciseScreen() {
@@ -63,8 +64,8 @@ export default function AddExerciseScreen() {
   const styles = useMemo(() => StyleSheet.create({
     flex: { flex: 1, backgroundColor: colors.bg },
     container: { flex: 1 },
-    content: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl, gap: spacing.sm, paddingBottom: 40 },
-    title: { ...typography.h1, color: colors.text, marginBottom: spacing.sm },
+    content: { paddingBottom: 40 },
+    contentInner: { paddingHorizontal: spacing.lg },
   }), [colors]);
 
   return (
@@ -77,14 +78,18 @@ export default function AddExerciseScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>Agregar ejercicio</Text>
-
+        <ScreenHeader
+          title="Agregar ejercicio"
+          onBack={() => router.navigate(`/(tabs)/routines/${id}`)}
+        />
+        <View style={styles.contentInner}>
         <ExercisePicker
           existingIds={existingIds}
           onAdd={handleAdd}
           submitLabel="Agregar a rutina"
           isLoading={isPending}
         />
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

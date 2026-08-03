@@ -15,6 +15,7 @@ import Plus from 'lucide-react-native/icons/plus';
 import { useCreateCustomExercise } from '@/hooks/useCreateCustomExercise';
 import { useSession } from '@/hooks/useSession';
 import { LoadingScreen } from '@/components/LoadingScreen';
+import { ScreenHeader } from '@/components/ScreenHeader';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 const MUSCLE_GROUPS = [
@@ -73,17 +74,11 @@ export default function NewExerciseScreen() {
       flex: 1,
     },
     content: {
-      paddingHorizontal: spacing.lg,
-      paddingTop: spacing.xl,
-      gap: spacing.sm,
       paddingBottom: 40,
     },
-    title: {
-      ...typography.caption,
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 1,
-      marginBottom: spacing.sm,
+    contentInner: {
+      flex: 1,
+      paddingHorizontal: spacing.lg,
     },
     label: {
       ...typography.captionBold,
@@ -162,8 +157,11 @@ export default function NewExerciseScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>Nuevo ejercicio</Text>
-
+        <ScreenHeader
+          title="Nuevo ejercicio"
+          onBack={() => router.navigate('/(tabs)/exercises')}
+        />
+        <View style={styles.contentInner}>
         {error != null && <Text style={styles.error}>{error}</Text>}
 
         <Text style={styles.label}>Nombre</Text>
@@ -223,6 +221,7 @@ export default function NewExerciseScreen() {
             {isPending ? 'Creando...' : 'Crear ejercicio'}
           </Text>
         </TouchableOpacity>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

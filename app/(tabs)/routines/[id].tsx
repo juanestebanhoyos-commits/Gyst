@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Copy, User, Globe } from 'lucide-react-native';
+import { Copy, User, Globe, Play } from 'lucide-react-native';
 import { useRoutine } from '@/hooks/useRoutine';
 import { useRoutineExercises } from '@/hooks/useRoutineExercises';
 import { useSession } from '@/hooks/useSession';
@@ -9,6 +9,7 @@ import { useCloneRoutine } from '@/hooks/useCloneRoutine';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
+import { ScreenHeader } from '@/components/ScreenHeader';
 import { getDayNames } from '@/lib/date-utils';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
@@ -52,25 +53,15 @@ export default function RoutineDetailScreen() {
     container: {
       flex: 1,
       backgroundColor: colors.bg,
-      paddingHorizontal: spacing.lg,
-      paddingTop: spacing.xl,
     },
-    titleRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-      marginBottom: spacing.xs,
-    },
-    title: {
-      ...typography.caption,
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 1,
+    content: {
       flex: 1,
+      paddingHorizontal: spacing.lg,
     },
     detailBadge: {
       flexDirection: 'row',
       alignItems: 'center',
+      alignSelf: 'flex-start',
       gap: 4,
       paddingHorizontal: spacing.sm,
       paddingVertical: 2,
@@ -82,19 +73,25 @@ export default function RoutineDetailScreen() {
       textTransform: 'uppercase',
       letterSpacing: 0.5,
     },
-    description: {
-      fontSize: 15,
-      color: colors.textMuted,
-      marginBottom: 20,
-      lineHeight: 22,
-    },
-    scheduledSection: {
+    summaryCard: {
       backgroundColor: colors.bgWhite,
       borderRadius: borderRadius.lg,
       padding: spacing.lg - 2,
       borderWidth: 1,
       borderColor: colors.borderLight,
       marginBottom: spacing.lg,
+    },
+    description: {
+      fontSize: 15,
+      color: colors.textMuted,
+      marginTop: spacing.sm,
+      lineHeight: 22,
+    },
+    scheduleBlock: {
+      marginTop: spacing.md,
+      paddingTop: spacing.md,
+      borderTopWidth: 1,
+      borderTopColor: colors.borderLight,
     },
     scheduledLabel: {
       ...typography.small,
@@ -163,30 +160,19 @@ export default function RoutineDetailScreen() {
       color: colors.primary,
       fontSize: 15,
     },
-    cloneButton: {
-      backgroundColor: colors.success,
-      borderRadius: borderRadius.md,
-      padding: spacing.md,
+    secondaryButton: {
+      flex: 1,
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      gap: spacing.sm,
-      marginBottom: spacing.lg,
-    },
-    cloneButtonText: {
-      color: colors.textOnPrimary,
-      fontSize: 15,
-      fontWeight: '600',
-    },
-    editButton: {
-      backgroundColor: colors.primary,
+      gap: spacing.xs,
+      borderWidth: 1,
+      borderColor: colors.primary,
       borderRadius: borderRadius.md,
       padding: spacing.md,
-      alignItems: 'center',
-      marginBottom: spacing.lg,
     },
-    editButtonText: {
-      color: colors.textOnPrimary,
+    secondaryButtonText: {
+      color: colors.primary,
       fontSize: 15,
       fontWeight: '600',
     },
@@ -198,9 +184,23 @@ export default function RoutineDetailScreen() {
     },
     buttonsRow: {
       flexDirection: 'row',
-      justifyContent: 'center',
-      gap: spacing.md,
+      gap: spacing.sm,
       marginBottom: spacing.lg,
+    },
+    startButton: {
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg - 2,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginBottom: spacing.lg,
+    },
+    startButtonText: {
+      color: colors.textOnPrimary,
+      fontSize: 16,
+      fontWeight: '700',
     },
     errorText: {
       color: colors.errorText,
@@ -241,62 +241,80 @@ export default function RoutineDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.titleRow}>
-        <Text style={styles.title}>{routine.name}</Text>
-        <View style={[
-          styles.detailBadge,
-          { backgroundColor: isOwner ? colors.primaryBg : colors.bgLight },
-        ]}>
-          {isOwner
-            ? <User size={12} color={colors.primary} />
-            : <Globe size={12} color={colors.textMuted} />
-          }
-          <Text style={[
-            styles.detailBadgeText,
-            { color: isOwner ? colors.primary : colors.textMuted },
+      <ScreenHeader
+        title={routine.name}
+        onBack={() => router.navigate('/(tabs)/routines')}
+      />
+      <View style={styles.content}>
+        <View style={styles.summaryCard}>
+          <View style={[
+            styles.detailBadge,
+            { backgroundColor: isOwner ? colors.primaryBg : colors.bgLight },
           ]}>
-            {isOwner ? 'Personal' : 'Pública'}
-          </Text>
+            {isOwner
+              ? <User size={12} color={colors.primary} />
+              : <Globe size={12} color={colors.textMuted} />
+            }
+            <Text style={[
+              styles.detailBadgeText,
+              { color: isOwner ? colors.primary : colors.textMuted },
+            ]}>
+              {isOwner ? 'Personal' : 'Pública'}
+            </Text>
+          </View>
+          {routine.description ? (
+            <Text style={styles.description}>{routine.description}</Text>
+          ) : null}
+          {routine.scheduled_days && routine.scheduled_days.length > 0 ? (
+            <View style={styles.scheduleBlock}>
+              <Text style={styles.scheduledLabel}>Días programados</Text>
+              <Text style={styles.scheduledDays}>
+                {getDayNames(routine.scheduled_days).join(' · ')}
+              </Text>
+            </View>
+          ) : null}
         </View>
-      </View>
-      {routine.description ? (
-        <Text style={styles.description}>{routine.description}</Text>
-      ) : null}
-      <View style={styles.buttonsRow}>
+        {isOwner ? (
+          <TouchableOpacity
+            style={styles.startButton}
+            activeOpacity={0.8}
+            onPress={() => router.push(`/workout/${id}`)}
+          >
+            <Play color={colors.textOnPrimary} size={18} />
+            <Text style={styles.startButtonText}>Empezar rutina</Text>
+          </TouchableOpacity>
+        ) : null}
+        <View style={styles.buttonsRow}>
         {canClone ? (
           <TouchableOpacity
-            style={styles.cloneButton}
+            style={styles.secondaryButton}
             activeOpacity={0.8}
             onPress={handleClone}
             disabled={cloneMutation.isPending}
           >
-            <Copy color={colors.textOnPrimary} size={18} />
-            <Text style={styles.cloneButtonText}>
-              {cloneMutation.isPending ? 'Clonando...' : 'Clonar rutina'}
+            {cloneMutation.isPending ? (
+              <ActivityIndicator size="small" color={colors.primary} />
+            ) : (
+              <Copy color={colors.primary} size={16} />
+            )}
+            <Text style={styles.secondaryButtonText}>
+              {cloneMutation.isPending ? 'Clonando...' : 'Clonar'}
             </Text>
           </TouchableOpacity>
         ) : null}
         {canEdit ? (
           <TouchableOpacity
-            style={styles.editButton}
+            style={styles.secondaryButton}
             activeOpacity={0.8}
             onPress={handleEdit}
           >
-            <Text style={styles.editButtonText}>Editar rutina</Text>
+            <Text style={styles.secondaryButtonText}>Editar</Text>
           </TouchableOpacity>
         ) : null}
       </View>
       {cloneError ? (
         <Text style={styles.errorText}>{cloneError}</Text>
       ) : null}
-        {routine.scheduled_days && routine.scheduled_days.length > 0 ? (
-          <View style={styles.scheduledSection}>
-            <Text style={styles.scheduledLabel}>Días programados</Text>
-            <Text style={styles.scheduledDays}>
-              {getDayNames(routine.scheduled_days).join(' · ')}
-            </Text>
-          </View>
-        ) : null}
         <Text style={styles.sectionTitle}>Ejercicios</Text>
       {loadingExercises ? (
         <LoadingScreen />
@@ -314,6 +332,7 @@ export default function RoutineDetailScreen() {
           }
         />
       )}
+      </View>
     </View>
   );
 }
