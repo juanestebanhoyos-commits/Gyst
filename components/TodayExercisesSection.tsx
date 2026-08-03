@@ -68,6 +68,10 @@ export function TodayExercisesSection() {
           marginHorizontal: spacing.lg,
           marginBottom: spacing.lg,
         },
+        titleRoutineName: {
+          ...typography.h3,
+          color: colors.textSecondary,
+        },
         list: {
           gap: spacing.sm,
           marginHorizontal: spacing.lg,
@@ -180,7 +184,12 @@ export function TodayExercisesSection() {
   if (!routineId) {
     return (
       <View style={styles.section}>
-        <Text style={styles.title}>Ejercicios de hoy</Text>
+        <Text style={styles.title} numberOfLines={1}>
+          Ejercicios de hoy
+          {todayRoutine ? (
+            <Text style={styles.titleRoutineName}> · {todayRoutine.name}</Text>
+          ) : null}
+        </Text>
         <Text style={styles.emptyText}>No hay rutina programada para hoy</Text>
         <TouchableOpacity
           style={styles.ctaButton}
@@ -196,7 +205,12 @@ export function TodayExercisesSection() {
   if (exercisesLoading) {
     return (
       <View style={styles.section}>
-        <Text style={styles.title}>Ejercicios de hoy</Text>
+        <Text style={styles.title} numberOfLines={1}>
+          Ejercicios de hoy
+          {todayRoutine ? (
+            <Text style={styles.titleRoutineName}> · {todayRoutine.name}</Text>
+          ) : null}
+        </Text>
         <Text style={styles.loadingText}>Cargando ejercicios…</Text>
       </View>
     );
@@ -205,7 +219,12 @@ export function TodayExercisesSection() {
   if (!exercises || exercises.length === 0) {
     return (
       <View style={styles.section}>
-        <Text style={styles.title}>Ejercicios de hoy</Text>
+        <Text style={styles.title} numberOfLines={1}>
+          Ejercicios de hoy
+          {todayRoutine ? (
+            <Text style={styles.titleRoutineName}> · {todayRoutine.name}</Text>
+          ) : null}
+        </Text>
         <Text style={styles.emptyText}>
           Esta rutina aún no tiene ejercicios
         </Text>
@@ -222,7 +241,12 @@ export function TodayExercisesSection() {
 
   return (
     <View style={styles.section}>
-      <Text style={styles.title}>Ejercicios de hoy</Text>
+      <Text style={styles.title} numberOfLines={1}>
+        Ejercicios de hoy
+        {todayRoutine ? (
+          <Text style={styles.titleRoutineName}> · {todayRoutine.name}</Text>
+        ) : null}
+      </Text>
       <View style={styles.list}>
         {exercises.map((re) => (
           <PressableCard
