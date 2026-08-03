@@ -1,11 +1,48 @@
-import { useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useMemo, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ChevronRight } from 'lucide-react-native';
+import { ChevronRight, Play } from 'lucide-react-native';
 import { useTodayRoutine } from '@/hooks/useTodayRoutine';
 import { useRoutineExercises } from '@/hooks/useRoutineExercises';
 import { useActiveWorkout } from '@/hooks/useActiveWorkout';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
+
+function PressableCard({ children, onPress }: { children: React.ReactNode; onPress?: () => void }) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.97,
+      useNativeDriver: true,
+      stiffness: 300,
+      damping: 20,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      stiffness: 300,
+      damping: 20,
+    }).start();
+  };
+
+  if (!onPress) return <>{children}</>;
+
+  return (
+    <TouchableOpacity
+      activeOpacity={1}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      onPress={onPress}
+    >
+      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+        {children}
+      </Animated.View>
+    </TouchableOpacity>
+  );
+}
 
 export function TodayExercisesSection() {
   const { colors } = useAppTheme();
@@ -41,6 +78,18 @@ export function TodayExercisesSection() {
           borderWidth: 1,
           borderColor: colors.border,
           padding: spacing.lg,
+          paddingLeft: spacing.lg + 6,
+          overflow: 'hidden',
+        },
+        accentBar: {
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 3,
+          backgroundColor: colors.primary,
+          borderTopLeftRadius: borderRadius.md,
+          borderBottomLeftRadius: borderRadius.md,
         },
         cardTop: {
           flexDirection: 'row',
@@ -57,9 +106,9 @@ export function TodayExercisesSection() {
         setsRepsBlock: {
           alignItems: 'flex-end',
         },
-        setsReps: {
+        setsRepsValue: {
           ...typography.bodyBold,
-          color: colors.text,
+          color: colors.primary,
         },
         setsRepsLabel: {
           ...typography.small,
@@ -107,6 +156,9 @@ export function TodayExercisesSection() {
           alignItems: 'center',
           marginHorizontal: spacing.lg,
           marginTop: spacing.md,
+          flexDirection: 'row',
+          justifyContent: 'center',
+          gap: spacing.sm,
         },
         ctaText: {
           color: colors.textOnPrimary,
@@ -134,6 +186,7 @@ export function TodayExercisesSection() {
           style={styles.ctaButton}
           onPress={() => router.push('/(tabs)/routines/new')}
         >
+          <Play color={colors.textOnPrimary} size={18} />
           <Text style={styles.ctaText}>Crear rutina</Text>
         </TouchableOpacity>
       </View>
@@ -160,6 +213,7 @@ export function TodayExercisesSection() {
           style={styles.ctaButton}
           onPress={() => router.push(`/(tabs)/routines/${routineId}`)}
         >
+          <Play color={colors.textOnPrimary} size={18} />
           <Text style={styles.ctaText}>Agregar ejercicios</Text>
         </TouchableOpacity>
       </View>
@@ -171,33 +225,36 @@ export function TodayExercisesSection() {
       <Text style={styles.title}>Ejercicios de hoy</Text>
       <View style={styles.list}>
         {exercises.map((re) => (
-          <View key={re.id} style={styles.card}>
-            <View style={styles.cardTop}>
-              <Text style={styles.category}>
-                {re.exercises?.primary_muscle ?? 'Ejercicio'}
-              </Text>
-              <View style={styles.setsRepsBlock}>
-                <Text style={styles.setsReps}>
-                  {re.target_sets} x {re.target_reps_min}
+          <PressableCard
+            key={re.id}
+            onPress={() => router.push(`/exercise/${re.exercise_id}`)}
+          >
+            <View style={styles.card}>
+              <View style={styles.accentBar} />
+              <View style={styles.cardTop}>
+                <Text style={styles.category} numberOfLines={1}>
+                  {re.exercises?.primary_muscle ?? 'Ejercicio'}
                 </Text>
-                <Text style={styles.setsRepsLabel}>SERIES X REPS</Text>
+                <View style={styles.setsRepsBlock}>
+                  <Text style={styles.setsRepsValue}>
+                    {re.target_sets} × {re.target_reps_min}
+                  </Text>
+                  <Text style={styles.setsRepsLabel}>SERIES × REPS</Text>
+                </View>
+              </View>
+
+              <Text style={styles.exerciseName} numberOfLines={1}>
+                {re.exercises?.name ?? 'Ejercicio'}
+              </Text>
+
+              <View style={styles.cardBottom}>
+                <View style={styles.verButton}>
+                  <Text style={styles.verText}>Ver</Text>
+                  <ChevronRight size={14} color={colors.text} />
+                </View>
               </View>
             </View>
-
-            <Text style={styles.exerciseName}>
-              {re.exercises?.name ?? 'Ejercicio'}
-            </Text>
-
-            <View style={styles.cardBottom}>
-              <TouchableOpacity
-                style={styles.verButton}
-                onPress={() => router.push(`/exercise/${re.exercise_id}`)}
-              >
-                <Text style={styles.verText}>Ver</Text>
-                <ChevronRight size={14} color={colors.text} />
-              </TouchableOpacity>
-            </View>
-          </View>
+          </PressableCard>
         ))}
       </View>
 
@@ -211,6 +268,7 @@ export function TodayExercisesSection() {
           }
         }}
       >
+        <Play color={colors.textOnPrimary} size={20} />
         <Text style={styles.ctaText}>
           {activeWorkoutId ? 'Continuar entrenamiento' : 'Empezar entrenamiento'}
         </Text>

@@ -262,7 +262,7 @@ export default function NewRoutineScreen() {
           <Switch
             value={isPublic}
             onValueChange={setIsPublic}
-            trackColor={{ false: '#d1d5db', true: colors.primaryLight }}
+            trackColor={{ false: colors.border, true: colors.primaryLight }}
             thumbColor={isPublic ? colors.primary : colors.bgLight}
           />
         </View>

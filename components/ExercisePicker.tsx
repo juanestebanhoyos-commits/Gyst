@@ -41,6 +41,7 @@ interface PickerContextType {
   select: (e: Exercise | null) => void;
   available: Exercise[];
   isLoading: boolean;
+  submitLabel?: string;
   handleAddConfig: (config: ExerciseConfig) => void;
   styles: ReturnType<typeof StyleSheet.create>;
 }
@@ -153,13 +154,25 @@ export default function ExercisePicker({
         card: {
           backgroundColor: colors.bgWhite,
           borderRadius: borderRadius.md,
-          padding: spacing.lg - 2,
+          padding: spacing.md,
+          paddingLeft: spacing.md + 6,
           borderWidth: 1,
           borderColor: colors.borderLight,
+          overflow: 'hidden',
         },
         cardActive: {
           borderColor: colors.primary,
           backgroundColor: colors.primaryBg,
+        },
+        cardAccent: {
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 3,
+          backgroundColor: colors.primary,
+          borderTopLeftRadius: borderRadius.md,
+          borderBottomLeftRadius: borderRadius.md,
         },
         cardName: {
           fontSize: 16,
@@ -203,10 +216,11 @@ export default function ExercisePicker({
       select: handleSelect,
       available,
       isLoading,
+      submitLabel,
       handleAddConfig: handleAdd,
       styles,
     }),
-    [selectedExercise, handleSelect, available, isLoading, handleAdd, styles],
+    [selectedExercise, handleSelect, available, isLoading, submitLabel, handleAdd, styles],
   );
 
   const inner = (
@@ -215,12 +229,6 @@ export default function ExercisePicker({
       <ExercisePicker.Search />
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <ExercisePicker.List />
-      {selectedExercise ? (
-        <ExercisePicker.ConfigForm
-          submitLabel={submitLabel}
-          isLoading={isLoading}
-        />
-      ) : null}
     </>
   );
 
@@ -304,35 +312,38 @@ ExercisePicker.List = function PickerList() {
   }
 
   return (
-    <View style={[styles.list, { height: 370 }]}>
+    <View style={[styles.list, { height: 400 }]}>
       <ScrollView contentContainerStyle={{ gap: 6 }} nestedScrollEnabled>
-        {available.map((exercise) => {
+        {available.flatMap((exercise) => {
           const isSelected = selectedExercise?.id === exercise.id;
-          return (
+          const elements = [
             <TouchableOpacity
               key={exercise.id}
               style={[styles.card, isSelected && styles.cardActive]}
               onPress={() => select(exercise)}
               activeOpacity={0.7}
             >
+              {isSelected ? <View style={styles.cardAccent} /> : null}
               <Text style={styles.cardName}>{exercise.name}</Text>
               <Text style={styles.cardMuscle}>{exercise.primary_muscle}</Text>
-            </TouchableOpacity>
-          );
+            </TouchableOpacity>,
+          ];
+          if (isSelected) {
+            elements.push(
+              <View key={`${exercise.id}-config`} style={{ marginBottom: 2 }}>
+                <ExercisePicker.ConfigForm />
+              </View>,
+            );
+          }
+          return elements;
         })}
       </ScrollView>
     </View>
   );
 };
 
-ExercisePicker.ConfigForm = function PickerConfigForm({
-  submitLabel,
-  isLoading,
-}: {
-  submitLabel?: string;
-  isLoading?: boolean;
-}) {
-  const { selectedExercise, handleAddConfig, select } = usePickerCtx();
+ExercisePicker.ConfigForm = function PickerConfigForm() {
+  const { selectedExercise, handleAddConfig, select, submitLabel, isLoading } = usePickerCtx();
   if (!selectedExercise) return null;
   return (
     <ExerciseConfigForm

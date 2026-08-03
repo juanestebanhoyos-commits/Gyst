@@ -23,9 +23,7 @@ const ExerciseList = memo(function ExerciseList({
 
   const renderItem = useCallback(
     ({ item }: { item: Exercise }) => (
-      <TouchableOpacity onPress={() => onPress(item.id)} activeOpacity={0.7}>
-        <ExerciseCard exercise={item} />
-      </TouchableOpacity>
+      <ExerciseCard exercise={item} onPress={() => onPress(item.id)} />
     ),
     [onPress],
   );

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { LogIn } from 'lucide-react-native';
 import { useLogin } from '@/hooks/useLogin';
+import { useSyncOnboardingProfile } from '@/hooks/useSyncOnboardingProfile';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 export default function LoginScreen() {
@@ -18,6 +19,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const login = useLogin();
+  const syncOnboardingProfile = useSyncOnboardingProfile();
 
   function handleLogin() {
     setError(null);
@@ -34,7 +36,12 @@ export default function LoginScreen() {
     login.mutate(
       { email: email.trim(), password },
       {
-        onSuccess: () => router.replace('/(tabs)'),
+        onSuccess: async (user) => {
+          if (user?.id) {
+            await syncOnboardingProfile.sync(user.id);
+          }
+          router.replace('/(tabs)');
+        },
         onError: (err) => setError(err.message),
       },
     );

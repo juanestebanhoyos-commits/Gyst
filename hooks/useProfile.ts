@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/hooks/useSession';
+import { useSyncOnboardingProfile } from '@/hooks/useSyncOnboardingProfile';
 import type { Database } from '@/types/supabase';
 
 type Profile = Pick<
@@ -8,31 +9,63 @@ type Profile = Pick<
   'username' | 'avatar_url' | 'training_days' | 'theme_preference'
 >;
 
+const PROFILE_COLUMNS = 'username, avatar_url, training_days, theme_preference';
+
 export function useProfile() {
   const { user } = useSession();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const { sync } = useSyncOnboardingProfile();
+  const syncedRef = useRef(false);
 
   useEffect(() => {
     if (!user) {
       setProfile(null);
+      syncedRef.current = false;
       return;
     }
 
-    supabase
-      .from('profiles')
-      .select('username, avatar_url, training_days, theme_preference')
-      .eq('id', user.id)
-      .single()
-      .then(({ data, error }) => {
-        if (error && error.code === 'PGRST116') {
-          setProfile(null);
-        } else if (error) {
-          setProfile(null);
-        } else {
-          setProfile(data);
+    let cancelled = false;
+    const userId = user.id;
+
+    async function load() {
+      const { data } = await supabase
+        .from('profiles')
+        .select(PROFILE_COLUMNS)
+        .eq('id', userId)
+        .single();
+
+      if (cancelled) return;
+
+      if (data?.username) {
+        setProfile(data);
+        return;
+      }
+
+      if (!syncedRef.current) {
+        syncedRef.current = true;
+        await sync(userId);
+
+        const { data: retry } = await supabase
+          .from('profiles')
+          .select(PROFILE_COLUMNS)
+          .eq('id', userId)
+          .single();
+
+        if (!cancelled) {
+          setProfile(retry?.username ? retry : null);
         }
-      });
-  }, [user?.id]);
+        return;
+      }
+
+      setProfile(null);
+    }
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, sync]);
 
   return { data: profile };
 }

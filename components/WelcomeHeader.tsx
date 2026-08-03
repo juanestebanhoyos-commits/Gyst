@@ -2,6 +2,8 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { useProfile } from '@/hooks/useProfile';
+import { useSession } from '@/hooks/useSession';
+import { useOnboardingLocal } from '@/hooks/useOnboardingLocal';
 import { useTodayRoutine } from '@/hooks/useTodayRoutine';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
@@ -10,10 +12,19 @@ const AVATAR_SIZE = 80;
 export function WelcomeHeader() {
   const { colors } = useAppTheme();
   const router = useRouter();
+  const { user } = useSession();
   const { data: todayRoutine } = useTodayRoutine();
   const { data: profile } = useProfile();
+  const { data: onboarding } = useOnboardingLocal();
 
-  const displayName = profile?.username ?? 'atleta';
+  const metadataName =
+    typeof user?.user_metadata?.name === 'string' ? user.user_metadata.name : '';
+
+  const displayName =
+    profile?.username?.trim() ||
+    onboarding?.name?.trim() ||
+    metadataName.trim() ||
+    'atleta';
   const initial = displayName.charAt(0).toUpperCase();
   const hasRoutine = !!todayRoutine;
 

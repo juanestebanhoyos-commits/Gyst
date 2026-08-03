@@ -26,26 +26,32 @@ export const typography = {
 } as const;
 
 export const lightColors = {
-  // Acento oscurecido (lime-600) — el lima puro del dark mode falla contraste sobre blanco
-  primary: '#65A30D',
-  primaryLight: '#A3E635',
-  primaryBg: '#ECFCCB',
-  text: '#111827',
-  textSecondary: '#4B5563',
-  textMuted: '#6B7280',
-  textPlaceholder: '#9CA3AF',
-  textTertiary: '#6B7280',
-  textOnPrimary: '#000000',
-  bg: '#F3F4F6',
+  // Teal profundo de marca — funciona como texto/icono sobre bg (9.17:1 AAA)
+  primary: '#004643',
+  // Acento claro — track del Switch; el thumb primary mantiene 7.25:1 sobre él
+  primaryLight: '#5EEAD4',
+  // Fondo de botón secundario — texto blanco encima (5.47:1 AA)
+  primarySecondaryBg: '#0F766E',
+  // Tinte teal claro para chips/estados seleccionados (texto oscuro encima)
+  primaryBg: '#E3F1EE',
+  // Neutros cálidos (escala stone) sobre bg #F0EDE5
+  text: '#1C1917',
+  textSecondary: '#57534E',
+  textMuted: '#78716C',
+  textPlaceholder: '#A8A29E',
+  textTertiary: '#78716C',
+  textOnPrimary: '#FFFFFF',
+  bg: '#F0EDE5',
   bgWhite: '#FFFFFF',
-  bgLight: '#F9FAFB',
-  border: '#D1D5DB',
-  borderLight: '#E5E7EB',
-  error: '#DC2626',
-  errorText: '#B91C1C',
+  bgLight: '#F7F4EE',
+  border: '#D6D3D1',
+  borderLight: '#E7E5E4',
+  // Semánticos oscurecidos un paso para cumplir AA sobre el nuevo bg
+  error: '#B91C1C',
+  errorText: '#991B1B',
   errorBg: '#FEF2F2',
-  success: '#16A34A',
-  successText: '#15803D',
+  success: '#166534',
+  successText: '#14532D',
   successBg: '#F0FDF4',
   shadow: '#000000',
 } as const;

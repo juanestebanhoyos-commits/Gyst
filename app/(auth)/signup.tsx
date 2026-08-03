@@ -54,8 +54,7 @@ export default function SignupScreen() {
         },
       },
       {
-        onSuccess: async () => {
-          await AsyncStorage.removeItem(ONBOARDING_KEY);
+        onSuccess: () => {
           router.replace('/(auth)/login');
         },
         onError: (err) => setError(err.message),

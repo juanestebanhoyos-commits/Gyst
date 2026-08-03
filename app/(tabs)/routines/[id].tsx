@@ -116,20 +116,34 @@ export default function RoutineDetailScreen() {
       paddingBottom: spacing.xl,
     },
     exerciseCard: {
-      flexDirection: 'row',
-      alignItems: 'center',
       backgroundColor: colors.bgWhite,
-      borderRadius: borderRadius.lg,
-      padding: spacing.lg - 2,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg,
+      paddingLeft: spacing.lg + 6,
       borderWidth: 1,
-      borderColor: colors.borderLight,
-      gap: spacing.md,
+      borderColor: colors.border,
+      overflow: 'hidden',
+    },
+    exerciseAccent: {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: 3,
+      backgroundColor: colors.primary,
+      borderTopLeftRadius: borderRadius.md,
+      borderBottomLeftRadius: borderRadius.md,
     },
     exerciseIndex: {
-      ...typography.body,
+      fontSize: 13,
       fontWeight: '700',
-      color: colors.textPlaceholder,
-      minWidth: 24,
+      color: colors.primary,
+    },
+    exerciseTop: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.xs,
     },
     exerciseInfo: {
       flex: 1,
@@ -137,6 +151,7 @@ export default function RoutineDetailScreen() {
     exerciseName: {
       ...typography.bodyBold,
       color: colors.text,
+      fontSize: 16,
     },
     exerciseMuscle: {
       ...typography.small,
@@ -146,6 +161,7 @@ export default function RoutineDetailScreen() {
     exerciseSets: {
       ...typography.captionBold,
       color: colors.primary,
+      fontSize: 15,
     },
     cloneButton: {
       backgroundColor: colors.success,
@@ -199,7 +215,13 @@ export default function RoutineDetailScreen() {
 
   const renderItem = useCallback(({ item, index }: { item: { id: string; exercises: { name: string; primary_muscle: string } | null; target_sets: number; target_reps_min: number; target_reps_max: number }; index: number }) => (
     <View style={styles.exerciseCard}>
-      <Text style={styles.exerciseIndex}>{index + 1}</Text>
+      <View style={styles.exerciseAccent} />
+      <View style={styles.exerciseTop}>
+        <Text style={styles.exerciseIndex}>Ejercicio {index + 1}</Text>
+        <Text style={styles.exerciseSets}>
+          {item.target_sets} × {item.target_reps_min}-{item.target_reps_max}
+        </Text>
+      </View>
       <View style={styles.exerciseInfo}>
         <Text style={styles.exerciseName}>
           {item.exercises?.name ?? 'Ejercicio desconocido'}
@@ -210,9 +232,6 @@ export default function RoutineDetailScreen() {
           </Text>
         ) : null}
       </View>
-      <Text style={styles.exerciseSets}>
-        {item.target_sets} × {item.target_reps_min}-{item.target_reps_max}
-      </Text>
     </View>
   ), [styles]);
 
