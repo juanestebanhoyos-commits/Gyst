@@ -126,7 +126,8 @@ function LogDetail({ logId, expandedExerciseId, onToggleExercise }: LogDetailPro
     );
   }
 
-  if (isError) {
+  // Offline: priorizar los datos de caché sobre el error del refetch.
+  if (isError && !data) {
     return (
       <View style={styles.center}>
         <Text style={styles.emptyText}>Error al cargar los detalles</Text>
@@ -358,7 +359,8 @@ export default function HistoryScreen() {
   }, [styles, colors, expandedLogId, expandedExerciseId, toggleLog, toggleExercise]);
 
   if (isLoading) return <LoadingScreen />;
-  if (error) return <ErrorScreen message="Error al cargar historial" />;
+  // Offline: priorizar los datos de caché sobre el error del refetch.
+  if (error && !logs) return <ErrorScreen message="Error al cargar historial" />;
 
   return (
     <View style={styles.container}>

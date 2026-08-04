@@ -16,6 +16,8 @@ import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import ExercisePicker from '@/components/ExercisePicker';
 import { ScreenHeader } from '@/components/ScreenHeader';
+import { RequiresConnectionNotice } from '@/components/RequiresConnectionNotice';
+import { useNetworkStatus } from '@/lib/offline/network';
 import { useAppTheme, spacing } from '@/lib/theme';
 import type { ExerciseEntry } from '@/components/ExercisePicker';
 
@@ -26,6 +28,7 @@ export default function AddExerciseScreen() {
   const { data: routine, isLoading: loadingRoutine, error } = useRoutine(id);
   const { data: currentExercises } = useRoutineExercises(id);
   const { mutate, isPending } = useAddExerciseToRoutine(id);
+  const { isOnline } = useNetworkStatus();
 
   const isLoading = loadingRoutine;
 
@@ -50,7 +53,8 @@ export default function AddExerciseScreen() {
   );
 
   if (isLoading) return <LoadingScreen />;
-  if (error) return <ErrorScreen message="Error al cargar ejercicios" />;
+  // Offline: priorizar los datos de caché sobre el error del refetch.
+  if (error && !routine) return <ErrorScreen message="Error al cargar ejercicios" />;
 
   if (!routine || (user && routine.user_id !== user.id)) {
     return <Redirect href="/(tabs)/routines" />;
@@ -83,11 +87,13 @@ export default function AddExerciseScreen() {
           onBack={() => router.navigate(`/(tabs)/routines/${id}`)}
         />
         <View style={styles.contentInner}>
+        <RequiresConnectionNotice />
         <ExercisePicker
           existingIds={existingIds}
           onAdd={handleAdd}
           submitLabel="Agregar a rutina"
           isLoading={isPending}
+          disabled={!isOnline}
         />
         </View>
       </ScrollView>

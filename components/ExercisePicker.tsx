@@ -42,6 +42,7 @@ interface PickerContextType {
   available: Exercise[];
   isLoading: boolean;
   submitLabel?: string;
+  disabled?: boolean;
   handleAddConfig: (config: ExerciseConfig) => void;
   styles: ReturnType<typeof StyleSheet.create>;
 }
@@ -66,6 +67,7 @@ interface ExercisePickerRootProps {
   onAdd: (entry: ExerciseEntry) => void;
   submitLabel?: string;
   isLoading?: boolean;
+  disabled?: boolean;
   onClose?: () => void;
   error?: string | null;
   children?: ReactNode;
@@ -76,6 +78,7 @@ export default function ExercisePicker({
   onAdd,
   submitLabel,
   isLoading: externalLoading,
+  disabled,
   onClose,
   error,
   children,
@@ -217,10 +220,11 @@ export default function ExercisePicker({
       available,
       isLoading,
       submitLabel,
+      disabled,
       handleAddConfig: handleAdd,
       styles,
     }),
-    [selectedExercise, handleSelect, available, isLoading, submitLabel, handleAdd, styles],
+    [selectedExercise, handleSelect, available, isLoading, submitLabel, disabled, handleAdd, styles],
   );
 
   const inner = (
@@ -343,7 +347,8 @@ ExercisePicker.List = function PickerList() {
 };
 
 ExercisePicker.ConfigForm = function PickerConfigForm() {
-  const { selectedExercise, handleAddConfig, select, submitLabel, isLoading } = usePickerCtx();
+  const { selectedExercise, handleAddConfig, select, submitLabel, isLoading, disabled } =
+    usePickerCtx();
   if (!selectedExercise) return null;
   return (
     <ExerciseConfigForm
@@ -352,6 +357,7 @@ ExercisePicker.ConfigForm = function PickerConfigForm() {
       onCancel={() => select(null)}
       submitLabel={submitLabel}
       isLoading={isLoading}
+      disabled={disabled}
     />
   );
 };

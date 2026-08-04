@@ -11,7 +11,25 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
+// Sin timeout, una petición a un servidor inalcanzable cuelga el fetch
+// indefinidamente (LoadingScreen eterno). 10s: suficiente para móvil.
+const FETCH_TIMEOUT_MS = 10_000;
+
+function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  return fetch(input, { ...init, signal: controller.signal }).finally(() =>
+    clearTimeout(timer),
+  );
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  global: {
+    fetch: fetchWithTimeout,
+  },
   auth: {
     storage: AsyncStorage,
     autoRefreshToken: true,

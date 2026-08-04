@@ -10,6 +10,8 @@ import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
 import { ListSeparator } from '@/components/ListSeparator';
 import { ScreenHeader } from '@/components/ScreenHeader';
+import { RequiresConnectionNotice } from '@/components/RequiresConnectionNotice';
+import { useNetworkStatus } from '@/lib/offline/network';
 import { getDayNames } from '@/lib/date-utils';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
@@ -28,6 +30,7 @@ export default function RoutineDetailScreen() {
   const { user } = useSession();
   const cloneMutation = useCloneRoutine();
   const [cloneError, setCloneError] = useState<string | null>(null);
+  const { isOnline } = useNetworkStatus();
 
   const isOwner = user ? routine?.user_id === user.id : false;
   const canClone = !isOwner && !!routine?.is_public;
@@ -235,7 +238,9 @@ export default function RoutineDetailScreen() {
     </View>
   ), [styles]);
 
-  if (routineError || exercisesError) return <ErrorScreen message="Error al cargar la rutina" />;
+  // Offline: priorizar los datos de caché sobre el error del refetch.
+  if (routineError && !routine) return <ErrorScreen message="Error al cargar la rutina" />;
+  if (exercisesError && !exercises) return <ErrorScreen message="Error al cargar los ejercicios" />;
   if (loadingRoutine && !routine) return <LoadingScreen />;
   if (!routine) return <ErrorScreen message="Rutina no encontrada" />;
 
@@ -284,13 +289,14 @@ export default function RoutineDetailScreen() {
             <Text style={styles.startButtonText}>Empezar rutina</Text>
           </TouchableOpacity>
         ) : null}
+        {!isOnline && canClone ? <RequiresConnectionNotice /> : null}
         <View style={styles.buttonsRow}>
         {canClone ? (
           <TouchableOpacity
             style={styles.secondaryButton}
             activeOpacity={0.8}
             onPress={handleClone}
-            disabled={cloneMutation.isPending}
+            disabled={cloneMutation.isPending || !isOnline}
           >
             {cloneMutation.isPending ? (
               <ActivityIndicator size="small" color={colors.primary} />

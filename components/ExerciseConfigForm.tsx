@@ -24,6 +24,7 @@ interface ExerciseConfigFormProps {
   onCancel?: () => void;
   submitLabel?: string;
   isLoading?: boolean;
+  disabled?: boolean;
 }
 
 export default function ExerciseConfigForm({
@@ -32,6 +33,7 @@ export default function ExerciseConfigForm({
   onCancel,
   submitLabel = 'Añadir a lista',
   isLoading = false,
+  disabled = false,
 }: ExerciseConfigFormProps) {
   const { colors } = useAppTheme();
   const [targetSets, setTargetSets] = useState('3');
@@ -209,7 +211,7 @@ export default function ExerciseConfigForm({
       <TouchableOpacity
         style={styles.addButton}
         onPress={handleSubmit}
-        disabled={isLoading}
+        disabled={isLoading || disabled}
         activeOpacity={0.8}
       >
         {isLoading ? (

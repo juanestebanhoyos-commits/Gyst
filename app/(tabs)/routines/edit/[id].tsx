@@ -22,6 +22,8 @@ import { ErrorScreen } from '@/components/ErrorScreen';
 import ExercisePicker from '@/components/ExercisePicker';
 import { TrainingDaysPicker } from '@/components/TrainingDaysPicker';
 import { ScreenHeader } from '@/components/ScreenHeader';
+import { RequiresConnectionNotice } from '@/components/RequiresConnectionNotice';
+import { useNetworkStatus } from '@/lib/offline/network';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { ExerciseEntry } from '@/components/ExercisePicker';
 import type { Exercise } from '@/types/supabase';
@@ -33,6 +35,7 @@ export default function EditRoutineScreen() {
   const { data: routine, isLoading: loadingRoutine, error: routineError } = useRoutine(id);
   const { data: routineExercises } = useRoutineExercises(id);
   const { mutate: updateRoutine, isPending } = useUpdateRoutine();
+  const { isOnline } = useNetworkStatus();
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -282,7 +285,8 @@ export default function EditRoutineScreen() {
   ) : null, [exercises, styles, handleRemoveExercise]);
 
   if (sessionLoading || loadingRoutine) return <LoadingScreen />;
-  if (routineError) return <ErrorScreen message="Error al cargar la rutina" />;
+  // Offline: priorizar los datos de caché sobre el error del refetch.
+  if (routineError && !routine) return <ErrorScreen message="Error al cargar la rutina" />;
   if (!routine) return <ErrorScreen message="Rutina no encontrada" />;
 
   if (!user || routine.user_id !== user.id) {
@@ -368,13 +372,16 @@ export default function EditRoutineScreen() {
             onAdd={handleAddExercise}
             onClose={() => setShowPicker(false)}
             submitLabel="Agregar ejercicio"
+            disabled={!isOnline}
           />
         </View>
 
+        <RequiresConnectionNotice />
+
         <TouchableOpacity
-          style={[styles.saveButton, isPending && styles.saveButtonDisabled]}
+          style={[styles.saveButton, (isPending || !isOnline) && styles.saveButtonDisabled]}
           onPress={handleSave}
-          disabled={isPending}
+          disabled={isPending || !isOnline}
           activeOpacity={0.8}
         >
           {isPending ? (

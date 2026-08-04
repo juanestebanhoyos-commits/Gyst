@@ -182,7 +182,8 @@ export default function ProfileScreen() {
   }), [colors]);
 
   if (isLoading) return <LoadingScreen />;
-  if (error) return <ErrorScreen message="Error al cargar perfil" />;
+  // Offline: priorizar los datos de caché sobre el error del refetch.
+  if (error && !profile) return <ErrorScreen message="Error al cargar perfil" />;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>

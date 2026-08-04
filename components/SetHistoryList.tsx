@@ -68,7 +68,8 @@ export function SetHistoryList({ exerciseId }: SetHistoryListProps) {
     );
   }
 
-  if (isError) {
+  // Offline: priorizar los datos de caché sobre el error del refetch.
+  if (isError && !data) {
     return (
       <View style={styles.center}>
         <Text style={styles.errorText}>{error?.message ?? 'Error al cargar el historial'}</Text>

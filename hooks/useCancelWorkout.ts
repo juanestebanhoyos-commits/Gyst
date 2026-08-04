@@ -1,10 +1,22 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { getNetworkStatus } from '@/lib/offline/network';
+import { enqueue } from '@/lib/offline/outbox';
+import { useSession } from '@/hooks/useSession';
 
 export function useCancelWorkout() {
   const queryClient = useQueryClient();
+  const { user } = useSession();
   return useMutation({
     mutationFn: async (workoutLogId: string) => {
+      // Camino offline: solo se encola. La decisión final (finalizar si hay
+      // series en servidor, eliminar si no) la toma el flush al reconectar.
+      if (!getNetworkStatus().isOnline) {
+        if (!user?.id) throw new Error('Sesión no encontrada');
+        await enqueue('cancel_workout', user.id, { id: workoutLogId });
+        return workoutLogId;
+      }
+
       const { data: sets, error: setsError } = await supabase
         .from('set_logs')
         .select('id')
@@ -29,6 +41,10 @@ export function useCancelWorkout() {
       return workoutLogId;
     },
     onSuccess: (workoutLogId) => {
+      // Reflejo local solo offline: la sesión deja de estar activa.
+      if (!getNetworkStatus().isOnline && user?.id) {
+        queryClient.setQueryData(['active_workout', user.id], null);
+      }
       queryClient.invalidateQueries({ queryKey: ['workout_logs'] });
       queryClient.invalidateQueries({ queryKey: ['workout_logs', workoutLogId] });
       queryClient.invalidateQueries({ queryKey: ['active_workout'] });

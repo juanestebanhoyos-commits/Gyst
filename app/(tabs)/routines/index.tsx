@@ -300,7 +300,8 @@ export default function RoutinesScreen() {
   }, [styles, user, cloningId, clonedId, handleClone, handleCardPress, colors]);
 
   if (isLoading) return <LoadingScreen />;
-  if (error) return <ErrorScreen message="Error al cargar rutinas" />;
+  // Offline: priorizar los datos de caché sobre el error del refetch.
+  if (error && !routines) return <ErrorScreen message="Error al cargar rutinas" />;
 
   return (
     <View style={styles.container}>

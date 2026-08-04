@@ -16,6 +16,8 @@ import { useCreateCustomExercise } from '@/hooks/useCreateCustomExercise';
 import { useSession } from '@/hooks/useSession';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ScreenHeader } from '@/components/ScreenHeader';
+import { RequiresConnectionNotice } from '@/components/RequiresConnectionNotice';
+import { useNetworkStatus } from '@/lib/offline/network';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 
 const MUSCLE_GROUPS = [
@@ -38,6 +40,7 @@ export default function NewExerciseScreen() {
   const [error, setError] = useState<string | null>(null);
   const { user, isLoading: sessionLoading } = useSession();
   const { mutate, isPending } = useCreateCustomExercise();
+  const { isOnline } = useNetworkStatus();
 
   const handleCreate = useCallback(() => {
     if (!user) return;
@@ -206,10 +209,12 @@ export default function NewExerciseScreen() {
           autoCapitalize="sentences"
         />
 
+        <RequiresConnectionNotice />
+
         <TouchableOpacity
           style={styles.button}
           onPress={handleCreate}
-          disabled={isPending}
+          disabled={isPending || !isOnline}
           activeOpacity={0.8}
         >
           {isPending ? (

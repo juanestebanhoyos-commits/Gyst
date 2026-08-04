@@ -123,7 +123,8 @@ export default function ExercisesScreen() {
   }, []);
 
   if (isLoading) return <LoadingScreen />;
-  if (error) return <ErrorScreen message="Error al cargar ejercicios" />;
+  // Offline: priorizar los datos de caché sobre el error del refetch.
+  if (error && !exercises) return <ErrorScreen message="Error al cargar ejercicios" />;
 
   return (
     <View

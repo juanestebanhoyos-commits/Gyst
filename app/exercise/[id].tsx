@@ -84,7 +84,10 @@ export default function ExerciseDetailScreen() {
   );
 
   if (isLoading) return <LoadingScreen />;
-  if (error) return <ErrorScreen message="Error al cargar el ejercicio" />;
+  // Offline: una query con caché que falla al refetch conserva data y setea
+  // error; priorizamos los datos para no derribar la pantalla.
+  if (exerciseError && !exercise) return <ErrorScreen message="Error al cargar el ejercicio" />;
+  if (logsError && !setLogs) return <ErrorScreen message="Error al cargar las series" />;
   if (!exercise) return <ErrorScreen message="Ejercicio no encontrado" />;
 
   return (

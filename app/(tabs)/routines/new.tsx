@@ -17,11 +17,14 @@ import { useCreateRoutine } from '@/hooks/useCreateRoutine';
 import ExercisePicker from '@/components/ExercisePicker';
 import { TrainingDaysPicker } from '@/components/TrainingDaysPicker';
 import { ScreenHeader } from '@/components/ScreenHeader';
+import { RequiresConnectionNotice } from '@/components/RequiresConnectionNotice';
+import { useNetworkStatus } from '@/lib/offline/network';
 import { useAppTheme, spacing, borderRadius, typography } from '@/lib/theme';
 import type { ExerciseEntry } from '@/components/ExercisePicker';
 
 export default function NewRoutineScreen() {
   const { colors } = useAppTheme();
+  const { isOnline } = useNetworkStatus();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(false);
@@ -310,10 +313,12 @@ export default function NewRoutineScreen() {
           />
         )}
 
+        <RequiresConnectionNotice />
+
         <TouchableOpacity
           style={styles.createButton}
           onPress={handleCreate}
-          disabled={isSubmitting}
+          disabled={isSubmitting || !isOnline}
           activeOpacity={0.8}
         >
           {isSubmitting ? (
