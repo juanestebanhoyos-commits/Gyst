@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STORAGE_KEY = '@gyst_onboarding';
@@ -18,6 +18,8 @@ const defaultData: OnboardingData = {
 export function useOnboardingLocal() {
   const [data, setData] = useState<OnboardingData>(defaultData);
   const [isLoading, setIsLoading] = useState(true);
+  const dataRef = useRef(data);
+  dataRef.current = data;
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)
@@ -41,16 +43,16 @@ export function useOnboardingLocal() {
 
   const updateName = useCallback(
     async (name: string) => {
-      await persist({ ...data, name });
+      await persist({ ...dataRef.current, name });
     },
-    [data, persist],
+    [persist],
   );
 
   const updateTrainingDays = useCallback(
     async (training_days: number[]) => {
-      await persist({ ...data, training_days });
+      await persist({ ...dataRef.current, training_days });
     },
-    [data, persist],
+    [persist],
   );
 
   const completeOnboarding = useCallback(

@@ -11,28 +11,41 @@ type Profile = Pick<
 
 const PROFILE_COLUMNS = 'username, avatar_url, training_days, theme_preference';
 
+async function fetchProfile(userId: string): Promise<Profile | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select(PROFILE_COLUMNS)
+    .eq('id', userId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    throw error;
+  }
+  return data;
+}
+
 export function useProfile() {
   const { user } = useSession();
   const [profile, setProfile] = useState<Profile | null>(null);
   const { sync } = useSyncOnboardingProfile();
   const syncedRef = useRef(false);
+  const userIdRef = useRef<string | undefined>(user?.id);
 
   useEffect(() => {
     if (!user) {
       setProfile(null);
       syncedRef.current = false;
+      userIdRef.current = undefined;
       return;
     }
 
     let cancelled = false;
     const userId = user.id;
+    userIdRef.current = userId;
 
     async function load() {
-      const { data } = await supabase
-        .from('profiles')
-        .select(PROFILE_COLUMNS)
-        .eq('id', userId)
-        .single();
+      const data = await fetchProfile(userId);
 
       if (cancelled) return;
 
@@ -45,11 +58,7 @@ export function useProfile() {
         syncedRef.current = true;
         await sync(userId);
 
-        const { data: retry } = await supabase
-          .from('profiles')
-          .select(PROFILE_COLUMNS)
-          .eq('id', userId)
-          .single();
+        const retry = await fetchProfile(userId);
 
         if (!cancelled) {
           setProfile(retry?.username ? retry : null);

@@ -61,6 +61,8 @@ export const TrainingDaysPicker = memo(function TrainingDaysPicker({
     [colors],
   );
 
+  const selectedSet = new Set(selectedDays);
+
   const toggleDay = (dayIndex: number) => {
     onChange(
       selectedDays.includes(dayIndex)
@@ -73,7 +75,7 @@ export const TrainingDaysPicker = memo(function TrainingDaysPicker({
     <View style={styles.container}>
       {DAY_OPTIONS.map((day, i) => {
         const dayIndex = i + 1;
-        const isSelected = selectedDays.includes(dayIndex);
+        const isSelected = selectedSet.has(dayIndex);
         return (
           <TouchableOpacity
             key={dayIndex}

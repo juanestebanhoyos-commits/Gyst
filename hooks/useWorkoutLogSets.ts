@@ -15,11 +15,21 @@ type SetLogJoined = SetLog & {
   exercises: Pick<Exercise, 'id' | 'name' | 'primary_muscle'> | null;
 };
 
+function getWorkoutLogSetsQueryKey(
+  userId: string | undefined,
+  workoutLogId: string | null,
+): string[] {
+  return ['workout_log_sets', userId ?? '', workoutLogId ?? ''];
+}
+
 export function useWorkoutLogSets(workoutLogId: string | null) {
   const queryClient = useQueryClient();
   const { user } = useSession();
+  const queryKey = getWorkoutLogSetsQueryKey(user?.id, workoutLogId);
+
   return useQuery<WorkoutLogExercise[]>({
-    queryKey: ['workout_log_sets', workoutLogId],
+    queryKey,
+    staleTime: 30_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('set_logs')
@@ -67,6 +77,6 @@ export function useWorkoutLogSets(workoutLogId: string | null) {
       }
       return Array.from(groups.values());
     },
-    enabled: !!workoutLogId,
+    enabled: !!workoutLogId && !!user?.id,
   });
 }

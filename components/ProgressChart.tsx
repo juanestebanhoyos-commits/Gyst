@@ -26,8 +26,12 @@ export const ProgressChart = memo(function ProgressChart({ data, width = 300, he
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
 
-  const maxValue = Math.max(...chartPoints.map(p => p.value));
-  const minValue = Math.min(...chartPoints.map(p => p.value));
+  let minValue = Infinity;
+  let maxValue = -Infinity;
+  for (const p of chartPoints) {
+    if (p.value < minValue) minValue = p.value;
+    if (p.value > maxValue) maxValue = p.value;
+  }
   const range = maxValue - minValue || 1;
   const xStep = chartWidth / (Math.max(chartPoints.length, 2) - 1);
 

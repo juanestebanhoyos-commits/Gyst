@@ -9,6 +9,7 @@ export function useTheme() {
 
   const { data: themePreference, isLoading } = useQuery<string>({
     queryKey: ['profile', user?.id],
+    staleTime: 10 * 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')

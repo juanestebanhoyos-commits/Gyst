@@ -7,6 +7,7 @@ export function useActiveWorkout() {
 
   return useQuery<string | null>({
     queryKey: ['active_workout', user?.id],
+    staleTime: 30_000,
     queryFn: async () => {
       if (!user?.id) return null;
 

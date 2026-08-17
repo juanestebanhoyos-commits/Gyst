@@ -14,7 +14,8 @@ export function useTodayRoutine() {
   const today = getTodayIndex();
 
   return useQuery<Routine | null>({
-    queryKey: ['today-routine', user?.id, today],
+    queryKey: ['today-routine', user?.id, String(today)],
+    staleTime: 5 * 60_000,
     queryFn: async () => {
       if (!user) return null;
 

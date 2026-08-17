@@ -8,18 +8,31 @@ interface PaginationOptions {
   search?: string;
 }
 
-export function useExercises(options?: PaginationOptions) {
+function getExercisesQueryKey(options?: PaginationOptions): string[] {
   const page = options?.page;
   const pageSize = options?.pageSize ?? 20;
   const search = options?.search;
   const paginated = page !== undefined;
 
+  if (paginated) {
+    return ['exercises', 'paginated', String(page), String(pageSize), search ?? ''];
+  }
+  return ['exercises', search ?? ''];
+}
+
+export function useExercises(options?: PaginationOptions) {
+  const queryKey = getExercisesQueryKey(options);
+
   return useQuery<Exercise[]>({
-    queryKey: paginated
-      ? ['exercises', 'paginated', page, pageSize, search]
-      : ['exercises', search],
+    queryKey,
+    staleTime: 5 * 60_000,
     placeholderData: keepPreviousData,
     queryFn: async () => {
+      const page = options?.page;
+      const pageSize = options?.pageSize ?? 20;
+      const search = options?.search;
+      const paginated = page !== undefined;
+
       let query = supabase
         .from('exercises')
         .select('*');
@@ -32,7 +45,7 @@ export function useExercises(options?: PaginationOptions) {
       query = query.order('name', { ascending: true });
 
       if (paginated) {
-        const from = page * pageSize;
+        const from = page! * pageSize;
         query = query.range(from, from + pageSize);
       }
 

@@ -1,6 +1,6 @@
 import {
   createContext,
-  useContext,
+  use,
   useState,
   useMemo,
   useCallback,
@@ -51,13 +51,13 @@ const SearchCtx = createContext<SearchContextType | null>(null);
 const PickerCtx = createContext<PickerContextType | null>(null);
 
 function useSearchCtx() {
-  const ctx = useContext(SearchCtx);
+  const ctx = use(SearchCtx);
   if (!ctx) throw new Error('useSearchCtx must be used within <ExercisePicker>');
   return ctx;
 }
 
 function usePickerCtx() {
-  const ctx = useContext(PickerCtx);
+  const ctx = use(PickerCtx);
   if (!ctx) throw new Error('usePickerCtx must be used within <ExercisePicker>');
   return ctx;
 }

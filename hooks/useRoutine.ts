@@ -5,6 +5,7 @@ import type { Routine } from '@/types/supabase';
 export function useRoutine(id: string) {
   return useQuery<Routine>({
     queryKey: ['routines', id],
+    staleTime: 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('routines')

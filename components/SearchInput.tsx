@@ -15,7 +15,10 @@ export const SearchInput = memo(function SearchInput({
   const [value, setValue] = useState('');
   const { colors } = useAppTheme();
   const onSearchRef = useRef(onSearch);
-  onSearchRef.current = onSearch;
+
+  useEffect(() => {
+    onSearchRef.current = onSearch;
+  }, [onSearch]);
 
   useEffect(() => {
     const t = setTimeout(() => onSearchRef.current(value), 300);

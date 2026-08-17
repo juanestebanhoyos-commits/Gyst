@@ -6,10 +6,20 @@ import { mergePendingSetLogs } from '@/lib/offline/merge';
 import { useSession } from '@/hooks/useSession';
 import type { SetLog } from '@/types/supabase';
 
+function getExerciseSetLogsQueryKey(
+  userId: string | undefined,
+  exerciseId: string,
+): string[] {
+  return ['set_logs', 'exercise', userId ?? '', exerciseId];
+}
+
 export function useExerciseSetLogs(exerciseId: string) {
   const { user } = useSession();
+  const queryKey = getExerciseSetLogsQueryKey(user?.id, exerciseId);
+
   return useQuery<SetLog[]>({
-    queryKey: ['set_logs', 'exercise', exerciseId],
+    queryKey,
+    staleTime: 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('set_logs')
@@ -29,5 +39,6 @@ export function useExerciseSetLogs(exerciseId: string) {
         b.created_at.localeCompare(a.created_at),
       );
     },
+    enabled: !!exerciseId && !!user?.id,
   });
 }
