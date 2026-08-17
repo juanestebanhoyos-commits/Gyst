@@ -6,6 +6,7 @@
     "scheme": "gyst",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
     "plugins": [
       "expo-status-bar",
       "expo-router",
@@ -17,7 +18,11 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.juanestebanhoyos.gyst"
+      "package": "com.juanestebanhoyos.gyst",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#131313"
+      }
     },
     "extra": {
       "router": {},
