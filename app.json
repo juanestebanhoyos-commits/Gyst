@@ -1,9 +1,30 @@
 {
-  "scheme": "gyst",
-  "plugins": [
-    "expo-status-bar",
-    "expo-router",
-    "expo-font",
-    "expo-splash-screen"
-  ]
+  "expo": {
+    "name": "Gyst",
+    "slug": "gyst",
+    "version": "1.0.0",
+    "scheme": "gyst",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "plugins": [
+      "expo-status-bar",
+      "expo-router",
+      "expo-font",
+      "expo-splash-screen"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.juanestebanhoyos.gyst",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.juanestebanhoyos.gyst"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7305a5cd-dcf5-4abe-8123-0259bbc6ef9c"
+      }
+    },
+    "owner": "juanestebanhoyos-commits"
+  }
 }
